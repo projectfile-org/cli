@@ -1,0 +1,179 @@
+---
+# SPDX-FileCopyrightText: 2026 Damián Búho <damian.buho@proton.me>
+#
+# SPDX-License-Identifier: MIT
+$schema: https://projectfile.org/schema/v1.json
+copyright:
+  year: 2026
+identity:
+  created: "2026-07-07"
+  name: cli
+  summary: pf-cli — the projectfile document-backend CLI (get/set/convert/validate/…)
+  title: projectfile/cli
+includes:
+  - .makefile/b19/ci.yaml
+  - .makefile/b19/images/go.yaml
+  - .makefile/b19/images/ubuntu.yaml
+  - .makefile/library/languages/go.yaml
+  - https://kiota.ch/damian-buho/metadata/raw/branch/main/include.yaml
+  - https://kiota.ch/projectfile/metadata/raw/branch/main/include.yaml
+kind: SoftwareSourceCode
+links:
+  - label: Source Code on Codeberg
+    type: source-code
+    url: https://codeberg.org/projectfile/cli
+  - label: Source Code on GitHub
+    type: source-code
+    url: https://github.com/damian-buho/projectfile-cli
+  - label: Source Code on kiota.ch
+    type: source-code
+    url: https://kiota.ch/projectfile/cli
+  - label: Issues on Codeberg
+    type: bugs
+    url: https://codeberg.org/projectfile/cli/issues
+  - label: Issues on GitHub
+    type: bugs
+    url: https://github.com/damian-buho/projectfile-cli/issues
+org:
+  projectfile:
+    artifacts:
+      go-binary:
+        command: pf-cli
+        kind: binary
+        path: dist/pf-cli
+    build:
+      args:
+        GOPROXY: ""
+    ci:
+      env:
+        GOPROXY: https://kiota.ch/api/packages/projectfile/go,direct
+      forgejo:
+        credentials:
+          FORGEJO_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+      nodes:
+        # //go:embed makes the v1 schema a COMPILE input, so it must land before
+        # any Go tool runs — lint, test and container build alike.
+        # Each consumer needs a DIRECT edge to schema-fetched: the artifact
+        # hand-off is derived from the needs-edge, so a transitive path through
+        # source-is-ready orders the jobs but downloads nothing.
+        # Matrixed consumers cannot use the edge (`artifact:` hands off one
+        # artifact PER CELL, and fetch-schema carries no matrix), so
+        # binaries-built calls .scripts/fetch-schema.sh itself instead.
+        schema-fetched:
+          needs:
+            fetch-schema: true
+        source-passes-lint:
+          needs:
+            schema-fetched: true
+        source-is-tested:
+          needs:
+            schema-fetched: true
+        image-is-built:
+          needs:
+            schema-fetched: true
+        # The two binary nodes MUST mirror cell for cell: the artifact hand-off is
+        # keyed by the cell, so a release cell whose build twin is absent would
+        # download an artifact nobody uploaded. Go has no darwin/riscv64 target
+        # (`go tool dist list` gives linux and openbsd only), so both grids
+        # subtract that corner rather than split into a second node.
+        binaries-built:
+          matrix:
+            axes:
+              GOARCH:
+                - amd64
+                - arm64
+                - riscv64
+              GOOS:
+                - linux
+                - darwin
+            exclude:
+              - GOARCH: riscv64
+                GOOS: darwin
+          needs:
+            build-binaries: true
+            gsa: true
+            source-is-ready: true
+        binaries-released:
+          matrix:
+            axes:
+              GOARCH:
+                - amd64
+                - arm64
+                - riscv64
+              GOOS:
+                - linux
+                - darwin
+            exclude:
+              - GOARCH: riscv64
+                GOOS: darwin
+          needs:
+            binaries-built: true
+            forgejo-release: true
+            gh-release: true
+          when:
+            events:
+              - tag
+        published:
+          needs:
+            binaries-released: true
+            install-binary: true
+      tools:
+        build-binaries:
+          artifact: dist
+          env:
+            - GOPROXY
+            - GOOS
+            - GOARCH
+            - GITHUB_REF_NAME
+          guard: go.mod
+          image: GO_TOOL_IMAGE
+          m6e:
+            prefer-local: true
+          run: .scripts/build-binaries.sh
+        fetch-schema:
+          artifact: internal/validate/embedded
+          description: Clone or update projectfile/specification, then install the v1 schema for embedding
+          run: .scripts/fetch-schema.sh
+        forgejo-release:
+          action: forgejo-release
+          env:
+            - FORGEJO_TOKEN
+          gha: false
+          m6e: false
+        gh-release:
+          env:
+            - GH_TOKEN
+          forgejo: false
+          m6e: false
+          run: .scripts/gh-release.sh "$${{ github.ref_name }}"
+        install-binary:
+          forgejo: false
+          gha: false
+          run: .scripts/install-binary.sh
+    ignores:
+      git:
+        include:
+          - _specification
+          - internal/validate/embedded/v1.json
+          - internal/validate/embedded/v1.json.license
+    readme:
+      usage:
+        - name: binary
+          prefix: "Read and write projectfile fields from the shell:"
+          commands:
+            - pf-cli get identity.name
+            - pf-cli get 'links[type=source-code].url'
+            - pf-cli set org.projectfile.status maintained
+            - pf-cli validate
+    status: maintained
+repositories:
+  - issues: true
+    role: mirror
+    type: git
+    url: ssh://git@codeberg.org/projectfile/cli.git
+  - role: mirror
+    type: git
+    url: git@github.com:damian-buho/projectfile-cli.git
+  - role: origin
+    type: git
+    url: ssh://git@kiota.ch/projectfile/cli.git
