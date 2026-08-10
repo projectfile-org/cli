@@ -14,19 +14,14 @@ import (
 	"kiota.ch/projectfile/core/v2/pkg/projectfile"
 )
 
-// cacheApp is the per-binary slot this process owns under
-// $XDG_CACHE_HOME/projectfile/. pf-cli only caches HTTP includes here — SPDX
-// license texts are warmed and read by pf-bridge (see pf-bridge cache).
-const cacheApp = "cli"
-
-// cacheRoot returns the resolved on-disk path of this binary's cache slot, so
+// cacheRoot returns the resolved on-disk path of the shared cache slot, so
 // status/purge can show users the REAL location (not just the env-var name).
 func cacheRoot() (string, error) {
 	base, err := projectfile.XDGCacheDir()
 	if err != nil {
 		return "", err
 	}
-	return base + "/projectfile/" + cacheApp, nil
+	return base + "/pf", nil
 }
 
 var cacheCmd = &cobra.Command{
@@ -36,10 +31,11 @@ var cacheCmd = &cobra.Command{
 		"reading a projectfile works without a network connection once warmed.\n" +
 		"\n" +
 		"The cache lives at:\n" +
-		"  ${XDG_CACHE_HOME:-~/.cache}/projectfile/" + cacheApp + "/\n" +
+		"  ${XDG_CACHE_HOME:-~/.cache}/pf/\n" +
 		"\n" +
-		"SPDX license texts are NOT cached here — they belong to pf-bridge.\n" +
-		"Run `pf-bridge cache` to warm or purge them.",
+		"This slot is shared with pf-bridge and pf-ci — a purge here clears the\n" +
+		"cache they all read. SPDX license texts are warmed and read by pf-bridge;\n" +
+		"run `pf-bridge cache` to manage them.",
 }
 
 var cacheStatusCmd = &cobra.Command{

@@ -81,6 +81,6 @@ The binary is `pf-cli` (the `pf-*` triad with `pf-ci` + `pf-bridge`); its image
 is `projectfile/cli` (from `identity.name: cli`). The on-disk/config/env
 contracts share the `cli`/`pf-cli` spelling: the `# pf-cli-managed:` sentinel,
 `PF_CLI_VERBOSE`, the `projectfile/cli.toml` user-config path, and the
-`projectfile/cli/` XDG cache slot (its includes cache under
-`$XDG_CACHE_HOME/projectfile/cli/`). Renaming any of these would orphan
-existing files/config.
+shared `pf/` XDG cache slot (its includes cache under
+`$XDG_CACHE_HOME/pf/`, shared with pf-bridge and pf-ci). Renaming any of
+these would orphan existing files/config.

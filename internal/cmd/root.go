@@ -52,10 +52,6 @@ var rootCmd = &cobra.Command{
 		genlog.SetVerbose(verboseFlag)
 		userconfig.SetIgnored(ignoreUserConfigFlag)
 		projectfile.SetYAMLOutputSorted(sortedFlag)
-		// Claim the "cli" cache slot so pf-cli reads/writes its own includes
-		// cache ($XDG_CACHE_HOME/projectfile/cli/) and never collides with
-		// pf-bridge or ci-resolver.
-		projectfile.SetCacheApp("cli")
 		if offlineFlag {
 			genlog.Info("offline mode", "message", "network fetches disabled")
 		}
