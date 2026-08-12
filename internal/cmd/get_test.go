@@ -49,6 +49,10 @@ func resetGetFlags(t *testing.T) {
 	getPathFile = ""
 	getNamedPaths = nil
 	getLang = ""
+	// StringArrayVar APPENDS on every parse, so a scoped case would leak its
+	// scope into the next test and make an unscoped assertion silently pass
+	// against a composed value.
+	getScopes = nil
 	// get now detects --default via its Changed state, which is NOT self-clearing
 	// across Execute() calls on the shared rootCmd — reset it or a --default case
 	// would bleed presence into the next test.
@@ -245,34 +249,50 @@ func TestGetFlatListOfMaps(t *testing.T) {
 	}
 }
 
-// imageFixtureTOML carries a namespaced identity so the image.* synthetics
-// have both halves to split. The ci.image override is exercised separately with
-// an inline document (it changes the whole basename, tag included).
-const imageFixtureTOML = `#:schema https://projectfile.org/schema/v1.json
+// partsFixtureTOML is the declared-parts model in its smallest honest form: a
+// map of parts the project states, and destinations whose templates compose
+// them. Nothing in pf-cli has heard of any key here — `series` and `mood` are
+// words somebody typed.
+const partsFixtureTOML = `#:schema https://projectfile.org/schema/v1.json
 spec_version = "1"
 kind = "SoftwareSourceCode"
 
 [identity]
 namespace = "org.example.b19"
 name = "ubuntu"
+
+[org.projectfile.image]
+org = "b19"
+name = "${identity.name}"
+series = "resolute"
+tag = "latest"
+mood = "pissed"
+
+[org.projectfile.sinks.kiota]
+ref = "kiota.ch/${org}/${name}-${series}:${tag}"
+priority = 10
+
+[org.projectfile.sinks.ghcr]
+ref = "ghcr.io/buho/${name}-is-fucking-${mood}:${tag}"
+priority = 90
 `
 
-// TestGetImageSynthetics pins the three derived image addresses — the make-plane
-// home of the ${image.basename/namespace/name} references the m6e reader
-// interpolates. The split MUST match ci-resolver's basenameParts byte-for-byte
-// (last `/` is the namespace boundary), so a build-arg identity value can never
-// disagree across the make and cloud lowerings.
-func TestGetImageSynthetics(t *testing.T) {
+const partsScope = "org.projectfile.image"
+
+// TestGetScopeComposesDeclaredTemplates is the exit criterion of the model at
+// the CLI boundary: two unrelated path grammars, each a template over the same
+// parts, neither a code path here. `mood` is the falsifier — a pf-cli that knew
+// what an image was could not resolve a key invented after it shipped.
+func TestGetScopeComposesDeclaredTemplates(t *testing.T) {
 	dir := t.TempDir()
-	path := writeFixture(t, dir, imageFixtureTOML)
+	path := writeFixture(t, dir, partsFixtureTOML)
 
 	cases := map[string]string{
-		addrImageBasename:  "b19/ubuntu", // last-label(namespace)/name
-		addrImageNamespace: "b19",        // before the last /
-		addrImageName:      "ubuntu",     // after the last /, no :tag
+		"org.projectfile.sinks.kiota.ref": "kiota.ch/b19/ubuntu-resolute:latest",
+		"org.projectfile.sinks.ghcr.ref":  "ghcr.io/buho/ubuntu-is-fucking-pissed:latest",
 	}
 	for addr, want := range cases {
-		out, err := runGetCmd(t, addr, "--path-file", path)
+		out, err := runGetCmd(t, addr, "--path-file", path, "--scope", partsScope)
 		if err != nil {
 			t.Fatalf("get %s: %v", addr, err)
 		}
@@ -282,55 +302,60 @@ func TestGetImageSynthetics(t *testing.T) {
 	}
 }
 
-// TestGetImageSyntheticsBareName covers the namespace-less identity: the
-// namespace half is EMPTY-but-PRESENT (an empty identity arg is valid), so the
-// command exits 0 with a blank value rather than treating it as missing (which
-// would let --or-default fire). Mirrors the ci-resolver behaviour.
-func TestGetImageSyntheticsBareName(t *testing.T) {
+// A part addresses the document, so ONE shared fragment can declare the parts
+// for a whole fleet and a project states only what makes it different.
+func TestGetScopeResolvesAPartThatIsItselfAReference(t *testing.T) {
 	dir := t.TempDir()
-	path := writeFixture(t, dir, strings.Replace(imageFixtureTOML,
-		"namespace = \"org.example.b19\"\nname = \"ubuntu\"", "name = \"loner\"", 1))
+	path := writeFixture(t, dir, partsFixtureTOML)
 
-	out, err := runGetCmd(t, addrImageNamespace, "--path-file", path)
+	out, err := runGetCmd(t, "name", "--path-file", path, "--scope", partsScope)
 	if err != nil {
-		t.Fatalf("get image.namespace (bare): %v", err)
+		t.Fatalf("get name --scope: %v", err)
 	}
-	if got := strings.TrimSpace(out); got != "" {
-		t.Fatalf("bare-name image.namespace = %q, want empty", got)
-	}
-	nameOut, err := runGetCmd(t, addrImageName, "--path-file", path)
-	if err != nil {
-		t.Fatalf("get image.name (bare): %v", err)
-	}
-	if got := strings.TrimSpace(nameOut); got != "loner" {
-		t.Fatalf("bare-name image.name = %q, want loner", got)
+	if got := strings.TrimSpace(out); got != "ubuntu" {
+		t.Fatalf("scoped name = %q, want ubuntu", got)
 	}
 }
 
-// TestGetImageSyntheticsCIOverride confirms org.projectfile.ci.image wins
-// verbatim for the basename (tag and all), and the namespace/name split still
-// strips the :tag from the name half only — the property a tagged override
-// relies on so M6E_PROJECT never carries a version tag.
-func TestGetImageSyntheticsCIOverride(t *testing.T) {
+// Without --scope the template comes back VERBATIM. Two things ride on this:
+// every caller that predates the flag keeps its exact behaviour, and a
+// half-composed reference can never be emitted by accident — `${org}` is not a
+// document address, so nothing invents a value for it.
+func TestGetWithoutScopeLeavesTheTemplateVerbatim(t *testing.T) {
 	dir := t.TempDir()
-	path := writeFixture(t, dir, imageFixtureTOML+`
-[org.projectfile.ci]
-image = "custom/thing:v2"
-`)
+	path := writeFixture(t, dir, partsFixtureTOML)
 
-	cases := map[string]string{
-		addrImageBasename:  "custom/thing:v2", // override wins verbatim, tag kept
-		addrImageNamespace: "custom",
-		addrImageName:      "thing", // :tag stripped from the name half
+	out, err := runGetCmd(t, "org.projectfile.sinks.kiota.ref", "--path-file", path)
+	if err != nil {
+		t.Fatalf("get ref (no scope): %v", err)
 	}
-	for addr, want := range cases {
-		out, err := runGetCmd(t, addr, "--path-file", path)
-		if err != nil {
-			t.Fatalf("get %s (override): %v", addr, err)
-		}
-		if got := strings.TrimSpace(out); got != want {
-			t.Fatalf("override get %s = %q, want %q", addr, got, want)
-		}
+	want := "kiota.ch/${org}/${name}-${series}:${tag}"
+	if got := strings.TrimSpace(out); got != want {
+		t.Fatalf("unscoped ref = %q, want %q", got, want)
+	}
+}
+
+// One spawn composes EVERY destination, ranked by priority. This is what
+// replaces a dedicated sink subcommand: the map projection already fans out, and
+// --scope expands through the entries it hands back.
+func TestGetScopeComposesEverySinkInOneCall(t *testing.T) {
+	dir := t.TempDir()
+	path := writeFixture(t, dir, partsFixtureTOML)
+
+	out, err := runGetCmd(t, "org.projectfile.sinks{}.values", "--path-file", path, "--scope", partsScope)
+	if err != nil {
+		t.Fatalf("get sinks{}.values: %v", err)
+	}
+	if strings.Contains(out, "${") {
+		t.Fatalf("every ref must be composed, got %q", out)
+	}
+	ghcr := strings.Index(out, "ghcr.io/buho/ubuntu-is-fucking-pissed:latest")
+	kiota := strings.Index(out, "kiota.ch/b19/ubuntu-resolute:latest")
+	if ghcr < 0 || kiota < 0 {
+		t.Fatalf("both refs must appear, got %q", out)
+	}
+	if ghcr > kiota {
+		t.Fatalf("priority 90 must precede priority 10, got %q", out)
 	}
 }
 

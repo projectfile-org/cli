@@ -32,6 +32,7 @@ var (
 	getPathFile   string
 	getNamedPaths []string
 	getLang       string
+	getScopes     []string
 )
 
 var getCmd = &cobra.Command{
@@ -138,11 +139,12 @@ func runGet(cmd *cobra.Command, args []string) error {
 	out := make([]resolvedEntry, 0, len(entries))
 	missingAny := false
 	for _, e := range entries {
-		val, isList, isPairs, present, err := resolveEntry(doc, e.Path)
+		val, isList, isPairs, present, err := resolveScoped(doc, e.Path, getScopes)
 		switch {
 		case err != nil:
 			return err
 		case present:
+			val = expandScoped(val, doc, getScopes)
 			out = append(out, resolvedEntry{key: e.Key, path: e.Path, value: val, isList: isList, isPairs: isPairs, present: true})
 		default:
 			if d, ok := defaultValueFor(doc, e.Path, defaultSet); ok {
@@ -197,20 +199,14 @@ func runGet(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-// resolveEntry produces the (value, present) outcome for one path. A SYNTHETIC
-// derived field (see derivedFields) wins over document resolution, so a computed
-// rule such as image.basename has one home every consumer reads. Otherwise the
-// path resolves against the document, with a not-found mapped to present=false
-// (the caller then consults --default / --or-default). Any other resolve error
-// propagates — notably fieldpath.ErrListOpOnMap, a `[N]`/`[k=v]`/`[]` operator
-// aimed at a map of named keys (e.g. `org.projectfile.artifacts[kind=binary]`):
-// that is a GRAMMAR mistake, refused LOUDLY here rather than laundered into a
-// silent present=false miss that would read as a typo.
+// resolveEntry produces the (value, present) outcome for one path against the
+// document, with a not-found mapped to present=false (the caller then consults
+// --default / --or-default). Any other resolve error propagates — notably
+// fieldpath.ErrListOpOnMap, a `[N]`/`[k=v]`/`[]` operator aimed at a map of
+// named keys (e.g. `org.projectfile.artifacts[kind=binary]`): that is a GRAMMAR
+// mistake, refused LOUDLY here rather than laundered into a silent present=false
+// miss that would read as a typo.
 func resolveEntry(doc *projectfile.Document, p fieldpath.Path) (value any, isList, isPairs, present bool, err error) {
-	if fn, ok := derivedFields[p.String()]; ok {
-		v, ok := fn(doc)
-		return v, false, false, ok, nil
-	}
 	r, err := fieldpath.Resolve(doc, p)
 	switch {
 	case err == nil:
@@ -696,5 +692,11 @@ func init() {
 	getCmd.Flags().StringVarP(&getPathFile, "path-file", "f", "", "explicit projectfile path (skips detection)")
 	getCmd.Flags().StringArrayVar(&getNamedPaths, "path", nil, "named path KEY=ADDR (repeatable, batch mode)")
 	getCmd.Flags().StringVar(&getLang, "lang", "", "language to select from localized string maps (e.g. en, es, uk)")
+	getCmd.Flags().StringArrayVar(&getScopes, "scope", nil,
+		"address whose subtree answers a `${…}` reference before the document root\n"+
+			"(repeatable, first match wins). Setting it also EXPANDS the resolved value,\n"+
+			"so a declared template is read composed rather than verbatim:\n"+
+			"  get org.projectfile.sinks.kiota.ref --scope org.projectfile.image\n"+
+			"Without it, `get` resolves exactly what it always did.")
 	rootCmd.AddCommand(getCmd)
 }
