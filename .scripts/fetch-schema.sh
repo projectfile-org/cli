@@ -42,8 +42,36 @@ TARGET="internal/validate/embedded/v1.json"
 
 log() { printf '[fetch-schema] %s\n' "$*" >&2; }
 
+# `git -C DIR` does NOT isolate the repository: GIT_DIR in the environment wins
+# over directory discovery. Git exports GIT_DIR to every hook, so under
+# lefthook's pre-commit every `git -C ${DEST}` below silently targeted THIS
+# repository — repointing its origin at the specification repository and
+# resetting the checkout onto a foreign history, which a later push would have
+# sent to the wrong place.
+#
+# The trap is that `rev-parse --show-toplevel` still reports ${DEST}, so a
+# toplevel assertion looks like it passes while `remote get-url origin` already
+# answers about the enclosing repository. Only clearing the inherited
+# environment fixes it.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX GIT_COMMON_DIR
+
+# Belt and braces: assert the repository git resolves for ${DEST} really is
+# ${DEST}'s own. Compares the GIT DIRECTORY, not the toplevel — that is the
+# value the environment overrides, so it is the one that detects the fault.
+assert_dest_is_repo_root() {
+    _got=$(git -C "${DEST}" rev-parse --absolute-git-dir 2>/dev/null || true)
+    _want=$(cd "${DEST}" && pwd -P)/.git
+    if [ "${_got}" != "${_want}" ]; then
+        log "ERROR: git resolves ${DEST} to '${_got:-none}', want '${_want}'"
+        log "refusing to run git commands that would act on another repository"
+        return 1
+    fi
+    return 0
+}
+
 if [ -d "${DEST}/.git" ]; then
     log "existing clone at ${DEST}, syncing to ref=${REF} repo=${REPO}"
+    assert_dest_is_repo_root || exit 1
     git -C "${DEST}" remote set-url origin "${REPO}"
     git -C "${DEST}" fetch --quiet --force origin "${REF}"
     git -C "${DEST}" reset --quiet --hard "origin/${REF}"

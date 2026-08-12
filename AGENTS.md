@@ -29,6 +29,45 @@ consumers alongside `pf-bridge` (`projectfile/bridge`) and `pf-ci`
 external files/forges/the repository (`bridge`/`forge`/`scan`/`init`) live in
 `pf-bridge`, not here.
 
+### `get --scope` — reading a value the document COMPOSES
+
+`--scope <address>` (repeatable) makes a subtree answer a `${…}` reference
+before the document root, and turns expansion ON for the resolved value. It is
+the whole mechanism behind composed references, and pf-cli knows no vocabulary
+of any domain:
+
+```yaml
+org.projectfile.image: {org: b19, name: ${identity.name}, series: resolute, tag: latest}
+org.projectfile.sinks:
+  kiota: {ref: "kiota.ch/${org}/${name}-${series}:${tag}", priority: 10}
+  ghcr:  {ref: "ghcr.io/buho/${org}-${name}-${series}:${tag}", priority: 90}
+```
+
+```sh
+pf-cli get org.projectfile.sinks.kiota.ref --scope org.projectfile.image
+# kiota.ch/b19/ubuntu-resolute:latest
+
+pf-cli get 'org.projectfile.sinks{}.values' --scope org.projectfile.image
+# every destination composed, ONE spawn, ranked by priority descending
+```
+
+Three properties the make plane depends on:
+
+- **Without `--scope` nothing changes.** `${org}` is not a document address, so
+    an unscoped `get` returns the template verbatim and every caller that
+    predates the flag keeps its behaviour. It is also why a half-composed
+    reference cannot be emitted by accident.
+- **Expansion descends into entries.** A map projection hands back whole entry
+    maps, and `expandScoped` walks into them — which is what makes "compose every
+    destination" one spawn instead of one per entry.
+- **`{AXIS}` survives.** A matrix placeholder carries no `$`, so it passes
+    through composition and is substituted per cell by the layer that owns the
+    matrix. Parts may hold one (`series: "{B19_UBUNTU_SERIES}"`).
+
+A scope is an ADDRESS the caller picks, so the same template composes a foreign
+subject by naming that subject’s parts — which is how a base image resolves
+without pf-cli knowing what a base image is.
+
 ## Layout
 
 ```text
@@ -37,7 +76,7 @@ projectfile/cli/
 ├── go.mod                module projectfile.org/projectfile/cli
 │                         require kiota.ch/projectfile/core + replace => ../core
 └── internal/
-    ├── cmd/              Cobra commands + derived (synthetic get addresses)
+    ├── cmd/              Cobra commands + scope (scoped resolve + `${…}` expansion for get)
     ├── validate/         v1 JSON Schema check (embedded/v1.json) — cli-only
     └── usersetup/        interactive first-run wizard — cli-only
 ```
@@ -56,6 +95,41 @@ selector — is imported from `kiota.ch/projectfile/core/pkg/*`.
 - SPDX texts are NOT cached or warmed here — pf-cli’s cache is HTTP includes
     only. SPDX boilerplate (corpus + warming) lives in pf-bridge, which is the
     sole reader of `spdx.Text`.
+
+## `git -C` does not isolate a repository — `GIT_DIR` beats it
+
+**Any script that runs Git against a nested clone MUST clear the inherited Git
+environment first.** `git -C DIR` changes directory but does NOT override
+`GIT_DIR`, and Git exports `GIT_DIR` to every hook. So under lefthook’s
+pre-commit, every `git -C _specification …` in `.scripts/fetch-schema.sh`
+targeted **cli itself**: `remote set-url origin` repointed cli at
+`https://kiota.ch/projectfile/specification.git`, and `reset --hard origin/main`
+moved the checkout onto the specification’s history. A push in that state sends
+cli’s code to the wrong repository.
+
+What makes it hard to catch: `rev-parse --show-toplevel` still answers `DIR`,
+so a toplevel assertion passes while `remote get-url origin` already answers
+about the enclosing repository. Assert on `rev-parse --absolute-git-dir`
+instead — that is the value the environment overrides.
+
+```sh
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_PREFIX GIT_COMMON_DIR
+```
+
+Reproduce (and prove a fix) without a commit:
+`GIT_DIR=$(git rev-parse --absolute-git-dir) sh .scripts/fetch-schema.sh`.
+
+The signature of the damage: `git log` shows specification commits, `git remote
+get-url origin` names the spec repository, and every file the local commits
+touched reads as modified because HEAD moved behind them. Repair with the URL
+cli’s own projectfile declares, then re-point the branch — `--mixed`, never
+`--hard`, or the working tree goes with it:
+
+```sh
+git remote set-url origin ssh://git@kiota.ch/projectfile/cli.git
+git fetch origin --prune
+git reset --mixed <the commit the branch should sit on>
+```
 
 ## Build
 
