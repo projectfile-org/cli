@@ -1,0 +1,82 @@
+<!--
+SPDX-FileCopyrightText: 2026 Damián Búho <damian.buho@proton.me>
+SPDX-License-Identifier: MIT
+pf-cli-managed: yes
+-->
+
+<!-- textlint-disable terminology -->
+
+[English](README.md) · [Español](docs/es/README.md)
+
+# Projectfile CLI
+
+pf-cli is a tool for reading, writing, validating projectfiles
+
+[![Stand with Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://damian-buho.github.io/support-ukraine/) [![License](https://img.shields.io/static/v1?label=license&message=MIT&color=4c1&style=flat-square)](LICENSE) ![Commit style](https://img.shields.io/static/v1?label=commits&message=conventional&color=blue&style=flat-square) ![Workflow](https://img.shields.io/static/v1?label=workflow&message=git-flow&color=blue&style=flat-square) ![Versioning](https://img.shields.io/static/v1?label=versioning&message=semantic&color=blue&style=flat-square) [![PRs welcome](https://img.shields.io/static/v1?label=PRs&message=welcome&color=4c1&style=flat-square)](CONTRIBUTING.md) [![Citation](https://img.shields.io/static/v1?label=citation&message=cff&color=blue&style=flat-square)](CITATION.cff)
+
+![Project status](https://img.shields.io/static/v1?label=status&message=maintained&color=1d63ed&style=flat-square)
+
+[![Build status on kiota.ch](https://kiota.ch/projectfile/cli/badges/workflows/published.yaml/badge.svg)](https://kiota.ch/projectfile/cli/actions)
+
+## Можливості
+
+- Document read, write and query
+
+Див. [Можливості](FEATURES.md), щоб переглянути повний перелік.
+
+## Що надає цей проєкт
+
+- **Виконуваний файл** `pf-cli`
+- **Образ контейнера** `kiota.ch/projectfile/cli:latest`
+
+## Встановлення
+
+Pull the published container image:
+
+```sh
+docker pull kiota.ch/projectfile/cli:latest
+```
+
+## Використання
+
+Read and write projectfile fields from the shell:
+
+```sh
+pf-cli get identity.name
+pf-cli get 'links[type=source-code].url'
+pf-cli set org.projectfile.status maintained
+pf-cli validate
+```
+
+## Збирання
+
+- [Довідник із Makefile](docs/MAKEFILE.md)
+
+Точки входу конвеєра:
+
+- `make analyze` — Run the heavy analysis sweep (mutation testing, benchmarks)
+- `make audited` — Re-scan the pinned dependencies and published artifacts for new vulnerabilities
+- `make check-outdated` — Report every pinned dependency that lags upstream
+- `make ready-to-publish` — Run the pseudo-CI pipeline locally — build, test and scan, without publishing
+
+Виконайте `make` без аргументів для типової цілі; виконайте `make help`, щоб переглянути всі цілі.
+
+Для локального циклу розробки `make dev-container` піднімає dev-container.
+
+## Політики
+
+- [Як зробити внесок](docs/uk/CONTRIBUTING.md)
+- [Політика безпеки](docs/uk/SECURITY.md)
+- [Як отримати підтримку](docs/uk/SUPPORT.md)
+- [Кодекс поведінки](docs/uk/CODE_OF_CONDUCT.md)
+
+## Посилання
+
+- [специфікація projectfile](https://projectfile.org)
+- [Projectfile CLI on kiota.ch](https://kiota.ch/projectfile/cli)
+
+## Ліцензія
+
+Цей проєкт ліцензовано на умовах MIT — див. файл [LICENSE](LICENSE) для подробиць.
+
+<!-- textlint-enable -->
