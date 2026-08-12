@@ -5,6 +5,8 @@
 package cmd
 
 import (
+	"strings"
+
 	"kiota.ch/projectfile/core/v2/pkg/fieldpath"
 	"kiota.ch/projectfile/core/v2/pkg/genlog"
 	"kiota.ch/projectfile/core/v2/pkg/interp"
@@ -25,6 +27,50 @@ import (
 //
 // --scope is what turns expansion ON. A plain `get` resolves exactly what it
 // always did, so no existing caller changes behaviour on the day this ships.
+
+// splitScopes sorts the --scope values into the ones that apply to every path
+// and the ones bound to a single batch key.
+//
+// What we are trying to do: a batch reading MANY subjects needs one scope each.
+// Passing them all as global scopes does not do that — they form a search order,
+// so the first scope that answers `${path}` answers it for every subject, and a
+// batch of three images reads back as three copies of the first one. That is a
+// well-formed reference to the wrong image, so the binding has to be explicit.
+//
+//	--path GO=…images.go-tools.ref  --scope GO=org.projectfile.images.go-tools
+//
+// The split point is the first `=` that occurs BEFORE any `{`: a batch key is a
+// plain name, while a selector's `=` is always inside braces, so
+// `org.projectfile.sinks{role=primary}` stays a global scope rather than
+// becoming a key named `org.projectfile.sinks{role`.
+func splitScopes(scopes []string) (global []string, perKey map[string][]string) {
+	perKey = make(map[string][]string)
+	for _, s := range scopes {
+		eq := strings.IndexByte(s, '=')
+		brace := strings.IndexByte(s, '{')
+		if eq <= 0 || (brace >= 0 && brace < eq) {
+			global = append(global, s)
+			genlog.Decision("get_scope_global", s, "applies to every path", "")
+			continue
+		}
+		key := strings.TrimSpace(s[:eq])
+		addr := strings.TrimSpace(s[eq+1:])
+		perKey[key] = append(perKey[key], addr)
+		genlog.Decision("get_scope_bound", addr, key, "")
+	}
+	return global, perKey
+}
+
+// scopesFor is the scope list one batch entry composes under: its own bindings
+// first, then the global ones. Ordering that way is what lets a shared scope be
+// declared once and still lose to the subject the caller named for this key.
+func scopesFor(key string, global []string, perKey map[string][]string) []string {
+	bound := perKey[key]
+	if len(bound) == 0 {
+		return global
+	}
+	return append(append(make([]string, 0, len(bound)+len(global)), bound...), global...)
+}
 
 // resolveScoped resolves p under the scopes, then the document root — the same
 // order interp uses, so a template and a shell reading the same address can

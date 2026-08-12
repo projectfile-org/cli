@@ -138,13 +138,15 @@ func runGet(cmd *cobra.Command, args []string) error {
 	// fallback applies.
 	out := make([]resolvedEntry, 0, len(entries))
 	missingAny := false
+	globalScopes, boundScopes := splitScopes(getScopes)
 	for _, e := range entries {
-		val, isList, isPairs, present, err := resolveScoped(doc, e.Path, getScopes)
+		scopes := scopesFor(e.Key, globalScopes, boundScopes)
+		val, isList, isPairs, present, err := resolveScoped(doc, e.Path, scopes)
 		switch {
 		case err != nil:
 			return err
 		case present:
-			val = expandScoped(val, doc, getScopes)
+			val = expandScoped(val, doc, scopes)
 			out = append(out, resolvedEntry{key: e.Key, path: e.Path, value: val, isList: isList, isPairs: isPairs, present: true})
 		default:
 			if d, ok := defaultValueFor(doc, e.Path, defaultSet); ok {
@@ -697,6 +699,11 @@ func init() {
 			"(repeatable, first match wins). Setting it also EXPANDS the resolved value,\n"+
 			"so a declared template is read composed rather than verbatim:\n"+
 			"  get org.projectfile.sinks.kiota.ref --scope org.projectfile.image\n"+
-			"Without it, `get` resolves exactly what it always did.")
+			"Prefix it with a --path key to bind it to that entry alone, which is how\n"+
+			"one batch reads MANY subjects — without the key every entry composes\n"+
+			"under the first scope that answers, yielding copies of one subject:\n"+
+			"  --path GO=…images.go-tools.ref --scope GO=org.projectfile.images.go-tools\n"+
+			"A bound scope outranks the global ones for its own key. Without any\n"+
+			"scope, `get` resolves exactly what it always did.")
 	rootCmd.AddCommand(getCmd)
 }

@@ -359,6 +359,116 @@ func TestGetScopeComposesEverySinkInOneCall(t *testing.T) {
 	}
 }
 
+// manySubjectsTOML is the shape a build plane reads: SEVERAL images, each a set
+// of declared parts, all composed through the same destination template. It is
+// the case a single global scope cannot serve, because every subject answers the
+// same part names.
+const manySubjectsTOML = `#:schema https://projectfile.org/schema/v1.json
+spec_version = "1"
+kind = "SoftwareSourceCode"
+
+[identity]
+namespace = "org.example.d9t"
+name = "probe"
+
+[org.projectfile.images.go-tools]
+org = "d9t"
+name = "go-tools"
+path = "${org}/${name}"
+tag = "dev"
+ref = "${org.projectfile.sinks{role=primary}.ref}"
+
+[org.projectfile.images.js-tools]
+org = "d9t"
+name = "js-tools"
+path = "${org}/${name}"
+tag = "dev"
+ref = "${org.projectfile.sinks{role=primary}.ref}"
+
+[org.projectfile.sinks.ghcr]
+ref = "ghcr.io/buho/${path}:${tag}"
+role = "primary"
+priority = 90
+`
+
+// The defect a bound scope exists to prevent, pinned as a NEGATIVE control:
+// unbound scopes are a search order, so the first one to answer `${path}`
+// answers it for every entry and the batch reads back as copies of one subject.
+// The result is a well-formed reference to the wrong image, which no caller can
+// detect downstream — which is why the binding is not a convenience.
+func TestUnboundScopesCollapseABatchOntoOneSubject(t *testing.T) {
+	dir := t.TempDir()
+	path := writeFixture(t, dir, manySubjectsTOML)
+
+	out, err := runGetCmd(t, "--batch", "--format", "sh", "--path-file", path,
+		"--path", "GO=org.projectfile.images.go-tools.ref",
+		"--path", "JS=org.projectfile.images.js-tools.ref",
+		"--scope", "org.projectfile.images.go-tools",
+		"--scope", "org.projectfile.images.js-tools")
+	if err != nil {
+		t.Fatalf("get --batch: %v", err)
+	}
+	if !strings.Contains(out, "JS=ghcr.io/buho/d9t/go-tools:dev") {
+		t.Fatalf("expected JS to collapse onto the FIRST scope, got %q", out)
+	}
+}
+
+// One spawn, many subjects, each composed under the scope its own key names.
+// This is what makes a build plane affordable: the alternative is one process
+// per image on every make parse.
+func TestBoundScopesComposeEachSubjectInOneCall(t *testing.T) {
+	dir := t.TempDir()
+	path := writeFixture(t, dir, manySubjectsTOML)
+
+	out, err := runGetCmd(t, "--batch", "--format", "sh", "--path-file", path,
+		"--path", "GO=org.projectfile.images.go-tools.ref",
+		"--path", "JS=org.projectfile.images.js-tools.ref",
+		"--scope", "GO=org.projectfile.images.go-tools",
+		"--scope", "JS=org.projectfile.images.js-tools")
+	if err != nil {
+		t.Fatalf("get --batch: %v", err)
+	}
+	for _, want := range []string{
+		"GO=ghcr.io/buho/d9t/go-tools:dev",
+		"JS=ghcr.io/buho/d9t/js-tools:dev",
+	} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("missing %q in %q", want, out)
+		}
+	}
+}
+
+// A scope may legitimately carry a selector, whose `=` sits inside braces. The
+// split rule reads the first `=` BEFORE any `{`, so such a scope stays global
+// rather than becoming a key named `org.projectfile.sinks{role`.
+func TestScopeWithASelectorIsNotReadAsABinding(t *testing.T) {
+	global, perKey := splitScopes([]string{
+		"org.projectfile.sinks{role=primary}",
+		"GO=org.projectfile.images.go-tools",
+	})
+	if len(global) != 1 || global[0] != "org.projectfile.sinks{role=primary}" {
+		t.Fatalf("selector scope must stay global, got %v", global)
+	}
+	if got := perKey["GO"]; len(got) != 1 || got[0] != "org.projectfile.images.go-tools" {
+		t.Fatalf("bound scope not captured, got %v", perKey)
+	}
+}
+
+// A bound scope wins for its own key; a key that binds nothing still reads the
+// global ones. That is what lets a fleet declare one shared scope and a single
+// entry override it.
+func TestBoundScopeOutranksGlobalAndUnboundKeysKeepIt(t *testing.T) {
+	const shared, own = "root.scope", "go.scope"
+	global, perKey := splitScopes([]string{shared, "GO=" + own})
+
+	if got := scopesFor("GO", global, perKey); len(got) != 2 || got[0] != own || got[1] != shared {
+		t.Fatalf("bound key must search its own scope first, got %v", got)
+	}
+	if got := scopesFor("JS", global, perKey); len(got) != 1 || got[0] != shared {
+		t.Fatalf("unbound key must keep the global scopes, got %v", got)
+	}
+}
+
 // localizedFixtureTOML has identity.summary with a single language (en) and
 // identity.title with two languages (en + es) to exercise both auto-unwrap
 // and --lang selection.
