@@ -6,7 +6,7 @@ pf-cli-managed: yes
 
 <!-- textlint-disable terminology -->
 
-[English](README.md) · [Español](docs/es/README.md)
+[English](../../README.md) · [Español](../es/README.md)
 
 # Projectfile CLI
 
@@ -22,16 +22,24 @@ pf-cli is a tool for reading, writing, validating projectfiles
 
 - Document read, write and query
 
-Див. [Можливості](FEATURES.md), щоб переглянути повний перелік.
+Див. [FEATURES.md](../../FEATURES.md), щоб переглянути повний перелік.
 
 ## Що надає цей проєкт
 
 - **Виконуваний файл** `pf-cli`
-- **Образ контейнера** `kiota.ch/projectfile/cli:latest`
+- **Образ контейнера** `ghcr.io/damian-buho/projectfile/cli:latest`
+- **Образ контейнера** `docker.io/damianbuho/projectfile-cli:latest`
 
 ## Встановлення
 
-Pull the published container image:
+Завантажте опублікований образ контейнера:
+
+```sh
+docker pull ghcr.io/damian-buho/projectfile/cli:latest
+docker pull docker.io/damianbuho/projectfile-cli:latest
+```
+
+Якщо наведені вище реєстри недоступні, завантажте з джерела:
 
 ```sh
 docker pull kiota.ch/projectfile/cli:latest
@@ -50,7 +58,7 @@ pf-cli validate
 
 ## Збирання
 
-- [Довідник із Makefile](docs/MAKEFILE.md)
+- [Довідник із Makefile](../MAKEFILE.md)
 
 Точки входу конвеєра:
 
@@ -65,18 +73,19 @@ pf-cli validate
 
 ## Політики
 
-- [Як зробити внесок](docs/uk/CONTRIBUTING.md)
-- [Політика безпеки](docs/uk/SECURITY.md)
-- [Як отримати підтримку](docs/uk/SUPPORT.md)
-- [Кодекс поведінки](docs/uk/CODE_OF_CONDUCT.md)
+- [Як зробити внесок](CONTRIBUTING.md)
+- [Політика безпеки](SECURITY.md)
+- [Як отримати підтримку](SUPPORT.md)
+- [Кодекс поведінки](CODE_OF_CONDUCT.md)
 
 ## Посилання
 
-- [специфікація projectfile](https://projectfile.org)
+- [Специфікація Projectfile](https://projectfile.org)
 - [Projectfile CLI on kiota.ch](https://kiota.ch/projectfile/cli)
 
 ## Ліцензія
 
 Цей проєкт ліцензовано на умовах MIT — див. файл [LICENSE](LICENSE) для подробиць.
 
+*Згенеровано з projectfile ([дізнатися як](https://projectfile.org/how-to/readme))*
 <!-- textlint-enable -->

@@ -5,23 +5,17 @@ pf-cli-managed: yes
 -->
 
 <!-- textlint-disable terminology -->
-[English](SUPPORT.md) · [Español](docs/es/SUPPORT.md)
+[English](../../SUPPORT.md) · [Español](../es/SUPPORT.md)
 
 # Як отримати підтримку
 
 Дякуємо, що користуєтеся **Projectfile CLI**!
 Цей документ пояснює, де шукати допомогу та як ставити зрозумілі запитання.
 
-## Перш ніж питати
-
-Перегляньте це спершу — можливо, відповідь уже є:
-
-- [специфікація projectfile](https://projectfile.org)
-
 ## Куди звертатися
 
-- **Повідомити про вразливість безпеки** — [docs/uk/SECURITY.md](docs/uk/SECURITY.md)
-- **Зробити внесок у проєкт** — [docs/uk/CONTRIBUTING.md](docs/uk/CONTRIBUTING.md)
+- **Повідомити про вразливість безпеки** — [SECURITY.md](SECURITY.md)
+- **Зробити внесок у проєкт** — [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Як поставити гарне запитання
 
@@ -39,4 +33,6 @@ pf-cli-managed: yes
 ## Час відповіді
 
 Це проєкт, який підтримує спільнота. Супровідники відповідають, коли мають змогу — зазвичай протягом кількох днів, але без гарантій. Просимо про терпіння та повагу.
+
+*Згенеровано з projectfile ([дізнатися як](https://projectfile.org/how-to/support))*
 <!-- textlint-enable -->

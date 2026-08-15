@@ -10,3 +10,9 @@ internal/spdx/embedded/
 # Go templates carry `{{ }}` directives that confuse pair-match rules. The
 # generator tests verify the rendered output, which is what humans read.
 internal/generators/template/templates/
+
+# Translated feature-fragment sources: English-tuned prose rules
+# false-positive on Spanish and Ukrainian. The assembled docs/<lang>/FEATURES.md
+# stays linted (machine-wrapped in a textlint-disable block).
+docs/es/features.d/
+docs/uk/features.d/

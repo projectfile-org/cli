@@ -5,7 +5,7 @@ pf-cli-managed: yes
 -->
 
 <!-- textlint-disable terminology -->
-[English](SECURITY.md) · [Українська](docs/uk/SECURITY.md)
+[English](../../SECURITY.md) · [Українська](../uk/SECURITY.md)
 
 # Política de seguridad
 
@@ -27,7 +27,7 @@ Incluye toda la información que puedas de la siguiente lista; nos ayuda a clasi
 - Archivos de registro relevantes, si es posible
 - Código de prueba de concepto o de explotación, si es posible
 
-Procuramos acusar recibo de los informes en un plazo de 30 days y coordinar
+Procuramos acusar recibo de los informes en un plazo de 30 días y coordinar
 la divulgación en cuanto exista una corrección.
 
 ## Cifrar un informe
@@ -63,4 +63,6 @@ gpg --encrypt --armor --recipient B64C122EE16C3746 message.txt
 Projectfile CLI no ofrece actualmente un programa de recompensas. Aun así
 agradecemos los informes divulgados de forma responsable — consulta el canal de
 contacto anterior.
+
+*Generado desde projectfile ([saber cómo](https://projectfile.org/how-to/security))*
 <!-- textlint-enable -->

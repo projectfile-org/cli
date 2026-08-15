@@ -6,7 +6,7 @@ pf-cli-managed: yes
 
 <!-- textlint-disable terminology -->
 
-[English](README.md) · [Українська](docs/uk/README.md)
+[English](../../README.md) · [Українська](../uk/README.md)
 
 # Projectfile CLI
 
@@ -22,16 +22,24 @@ pf-cli is a tool for reading, writing, validating projectfiles
 
 - Document read, write and query
 
-Consulta [Características](FEATURES.md) para ver la lista completa.
+Consulta [FEATURES.md](../../FEATURES.md) para ver la lista completa.
 
 ## Qué entrega este proyecto
 
 - **Ejecutable** `pf-cli`
-- **Imagen de contenedor** `kiota.ch/projectfile/cli:latest`
+- **Imagen de contenedor** `ghcr.io/damian-buho/projectfile/cli:latest`
+- **Imagen de contenedor** `docker.io/damianbuho/projectfile-cli:latest`
 
 ## Instalación
 
-Pull the published container image:
+Descarga la imagen de contenedor publicada:
+
+```sh
+docker pull ghcr.io/damian-buho/projectfile/cli:latest
+docker pull docker.io/damianbuho/projectfile-cli:latest
+```
+
+Si los registros anteriores no están disponibles, descarga desde el origen:
 
 ```sh
 docker pull kiota.ch/projectfile/cli:latest
@@ -50,7 +58,7 @@ pf-cli validate
 
 ## Compilación
 
-- [Referencia del Makefile](docs/MAKEFILE.md)
+- [Referencia del Makefile](../MAKEFILE.md)
 
 Puntos de entrada de la canalización:
 
@@ -65,18 +73,19 @@ Para el bucle de desarrollo local, `make dev-container` levanta el dev-container
 
 ## Políticas
 
-- [Cómo contribuir](docs/es/CONTRIBUTING.md)
-- [Política de seguridad](docs/es/SECURITY.md)
-- [Cómo obtener ayuda](docs/es/SUPPORT.md)
-- [Código de conducta](docs/es/CODE_OF_CONDUCT.md)
+- [Cómo contribuir](CONTRIBUTING.md)
+- [Política de seguridad](SECURITY.md)
+- [Cómo obtener ayuda](SUPPORT.md)
+- [Código de conducta](CODE_OF_CONDUCT.md)
 
 ## Enlaces
 
-- [especificación de projectfile](https://projectfile.org)
+- [Especificación de Projectfile](https://projectfile.org)
 - [Projectfile CLI on kiota.ch](https://kiota.ch/projectfile/cli)
 
 ## Licencia
 
 Este proyecto se publica bajo la licencia MIT — consulta el archivo [LICENSE](LICENSE) para más detalles.
 
+*Generado desde projectfile ([saber cómo](https://projectfile.org/how-to/readme))*
 <!-- textlint-enable -->
