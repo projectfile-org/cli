@@ -8,8 +8,9 @@ copyright:
 identity:
   created: "2026-07-07"
   name: cli
-  summary: pf-cli — the projectfile document-backend CLI (get/set/convert/validate/…)
-  title: projectfile/cli
+  summary: pf-cli is the CLI for reading, writing and validating projectfiles
+  title: Projectfile CLI
+  description: 'pf-cli is the command-line front end for the projectfile: it reads, writes and validates fields, resolves remote includes, and generates derived artifacts. It embeds the v1 JSON Schema for offline validation and is the canonical tool for editing projectfiles locally and in CI.'
 includes:
   - .makefile/b19/ci.yaml
   - .makefile/b19/images/go.yaml
@@ -18,22 +19,6 @@ includes:
   - https://kiota.ch/damian-buho/metadata/raw/branch/main/include.yaml
   - https://kiota.ch/projectfile/metadata/raw/branch/main/include.yaml
 kind: SoftwareSourceCode
-links:
-  - label: Source Code on Codeberg
-    type: source-code
-    url: https://codeberg.org/projectfile/cli
-  - label: Source Code on GitHub
-    type: source-code
-    url: https://github.com/damian-buho/projectfile-cli
-  - label: Source Code on kiota.ch
-    type: source-code
-    url: https://kiota.ch/projectfile/cli
-  - label: Issues on Codeberg
-    type: bugs
-    url: https://codeberg.org/projectfile/cli/issues
-  - label: Issues on GitHub
-    type: bugs
-    url: https://github.com/damian-buho/projectfile-cli/issues
 org:
   projectfile:
     artifacts:
@@ -51,31 +36,6 @@ org:
         credentials:
           FORGEJO_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       nodes:
-        # //go:embed makes the v1 schema a COMPILE input, so it must land before
-        # any Go tool runs — lint, test and container build alike.
-        # Each consumer needs a DIRECT edge to schema-fetched: the artifact
-        # hand-off is derived from the needs-edge, so a transitive path through
-        # source-is-ready orders the jobs but downloads nothing.
-        # Matrixed consumers cannot use the edge (`artifact:` hands off one
-        # artifact PER CELL, and fetch-schema carries no matrix), so
-        # binaries-built calls .scripts/fetch-schema.sh itself instead.
-        schema-fetched:
-          needs:
-            fetch-schema: true
-        source-passes-lint:
-          needs:
-            schema-fetched: true
-        source-is-tested:
-          needs:
-            schema-fetched: true
-        image-is-built:
-          needs:
-            schema-fetched: true
-        # The two binary nodes MUST mirror cell for cell: the artifact hand-off is
-        # keyed by the cell, so a release cell whose build twin is absent would
-        # download an artifact nobody uploaded. Go has no darwin/riscv64 target
-        # (`go tool dist list` gives linux and openbsd only), so both grids
-        # subtract that corner rather than split into a second node.
         binaries-built:
           matrix:
             axes:
@@ -113,10 +73,22 @@ org:
           when:
             events:
               - tag
+        image-is-built:
+          needs:
+            schema-fetched: true
         published:
           needs:
             binaries-released: true
             install-binary: true
+        schema-fetched:
+          needs:
+            fetch-schema: true
+        source-is-tested:
+          needs:
+            schema-fetched: true
+        source-passes-lint:
+          needs:
+            schema-fetched: true
       tools:
         build-binaries:
           artifact: dist
@@ -158,13 +130,13 @@ org:
           - internal/validate/embedded/v1.json.license
     readme:
       usage:
-        - name: binary
-          prefix: "Read and write projectfile fields from the shell:"
-          commands:
+        - commands:
             - pf-cli get identity.name
             - pf-cli get 'links[type=source-code].url'
             - pf-cli set org.projectfile.status maintained
             - pf-cli validate
+          name: binary
+          prefix: 'Read and write projectfile fields from the shell:'
     status: maintained
 repositories:
   - issues: true
@@ -174,6 +146,27 @@ repositories:
   - role: mirror
     type: git
     url: git@github.com:damian-buho/projectfile-cli.git
-  - role: origin
+  - branch: main
+    role: origin
     type: git
     url: ssh://git@kiota.ch/projectfile/cli.git
+links:
+  - label:
+      en: Projectfile CLI on kiota.ch
+      es: Projectfile CLI en kiota.ch
+      uk: Projectfile CLI на kiota.ch
+    preferred: true
+    type: source-code
+    url: https://kiota.ch/projectfile/cli
+keywords:
+  - pf-cli
+  - projectfile
+  - cli
+  - yaml
+  - validate
+  - go
+technologies:
+  - go
+license:
+  covers: project
+  spdx: "MIT"
