@@ -8,9 +8,15 @@ copyright:
 identity:
   created: "2026-07-07"
   name: cli
-  summary: pf-cli is the CLI for reading, writing and validating projectfiles
+  summary:
+    en: pf-cli is the CLI for reading, writing and validating projectfiles
+    es: pf-cli es la CLI para leer, escribir y validar projectfiles
+    uk: pf-cli — CLI для читання, запису та валідації projectfile-файлів
   title: Projectfile CLI
-  description: 'pf-cli is the command-line front end for the projectfile: it reads, writes and validates fields, resolves remote includes, and generates derived artifacts. It embeds the v1 JSON Schema for offline validation and is the canonical tool for editing projectfiles locally and in CI.'
+  description:
+    en: 'pf-cli is the command-line front end for the projectfile: it reads, writes and validates fields, resolves remote includes, and generates derived artifacts. It embeds the v1 JSON Schema for offline validation and is the canonical tool for editing projectfiles locally and in CI.'
+    es: 'pf-cli es la interfaz de línea de órdenes del projectfile: lee, escribe y valida campos, resuelve includes remotos y genera artefactos derivados. Embebe el esquema JSON v1 para validación sin conexión y es la herramienta canónica para editar projectfiles localmente y en CI.'
+    uk: 'pf-cli — командний інтерфейс projectfile: читає, записує та валідує поля, розвʼязує віддалені includes і генерує похідні артефакти. Містить вбудовану JSON-схему v1 для офлайн-валідації та є канонічним інструментом редагування projectfile-файлів локально й у CI.'
 includes:
   - .makefile/b19/ci.yaml
   - .makefile/b19/images/go.yaml

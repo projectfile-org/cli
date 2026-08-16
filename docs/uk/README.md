@@ -4,13 +4,13 @@ SPDX-License-Identifier: MIT
 pf-cli-managed: yes
 -->
 
-<!-- textlint-disable terminology -->
+<!-- textlint-disable terminology,common-misspellings -->
 
 [English](../../README.md) · [Español](../es/README.md)
 
 # Projectfile CLI
 
-pf-cli is a tool for reading, writing, validating projectfiles
+pf-cli — CLI для читання, запису та валідації projectfile-файлів
 
 [![Stand with Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://damian-buho.github.io/support-ukraine/) [![License](https://img.shields.io/static/v1?label=license&message=MIT&color=4c1&style=flat-square)](LICENSE) ![Commit style](https://img.shields.io/static/v1?label=commits&message=conventional&color=blue&style=flat-square) ![Workflow](https://img.shields.io/static/v1?label=workflow&message=git-flow&color=blue&style=flat-square) ![Versioning](https://img.shields.io/static/v1?label=versioning&message=semantic&color=blue&style=flat-square) [![PRs welcome](https://img.shields.io/static/v1?label=PRs&message=welcome&color=4c1&style=flat-square)](CONTRIBUTING.md) [![Citation](https://img.shields.io/static/v1?label=citation&message=cff&color=blue&style=flat-square)](CITATION.cff)
 
@@ -20,9 +20,9 @@ pf-cli is a tool for reading, writing, validating projectfiles
 
 ## Можливості
 
-- Document read, write and query
+- Читання, запис і запити до документів
 
-Див. [FEATURES.md](../../FEATURES.md), щоб переглянути повний перелік.
+Див. [FEATURES.md](FEATURES.md), щоб переглянути повний перелік.
 
 ## Що надає цей проєкт
 
@@ -80,8 +80,14 @@ pf-cli validate
 
 ## Посилання
 
+### Проєкт
+
 - [Специфікація Projectfile](https://projectfile.org)
-- [Projectfile CLI on kiota.ch](https://kiota.ch/projectfile/cli)
+- [Projectfile CLI на kiota.ch](https://kiota.ch/projectfile/cli)
+
+### Інше
+
+- [Від автора](https://dbuho.me)
 
 ## Ліцензія
 
