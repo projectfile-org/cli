@@ -5,9 +5,3 @@
 # Sibling to .gitignore for `fd`-driven scans (e.g. lint walkers). Excludes
 # verbatim third-party content we never want linted as natural language.
 internal/spdx/embedded/
-
-# Translated feature-fragment sources: English-tuned prose rules
-# false-positive on Spanish and Ukrainian. The assembled docs/<lang>/FEATURES.md
-# stays linted (machine-wrapped in a textlint-disable block).
-docs/es/features.d/
-docs/uk/features.d/
