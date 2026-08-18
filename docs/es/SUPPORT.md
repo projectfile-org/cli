@@ -37,5 +37,4 @@ Hay soporte de pago disponible para Projectfile CLI:
 
 - [Apoyo del autor](https://dbuho.me)
 
-*Generado desde projectfile ([saber cómo](https://projectfile.org/how-to/support))*
 <!-- textlint-enable -->
