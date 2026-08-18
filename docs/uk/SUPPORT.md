@@ -4,7 +4,7 @@ SPDX-License-Identifier: MIT
 pf-cli-managed: yes
 -->
 
-<!-- textlint-disable terminology -->
+<!-- textlint-disable terminology,common-misspellings -->
 [English](../../SUPPORT.md) · [Español](../es/SUPPORT.md)
 
 # Як отримати підтримку
@@ -27,12 +27,15 @@ pf-cli-managed: yes
 4. **Середовище** — операційна система, версія Projectfile CLI, версія середовища виконання.
 5. **Мінімальний відтворюваний приклад**, якщо це можливо.
 
-Див. [посібник MCVE на Stack Overflow](https://stackoverflow.com/help/minimal-reproducible-example)
-для порад.
-
 ## Час відповіді
 
 Це проєкт, який підтримує спільнота. Супровідники відповідають, коли мають змогу — зазвичай протягом кількох днів, але без гарантій. Просимо про терпіння та повагу.
+
+## Платна підтримка
+
+Платна підтримка для Projectfile CLI доступна:
+
+- [Підтримка від автора](https://dbuho.me)
 
 *Згенеровано з projectfile ([дізнатися як](https://projectfile.org/how-to/support))*
 <!-- textlint-enable -->
