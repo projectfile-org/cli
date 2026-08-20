@@ -1,33 +1,54 @@
 <!--
 SPDX-FileCopyrightText: 2026 Damián Búho <damian.buho@proton.me>
 SPDX-License-Identifier: MIT
+pf-cli-managed: yes
 -->
 
-<!-- pf-cli-managed: yes -->
-# projectfile/cli
+[Español](docs/es/README.md) · [Українська](docs/uk/README.md)
 
-pf-cli — the projectfile document-backend CLI (get/set/convert/validate/…)
+# Projectfile CLI
 
-[![License](https://img.shields.io/badge/license-MIT-4c1?style=flat-square)](LICENSE) [![PRs welcome](https://img.shields.io/badge/PRs-welcome-4c1?style=flat-square)](CONTRIBUTING.md) [![REUSE compliance](https://api.reuse.software/badge/codeberg.org/projectfile/cli)](https://api.reuse.software/info/codeberg.org/projectfile/cli)
+pf-cli is the CLI for reading, writing and validating projectfiles
 
-![Project status](https://img.shields.io/badge/status-maintained-1d63ed?style=flat-square) [![Last commit](https://img.shields.io/gitea/last-commit/projectfile/cli?gitea_url=https://codeberg.org&style=flat-square)](https://codeberg.org/projectfile/cli)
+[![Stand with Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://damian-buho.github.io/support-ukraine/) [![License](https://badges.kiota.ch/static/v1?label=license&message=MIT&color=4c1&style=flat-square)](LICENSE) ![Commit style](https://badges.kiota.ch/static/v1?label=commits&message=conventional&color=blue&style=flat-square) ![Workflow](https://badges.kiota.ch/static/v1?label=workflow&message=git-flow&color=blue&style=flat-square) ![Versioning](https://badges.kiota.ch/static/v1?label=versioning&message=semantic&color=blue&style=flat-square) [![PRs welcome](https://badges.kiota.ch/static/v1?label=PRs&message=welcome&color=4c1&style=flat-square)](CONTRIBUTING.md) [![Citation](https://badges.kiota.ch/static/v1?label=citation&message=cff&color=blue&style=flat-square)](CITATION.cff)
 
-[![Build status on kiota.ch](https://kiota.ch/projectfile/cli/badges/workflows/published.yaml/badge.svg)](https://kiota.ch/projectfile/cli/actions)
+![Project status](https://badges.kiota.ch/static/v1?label=status&message=maintained&color=1d63ed&style=flat-square) [![Last commit on kiota.ch](https://badges.kiota.ch/gitea/last-commit/projectfile/cli?gitea_url=https://kiota.ch&style=flat-square)](https://kiota.ch/projectfile/cli)
+
+[![Publish pipeline on kiota.ch](https://kiota.ch/projectfile/cli/badges/workflows/published.yaml/badge.svg?style=flat-square)](https://kiota.ch/projectfile/cli/actions) [![Vulnerability audit on kiota.ch](https://kiota.ch/projectfile/cli/badges/workflows/audited.yaml/badge.svg?style=flat-square)](https://kiota.ch/projectfile/cli/actions) [![Dependency freshness on kiota.ch](https://kiota.ch/projectfile/cli/badges/workflows/check-outdated.yaml/badge.svg?style=flat-square)](https://kiota.ch/projectfile/cli/actions) [![Analysis sweep on kiota.ch](https://kiota.ch/projectfile/cli/badges/workflows/analyze.yaml/badge.svg?style=flat-square)](https://kiota.ch/projectfile/cli/actions)
 
 ## Features
 
 - Document read, write and query
 
-See [Features](FEATURES.md) for the full list.
+See [FEATURES.md](FEATURES.md) for the full list.
 
 ## What this provides
 
 - **Executable** `pf-cli`
-- **Container image** `kiota.ch/projectfile/cli:latest`
+- **Container image** `ghcr.io/damian-buho/projectfile/cli:latest`
+- **Container image** `docker.io/damianbuho/projectfile-cli:latest`
 
 ## Installation
 
 Pull the published container image:
+
+### Pull from GHCR
+
+```sh
+docker pull ghcr.io/damian-buho/projectfile/cli:latest
+```
+
+### Pull from DockerHub
+
+```sh
+docker pull docker.io/damianbuho/projectfile-cli:latest
+```
+
+Stable releases also publish `X.Y.Z`, `X.Y` and `X` tags — pull the precision you want to pin.
+
+If the registries above are unreachable, pull from the origin instead:
+
+### Pull from Kiota
 
 ```sh
 docker pull kiota.ch/projectfile/cli:latest
@@ -46,14 +67,16 @@ pf-cli validate
 
 ## Building
 
-- [Makefile reference](docs/MAKEFILE.md)
+Run `make` with no arguments for the default target; run `make help` to list every target.
+
+For the local dev loop, `make dev-container` brings up the dev-container.
 
 Pipeline entry points:
 
 - `make analyze` — Run the heavy analysis sweep (mutation testing, benchmarks)
 - `make audited` — Re-scan the pinned dependencies and published artifacts for new vulnerabilities
 - `make check-outdated` — Report every pinned dependency that lags upstream
-- `make published` — Build, test, scan and publish the release artifacts
+- `make ready-to-publish` — Run the pseudo-CI pipeline locally — build, test and scan, without publishing
 
 ## Policies
 
@@ -61,16 +84,11 @@ Pipeline entry points:
 - [Security policy](SECURITY.md)
 - [Getting support](SUPPORT.md)
 - [Code of Conduct](CODE_OF_CONDUCT.md)
+- [AI and LLM Policy](AI_POLICY.md)
 
 ## Links
 
-### Project
-
-- [Source Code on Codeberg](https://codeberg.org/projectfile/cli)
-- [Source Code on GitHub](https://github.com/damian-buho/projectfile-cli)
-- [Source Code on kiota.ch](https://kiota.ch/projectfile/cli)
-- [Issues on Codeberg](https://codeberg.org/projectfile/cli/issues)
-- [Issues on GitHub](https://github.com/damian-buho/projectfile-cli/issues)
+- [Projectfile Specification](https://projectfile.org)
 
 ## License
 
