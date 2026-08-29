@@ -55,9 +55,6 @@ org:
             exclude:
               - GOARCH: riscv64
                 GOOS: darwin
-          needs:
-            build-binaries: true
-            source-is-ready: true
         gsa:
           matrix:
             axes:
@@ -71,13 +68,6 @@ org:
             exclude:
               - GOARCH: riscv64
                 GOOS: darwin
-          needs:
-            binaries-built: true
-            auto-gsa: true
-        binaries-ready:
-          needs:
-            binaries-built: true
-            gsa: true
         binaries-released:
           matrix:
             axes:
@@ -91,20 +81,9 @@ org:
             exclude:
               - GOARCH: riscv64
                 GOOS: darwin
-          needs:
-            binaries-ready: true
-            forgejo-release: true
-            gh-release: true
-          when:
-            events:
-              - tag
         image-is-built:
           needs:
             schema-fetched: true
-        published:
-          needs:
-            binaries-released: true
-            install-binary: true
         schema-fetched:
           needs:
             fetch-schema: true
@@ -115,38 +94,10 @@ org:
           needs:
             schema-fetched: true
       tools:
-        build-binaries:
-          artifact: dist
-          env:
-            - GOPROXY
-            - GOOS
-            - GOARCH
-            - GITHUB_REF_NAME
-          guard: go.mod
-          image: GO_TOOL_IMAGE
-          m6e:
-            prefer-local: true
-          run: .scripts/build-binaries.sh
         fetch-schema:
           artifact: internal/validate/embedded
           description: Clone or update projectfile/specification, then install the v1 schema for embedding
           run: .scripts/fetch-schema.sh
-        forgejo-release:
-          action: forgejo-release
-          env:
-            - FORGEJO_TOKEN
-          gha: false
-          m6e: false
-        gh-release:
-          env:
-            - GH_TOKEN
-          forgejo: false
-          m6e: false
-          run: .scripts/gh-release.sh "$${{ github.ref_name }}"
-        install-binary:
-          forgejo: false
-          gha: false
-          run: .scripts/install-binary.sh
     ignores:
       git:
         include:
