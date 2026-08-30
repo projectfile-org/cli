@@ -979,23 +979,11 @@ Tear down every variant’s stack and volumes, remove built images and the fetch
 
 ## Manifest
 
-### `build-binaries`
-
-`.scripts/build-binaries.sh`
-
-> Image: GO_TOOL_IMAGE
-
 ### `fetch-schema`
 
 Clone or update projectfile/specification, then install the v1 schema for embedding
 
 `.scripts/fetch-schema.sh`
-
-> Image: host runner
-
-### `install-binary`
-
-`.scripts/install-binary.sh`
 
 > Image: host runner
 
@@ -1262,6 +1250,24 @@ Validate the projectfile document
 `pf-cli validate`
 
 > Image: PF_CLI_IMAGE
+
+## Publish
+
+### `build-binaries`
+
+Cross-compile the release binaries for the OS/arch cell
+
+`.scripts/build-binaries.sh`
+
+> Image: GO_TOOL_IMAGE
+
+### `install-binary`
+
+Build the host-native binary and install it into ~/.local/bin
+
+`.scripts/install-binary.sh`
+
+> Image: host runner
 
 ## Release
 
