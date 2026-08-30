@@ -12,7 +12,7 @@ The **`pf-cli` binary** — the document-backend CLI. A thin Cobra command
 layer over the `projectfile/core` **library**, which it consumes through core’s
 `pkg/*` façades only (never core `internal/`). One of three peer library
 consumers alongside `pf-bridge` (`projectfile/bridge`) and `pf-ci`
-(`projectfile/ci-resolver`).
+(`projectfile/ci`).
 
 > **Bridge Revolution Phase 8 (2026-07-07):** `main.go` +
 > `internal/{cmd,validate,usersetup}` were extracted from `projectfile/core`
