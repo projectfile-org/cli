@@ -92,6 +92,9 @@ jobs:
             GOARCH=${{ matrix.GOARCH }}
             GOOS=${{ matrix.GOOS }}
             M6E_TORRENT_TRACKERS=https://tracker.kiota.ch/announce udp://tracker.kiota.ch:6969 wss://tracker.kiota.ch
+            GITHUB_REF_NAME
+            GITHUB_REPOSITORY
+            GITHUB_SERVER_URL
       - uses: actions/upload-artifact@v3
         with:
           name: torrent-create-${{ matrix.GOARCH }}-${{ matrix.GOOS }}-${{ github.run_id }}
@@ -105,6 +108,8 @@ jobs:
           env: |-
             GOARCH=${{ matrix.GOARCH }}
             GOOS=${{ matrix.GOOS }}
+            GITHUB_REF_NAME
+            GITHUB_REPOSITORY
           mounts: /app/data/ci-cache/rqbit-seed:/seed:rw
   binaries-built:
     runs-on: docker
