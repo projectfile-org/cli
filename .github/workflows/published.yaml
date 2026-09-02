@@ -73,7 +73,7 @@ jobs:
     env:
       GOARCH: ${{ matrix.GOARCH }}
       GOOS: ${{ matrix.GOOS }}
-      M6E_TORRENT_TRACKERS: ''
+      M6E_TORRENT_TRACKERS: https://tracker.kiota.ch/announce udp://tracker.kiota.ch:6969 wss://tracker.kiota.ch
     steps:
       - uses: actions/checkout@v7
         with:
@@ -91,8 +91,7 @@ jobs:
           env: |-
             GOARCH=${{ matrix.GOARCH }}
             GOOS=${{ matrix.GOOS }}
-            M6E_TORRENT_TRACKERS
-            R8E_RQBIT_TRACKERS
+            M6E_TORRENT_TRACKERS=https://tracker.kiota.ch/announce udp://tracker.kiota.ch:6969 wss://tracker.kiota.ch
       - uses: actions/upload-artifact@v7
         with:
           name: torrent-create-${{ matrix.GOARCH }}-${{ matrix.GOOS }}-${{ github.run_id }}
