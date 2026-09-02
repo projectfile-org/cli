@@ -23,6 +23,7 @@ includes:
   - .makefile/b19/images/ubuntu.yaml
   - .makefile/library/languages/go.yaml
   - .makefile/library/traits/go-binary.yaml
+  - .makefile/library/traits/torrent-binary.yaml
   - https://kiota.ch/damian-buho/metadata/raw/branch/main/include.yaml
   - https://kiota.ch/projectfile/metadata/raw/branch/main/include.yaml
 kind: SoftwareSourceCode
@@ -57,6 +58,19 @@ org:
               - GOARCH: riscv64
                 GOOS: darwin
         gsa:
+          matrix:
+            axes:
+              GOARCH:
+                - amd64
+                - arm64
+                - riscv64
+              GOOS:
+                - linux
+                - darwin
+            exclude:
+              - GOARCH: riscv64
+                GOOS: darwin
+        binaries-are-torrented:
           matrix:
             axes:
               GOARCH:

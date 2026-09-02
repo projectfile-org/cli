@@ -59,6 +59,54 @@ jobs:
     needs: ["built"]
     steps:
       - run: echo artifact-ready
+  binaries-are-torrented:
+    runs-on: docker
+    needs: ["binaries-ready"]
+    if: startsWith(github.ref, 'refs/tags/')
+    strategy:
+      matrix:
+        GOARCH: ["amd64", "arm64", "riscv64"]
+        GOOS: ["linux", "darwin"]
+        exclude:
+          - GOARCH: "riscv64"
+            GOOS: "darwin"
+    env:
+      GOARCH: ${{ matrix.GOARCH }}
+      GOOS: ${{ matrix.GOOS }}
+      M6E_TORRENT_TRACKERS: ''
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+      - uses: actions/download-artifact@v3
+        with:
+          name: build-binaries-${{ matrix.GOARCH }}-${{ matrix.GOOS }}-${{ github.run_id }}
+          path: dist
+      - name: torrent-create
+        uses: projectfile/ci-actions/run-tool@v1
+        with:
+          image: ${{ vars.R8E_RQBIT_IMAGE || format('{0}/r8e/rqbit', vars.SOURCE_DOCKER_REGISTRY || 'kiota.ch') }}
+          version: ${{ env.M6E_TAG }}
+          run: .makefile/core/scripts/torrent.sh create --cell dist/pf-cli
+          env: |-
+            GOARCH=${{ matrix.GOARCH }}
+            GOOS=${{ matrix.GOOS }}
+            M6E_TORRENT_TRACKERS
+            R8E_RQBIT_TRACKERS
+      - uses: actions/upload-artifact@v3
+        with:
+          name: torrent-create-${{ matrix.GOARCH }}-${{ matrix.GOOS }}-${{ github.run_id }}
+          path: dist
+      - name: torrent-seed
+        uses: projectfile/ci-actions/run-tool@v1
+        with:
+          image: ${{ vars.R8E_RQBIT_IMAGE || format('{0}/r8e/rqbit', vars.SOURCE_DOCKER_REGISTRY || 'kiota.ch') }}
+          version: ${{ env.M6E_TAG }}
+          run: .makefile/core/scripts/torrent.sh seed --cell dist/pf-cli
+          env: |-
+            GOARCH=${{ matrix.GOARCH }}
+            GOOS=${{ matrix.GOOS }}
+          mounts: /app/data/ci-cache/rqbit-seed:/seed:rw
   binaries-built:
     runs-on: docker
     needs: ["source-is-ready"]
@@ -98,7 +146,7 @@ jobs:
       - run: echo binaries-ready
   binaries-released:
     runs-on: docker
-    needs: ["binaries-ready"]
+    needs: ["binaries-are-torrented"]
     if: startsWith(github.ref, 'refs/tags/')
     strategy:
       matrix:
@@ -117,7 +165,7 @@ jobs:
           submodules: true
       - uses: actions/download-artifact@v3
         with:
-          name: build-binaries-${{ matrix.GOARCH }}-${{ matrix.GOOS }}-${{ github.run_id }}
+          name: torrent-create-${{ matrix.GOARCH }}-${{ matrix.GOOS }}-${{ github.run_id }}
           path: dist
       - name: forgejo-release
         uses: projectfile/ci-actions/forgejo-release@v1
