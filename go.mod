@@ -4,7 +4,7 @@
 
 module projectfile.org/projectfile/cli
 
-go 1.26.6
+go 1.26.7
 
 require (
 	github.com/charmbracelet/bubbles v1.0.0
