@@ -21,8 +21,10 @@ includes:
   - .makefile/b19/ci.yaml
   - .makefile/b19/images/go.yaml
   - .makefile/b19/images/ubuntu.yaml
+  - .makefile/b19/traits/supplychain.yaml
   - .makefile/library/languages/go.yaml
   - .makefile/library/traits/go-binary.yaml
+  - .makefile/library/traits/gpg-binary.yaml
   - .makefile/library/traits/torrent-binary.yaml
   - https://kiota.ch/damian-buho/metadata/raw/branch/main/include.yaml
   - https://kiota.ch/projectfile/metadata/raw/branch/main/include.yaml
@@ -70,7 +72,7 @@ org:
             exclude:
               - GOARCH: riscv64
                 GOOS: darwin
-        binaries-are-torrented:
+        binaries-are-signed:
           matrix:
             axes:
               GOARCH:
@@ -83,7 +85,27 @@ org:
             exclude:
               - GOARCH: riscv64
                 GOOS: darwin
+        # Torrenting waits on the signature: a signed artifact is bundled with its .asc before hashing.
+        binaries-are-torrented:
+          needs:
+            binaries-are-signed: true
+            binaries-ready: false
+          matrix:
+            axes:
+              GOARCH:
+                - amd64
+                - arm64
+                - riscv64
+              GOOS:
+                - linux
+                - darwin
+            exclude:
+              - GOARCH: riscv64
+                GOOS: darwin
+        # Release restores dist/ from the torrent node alone — the only one holding both the .asc and the .torrent.
         binaries-released:
+          needs:
+            binaries-are-signed: false
           matrix:
             axes:
               GOARCH:

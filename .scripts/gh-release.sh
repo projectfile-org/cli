@@ -14,10 +14,11 @@ set -eu
 # release already exists (re-run, race, manual pre-create), uploads them
 # with --clobber so the latest build wins.
 #
-# The .torrent and .magnet ride along when this project seeds, found by
-# suffixing the binary path exactly as the Forgejo release action does — so
-# neither end has to learn how torrent.sh spells its flat seed name. GitHub has
-# no shared release action, so this is the per-project copy of that rule.
+# The .torrent and .magnet ride along when this project seeds, and the .asc when
+# it signs, found by suffixing the binary path exactly as the Forgejo release
+# action does — so neither end has to learn how torrent.sh spells its flat seed
+# name. GitHub has no shared release action, so this is the per-project copy of
+# that rule.
 # =============================================================================
 
 version="${1:?usage: gh-release.sh <version>}"
@@ -27,10 +28,10 @@ asset="dist/pf-cli-${goos}-${goarch}"
 
 log() { printf '[gh-release] %s\n' "$*" >&2; }
 
-# The binary, plus whatever sidecars the torrent step left beside it. A project
-# that never opted into seeding has none, so an absent one is simply skipped.
+# The binary, plus whatever sidecars the torrent and signing steps left beside it.
+# A project that opted into neither has none, so an absent one is simply skipped.
 set -- "${asset}"
-for ext in torrent magnet; do
+for ext in torrent magnet asc; do
     if [ -f "${asset}.${ext}" ]; then
         set -- "$@" "${asset}.${ext}"
         log "attaching sidecar ${asset}.${ext}"
