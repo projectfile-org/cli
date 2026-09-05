@@ -86,22 +86,11 @@ org:
               - GOARCH: riscv64
                 GOOS: darwin
         # Torrenting waits on the signature: a signed artifact is bundled with its .asc before hashing.
+        # NO matrix: one torrent carries every cell, so this node runs once and takes them all.
         binaries-are-torrented:
           needs:
             binaries-are-signed: true
             binaries-ready: false
-          matrix:
-            axes:
-              GOARCH:
-                - amd64
-                - arm64
-                - riscv64
-              GOOS:
-                - linux
-                - darwin
-            exclude:
-              - GOARCH: riscv64
-                GOOS: darwin
         # Release restores dist/ from the torrent node alone — the only one holding both the .asc and the .torrent.
         binaries-released:
           needs:
