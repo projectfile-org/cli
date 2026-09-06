@@ -6,35 +6,18 @@
 
 set -eu
 
-# build-binaries.sh — cross-compile pf-cli for one GOOS/GOARCH, inject the
-# release version from the git tag, and write the stripped binary to
-# dist/pf-cli-<goos>-<goarch>. Called once per matrix axis by the build-binaries
-# CI tool, which supplies the Go SDK (b19/go image, or host go on a prefer-local
-# run). core is a pinned module, so its SPDX texts arrive in the module zip —
-# nothing to fetch before the build.
+# build-binaries.sh — cross-compile pf-cli for one GOOS/GOARCH, writing dist/pf-cli-<goos>-<goarch>.
 
-# The v1 schema is a //go:embed input, so it must exist before the compile. This
-# job cannot take it from the fetch-schema artifact: `artifact:` hands off ONE
-# artifact PER MATRIX CELL, and fetch-schema carries no matrix, so a cell here
-# would look for a name that was never uploaded. The script is idempotent and
-# costs about a second, so this job fetches its own copy.
-sh .scripts/fetch-schema.sh
+sh .scripts/fetch-schema.sh # //go:embed input; fetched here since a matrixed cell can't take it from another job's artifact
 
-# Version resolution, portable across planes: the forge runner exports the tag as
-# $GITHUB_REF_NAME (forwarded via the build-binaries tool's env: list); the make
-# plane has neither an arg nor that env, so fall back to a git-derived / dev version.
-# Keeps a local build honestly stamped, mirroring m6e-version.sh (tag → short sha → dev).
 version="${1:-${GITHUB_REF_NAME:-}}"
 case "${version}" in
-	'' | *['{}']*) version="$(git describe --tags --always --dirty 2>/dev/null || echo dev)" ;;
+	'' | *['{}']*) version="$(git describe --tags --always --dirty 2>/dev/null || echo dev)" ;; # empty or an unexpanded template placeholder
 esac
 
-# GOHOSTOS/GOHOSTARCH is the real host even under a cross-compile (GOOS/GOARCH set
-# only the TARGET). Default the target to the host when the matrix bound no cell —
-# the make-plane host build; the forge matrix sets GOOS/GOARCH per cell.
-hostos="$(go env GOHOSTOS)"
+hostos="$(go env GOHOSTOS)"   # the real host even under a cross-compile
 hostarch="$(go env GOHOSTARCH)"
-goos="${GOOS:-${hostos}}"
+goos="${GOOS:-${hostos}}"     # the matrix sets these per cell; unset means a host-native build
 goarch="${GOARCH:-${hostarch}}"
 out="dist/pf-cli-${goos}-${goarch}"
 
@@ -44,10 +27,4 @@ log "building pf-cli ${version} for ${goos}/${goarch}"
 go build -ldflags="-s -w -X projectfile.org/projectfile/cli/internal/cmd.version=${version}"      \
          -o "${out}" .
 
-# Stable unsuffixed copy (dist/pf-cli) referenced by a fixed path from both the
-# matrixed gsa (it analyzes ${org.projectfile.artifacts.go-binary.path} in every
-# cell) and the local install. Every cell drops it so gsa always finds this cell's
-# binary; releases attach only the suffixed asset, and the make plane runs the host
-# cell alone, so the install stays host-native.
-log "copying ${out} -> dist/pf-cli"
-cp "${out}" dist/pf-cli
+printf '%s\n' "${out}"
