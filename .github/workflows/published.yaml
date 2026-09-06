@@ -406,8 +406,10 @@ jobs:
           # place the archive goes, so a registry refusing a push fails only its own.
           sink: ${{ matrix.M6E_PUBLISH_SINK }}
       - name: cosign-key-file
+        if: vars.CI_PUBLISH_SINKS == '' || contains(format(',{0},', vars.CI_PUBLISH_SINKS), format(',{0},', matrix.M6E_PUBLISH_SINK))
         run: .makefile/b19/scripts/cosign-key-file.sh
       - name: cosign-sign
+        if: vars.CI_PUBLISH_SINKS == '' || contains(format(',{0},', vars.CI_PUBLISH_SINKS), format(',{0},', matrix.M6E_PUBLISH_SINK))
         uses: projectfile-org/actions/run-tool@v1
         with:
           image: ${{ vars.D9T_GO_TOOLS_IMAGE || format('{0}/d9t/go-tools', vars.SOURCE_DOCKER_REGISTRY || 'ghcr.io/damian-buho') }}
@@ -416,6 +418,7 @@ jobs:
           env: |-
             COSIGN_PASSWORD=${{ secrets.COSIGN_PASSWORD }}
       - name: cosign-attest
+        if: vars.CI_PUBLISH_SINKS == '' || contains(format(',{0},', vars.CI_PUBLISH_SINKS), format(',{0},', matrix.M6E_PUBLISH_SINK))
         uses: projectfile-org/actions/run-tool@v1
         with:
           image: ${{ vars.D9T_GO_TOOLS_IMAGE || format('{0}/d9t/go-tools', vars.SOURCE_DOCKER_REGISTRY || 'ghcr.io/damian-buho') }}
