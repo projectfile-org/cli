@@ -83,6 +83,8 @@ jobs:
         with:
           name: build-binaries-${{ matrix.GOARCH }}-${{ matrix.GOOS }}-${{ github.run_id }}
           path: dist
+      - name: gpg-key-file
+        run: gpg-key-file
       - name: gpg-sign
         uses: projectfile/actions/run-tool@v1
         with:
@@ -337,7 +339,7 @@ jobs:
         with:
           image: ${{ vars.D9T_GO_TOOLS_IMAGE || format('{0}/d9t/go-tools', vars.SOURCE_DOCKER_REGISTRY || 'kiota.ch') }}
           version: ${{ env.M6E_TAG }}
-          run: auto-gsa dist/pf-cli
+          run: .makefile/library/scripts/gsa-cell.sh dist/pf-cli
           env: |-
             GOARCH=${{ matrix.GOARCH }}
             GOOS=${{ matrix.GOOS }}
