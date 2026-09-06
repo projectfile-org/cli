@@ -195,7 +195,7 @@ jobs:
       - run: echo binaries-ready
   binaries-released:
     runs-on: docker
-    needs: ["binaries-are-torrented"]
+    needs: ["binaries-are-torrented", "image-is-attested"]
     if: startsWith(github.ref, 'refs/tags/')
     strategy:
       matrix:
