@@ -84,7 +84,7 @@ jobs:
           name: build-binaries-${{ matrix.GOARCH }}-${{ matrix.GOOS }}-${{ github.run_id }}
           path: dist
       - name: gpg-key-file
-        run: gpg-key-file
+        run: .makefile/core/scripts/gpg-key-file.sh
       - name: gpg-sign
         uses: projectfile-org/actions/run-tool@v1
         with:
@@ -95,7 +95,6 @@ jobs:
             GOARCH=${{ matrix.GOARCH }}
             GOOS=${{ matrix.GOOS }}
             M6E_GPG_PASSPHRASE=${{ secrets.GPG_PASSPHRASE }}
-            M6E_GPG_PRIVATE_KEY=${{ secrets.GPG_PRIVATE_KEY }}
       - uses: actions/upload-artifact@v7
         with:
           name: gpg-sign-${{ matrix.GOARCH }}-${{ matrix.GOOS }}-${{ github.run_id }}
@@ -406,6 +405,8 @@ jobs:
           # This CELL's destination, off the publish axis: the job runs one cell per
           # place the archive goes, so a registry refusing a push fails only its own.
           sink: ${{ matrix.M6E_PUBLISH_SINK }}
+      - name: cosign-key-file
+        run: .makefile/b19/scripts/cosign-key-file.sh
       - name: cosign-sign
         uses: projectfile-org/actions/run-tool@v1
         with:
@@ -414,7 +415,6 @@ jobs:
           run: auto-cosign sign
           env: |-
             COSIGN_PASSWORD=${{ secrets.COSIGN_PASSWORD }}
-            COSIGN_PRIVATE_KEY=${{ secrets.COSIGN_PRIVATE_KEY }}
       - name: cosign-attest
         uses: projectfile-org/actions/run-tool@v1
         with:
@@ -423,7 +423,6 @@ jobs:
           run: auto-cosign attest
           env: |-
             COSIGN_PASSWORD=${{ secrets.COSIGN_PASSWORD }}
-            COSIGN_PRIVATE_KEY=${{ secrets.COSIGN_PRIVATE_KEY }}
   image-is-built:
     runs-on: ubuntu-latest
     needs: ["schema-fetched", "source-is-ready"]
