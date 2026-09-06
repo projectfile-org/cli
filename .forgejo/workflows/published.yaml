@@ -587,7 +587,7 @@ jobs:
           run: pf-cli validate
   publish-image:
     runs-on: docker
-    needs: ["image-is-built", "ready-to-publish"]
+    needs: ["image-is-built", "ready-to-publish", "signing-is-ready"]
     if: (startsWith(github.ref, 'refs/heads/') && github.ref != 'refs/heads/main') || (startsWith(github.ref, 'refs/tags/'))
     steps:
       - run: echo publish-image
@@ -618,6 +618,26 @@ jobs:
     needs: ["image-is-built"]
     steps:
       - run: echo secrets-ready
+  signing-is-ready:
+    runs-on: docker
+    if: (startsWith(github.ref, 'refs/heads/') && github.ref != 'refs/heads/main') || (startsWith(github.ref, 'refs/tags/'))
+    env:
+      COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+      COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          submodules: true
+      - name: cosign-key-file-preflight
+        run: .makefile/b19/scripts/cosign-key-file.sh
+      - name: cosign-preflight
+        uses: projectfile/actions/run-tool@v1
+        with:
+          image: ${{ vars.D9T_GO_TOOLS_IMAGE || format('{0}/d9t/go-tools', vars.SOURCE_DOCKER_REGISTRY || 'kiota.ch') }}
+          version: ${{ env.M6E_TAG }}
+          run: auto-cosign preflight
+          env: |-
+            COSIGN_PASSWORD=${{ secrets.COSIGN_PASSWORD }}
   source-is-compliant:
     runs-on: docker
     steps:
