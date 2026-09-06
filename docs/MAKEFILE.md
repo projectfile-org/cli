@@ -1269,6 +1269,14 @@ Attest the SBOM to the published image with cosign
 
 > Image: D9T_GO_TOOLS_IMAGE
 
+### `cosign-preflight`
+
+Prove the cosign signing key signs and verifies before anything is pushed
+
+`auto-cosign preflight`
+
+> Image: D9T_GO_TOOLS_IMAGE
+
 ### `cosign-sign`
 
 Sign the published image with cosign
@@ -1430,6 +1438,14 @@ Scan the live built image for vulnerabilities (grype)
 ### `grype-scan-source`
 
 Scan project source for vulnerabilities (grype)
+
+`auto-grype`
+
+> Image: D9T_GO_TOOLS_IMAGE
+
+### `grype-scan-source-gha`
+
+Scan project source for vulnerabilities (grype), self-healing its own GHA cache
 
 `auto-grype`
 
