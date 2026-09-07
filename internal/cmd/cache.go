@@ -38,9 +38,7 @@ var cacheCmd = &cobra.Command{
 		"run `pf-bridge cache` to manage them.",
 }
 
-var (
-	cacheWarmForce bool
-)
+var cacheWarmForce bool
 
 var cacheStatusCmd = &cobra.Command{
 	Use:   "status",
