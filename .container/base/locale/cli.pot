@@ -1,12 +1,12 @@
 # SPDX-FileCopyrightText: 2026 Damián Búho <damian.buho@proton.me>
-# Copyright (C) 2026
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 #
 # SPDX-License-Identifier: MIT
 msgid ""
 msgstr ""
-"Project-Id-Version: pf-cli\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-01 00:00+0000\n"
+"Project-Id-Version: cli 1.1.2\n"
+"Report-Msgid-Bugs-To: i18n@b19.dev\n"
+"POT-Creation-Date: 2026-09-07 03:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -14,3 +14,23 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+
+#: .container/compile-go/build.d/compile-go/post/500-build-cli.sh:14
+msgid "Download modules"
+msgstr ""
+
+#: .container/compile-go/build.d/compile-go/post/500-build-cli.sh:17
+msgid "Build pf-cli"
+msgstr ""
+
+#: .container/compile-go/build.d/compile-go/post/500-build-cli.sh:22
+msgid "Copy binary to export"
+msgstr ""
+
+#: .container/compile-go/build.d/compile-go/post/500-build-cli.sh:25
+msgid "Copy %s to %s"
+msgstr ""
+
+#: .container/user/entrypoint.d/5000-start.sh:8
+msgid "Starting"
+msgstr ""
