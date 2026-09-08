@@ -46,7 +46,7 @@ org:
         credentials:
           FORGEJO_TOKEN: ${{ secrets.RELEASE_TOKEN }}
       nodes:
-        binaries-built:
+        binaries-are-built:
           matrix:
             axes:
               GOARCH:
@@ -90,9 +90,9 @@ org:
         binaries-are-torrented:
           needs:
             binaries-are-signed: true
-            binaries-ready: false
+            binaries-are-ok: false
         # Release restores dist/ from the torrent node alone — the only one holding both the .asc and the .torrent.
-        binaries-released:
+        binaries-are-released:
           needs:
             binaries-are-signed: false
           matrix:
