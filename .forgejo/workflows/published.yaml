@@ -412,6 +412,9 @@ jobs:
           path: dist
       - uses: actions/download-artifact@v3
         with:
+          name: image-${{ github.run_id }}
+      - uses: actions/download-artifact@v3
+        with:
           name: syft-sbom-tar-${{ github.run_id }}
           path: reports
       - name: oci-push
