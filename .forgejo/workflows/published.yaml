@@ -54,11 +54,6 @@ env:
   M6E_RUN_SCOPE: ${{ github.run_id }}-${{ github.run_attempt }}
   GOPROXY: https://kiota.ch/api/packages/projectfile/go,direct
 jobs:
-  artifact-ready:
-    runs-on: docker
-    needs: ["built"]
-    steps:
-      - run: echo artifact-ready
   binaries-are-signed:
     runs-on: docker
     needs: ["binaries-ready"]
@@ -160,7 +155,7 @@ jobs:
           mounts: /app/data/ci-cache/rqbit-seed:/seed:rw
   binaries-built:
     runs-on: docker
-    needs: ["source-is-ready"]
+    needs: ["inputs-are-ok"]
     strategy:
       matrix:
         GOARCH: ["amd64", "arm64", "riscv64"]
@@ -187,6 +182,7 @@ jobs:
             GOOS=${{ matrix.GOOS }}
             GITHUB_REF_NAME
             GOPROXY
+          mounts: /app/data/ci-cache/go:/app/.cache/go:rw
       - uses: actions/upload-artifact@v3
         with:
           name: build-binaries-${{ matrix.GOARCH }}-${{ matrix.GOOS }}-${{ github.run_id }}
@@ -229,16 +225,11 @@ jobs:
           # kind=binary entry). The action suffixes it per cell (→ <path>-${GOOS}-${GOARCH})
           # to find the binary the build→consumer download edge restored to the workspace.
           release-asset-path: dist/pf-cli
-  built:
+  container-is-ok:
     runs-on: docker
-    needs: ["source-is-ready"]
+    needs: ["images-are-ok"]
     steps:
-      - run: echo built
-  container-is-ready:
-    runs-on: docker
-    needs: ["images-are-current"]
-    steps:
-      - run: echo container-is-ready
+      - run: echo container-is-ok
   container-is-verified:
     runs-on: docker
     needs: ["container-ready-to-test"]
@@ -287,14 +278,14 @@ jobs:
           network: ci-projectfile-cli-${{ env.M6E_RUN_SCOPE }}-network
   container-ready-to-test:
     runs-on: docker
-    needs: ["container-is-ready"]
+    needs: ["container-is-ok"]
     steps:
       - run: echo container-ready-to-test
-  documentation-is-ready:
+  documentation-is-ok:
     runs-on: docker
     needs: ["documentation-passes-lint"]
     steps:
-      - run: echo documentation-is-ready
+      - run: echo documentation-is-ok
   documentation-passes-lint:
     runs-on: docker
     steps:
@@ -452,7 +443,7 @@ jobs:
             COSIGN_PASSWORD=${{ secrets.COSIGN_PASSWORD }}
   image-is-built:
     runs-on: docker
-    needs: ["schema-fetched", "source-is-ready"]
+    needs: ["fetched", "inputs-are-ok", "schema-fetched"]
     concurrency:
       group: build-${{ github.repository }}-${{ toJSON(matrix) }}
       cancel-in-progress: false
@@ -514,7 +505,7 @@ jobs:
           pf-cli-image: ${{ vars.PF_CLI_IMAGE || format('{0}/projectfile/cli:{1}', vars.SOURCE_DOCKER_REGISTRY || 'kiota.ch', env.M6E_TAG) }}
   image-is-ready:
     runs-on: docker
-    needs: ["container-is-verified", "image-is-secure", "image-is-valid"]
+    needs: ["container-is-verified", "image-is-secure"]
     steps:
       - run: echo image-is-ready
   image-is-secure:
@@ -561,17 +552,17 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - run: echo image-is-signed
-  image-is-valid:
-    runs-on: docker
-    needs: ["image-is-built"]
-    steps:
-      - run: echo image-is-valid
-  images-are-current:
+  images-are-ok:
     runs-on: docker
     needs: ["image-is-built", "secrets-ready"]
     steps:
-      - run: echo images-are-current
-  projectfile-is-synced:
+      - run: echo images-are-ok
+  inputs-are-ok:
+    runs-on: docker
+    needs: ["documentation-is-ok", "projectfile-is-ok", "source-is-ok"]
+    steps:
+      - run: echo inputs-are-ok
+  projectfile-is-ok:
     runs-on: docker
     needs: ["projectfile-is-valid"]
     steps:
@@ -611,7 +602,7 @@ jobs:
       - run: echo published
   ready-to-publish:
     runs-on: docker
-    needs: ["artifact-ready", "documentation-is-ready", "image-is-ready", "source-is-compliant", "source-is-secure"]
+    needs: ["image-is-ready", "inputs-are-ok"]
     steps:
       - run: echo ready-to-publish
   schema-fetched:
@@ -672,11 +663,11 @@ jobs:
           image: ${{ vars.D9T_PYTHON_TOOLS_IMAGE || format('{0}/d9t/python-tools', vars.SOURCE_DOCKER_REGISTRY || 'kiota.ch') }}
           version: ${{ env.M6E_TAG }}
           run: reuse lint
-  source-is-ready:
+  source-is-ok:
     runs-on: docker
-    needs: ["fetched", "projectfile-is-synced", "source-is-tested", "source-passes-lint"]
+    needs: ["source-is-compliant", "source-is-secure", "source-is-tested", "source-passes-lint"]
     steps:
-      - run: echo source-is-ready
+      - run: echo source-is-ok
   source-is-secure:
     runs-on: docker
     env:
