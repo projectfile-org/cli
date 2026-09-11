@@ -377,7 +377,7 @@ jobs:
     if: (startsWith(github.ref, 'refs/heads/') && github.ref != 'refs/heads/main') || (startsWith(github.ref, 'refs/tags/'))
     strategy:
       matrix:
-        M6E_PUBLISH_SINK: ["kiota", "dockerhub"]
+        M6E_PUBLISH_SINK: ["kiota"]
     env:
       COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
       COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
@@ -441,7 +441,6 @@ jobs:
           # each registry wants. Credentials key on the SINK name.
           refs: |
             kiota kiota.ch/projectfile/cli:latest
-            dockerhub docker.io/damianbuho/projectfile-cli:latest
           # This CELL's destination, off the publish axis: the job runs one cell per
           # place the archive goes, so a registry refusing a push fails only its own.
           sink: ${{ matrix.M6E_PUBLISH_SINK }}
