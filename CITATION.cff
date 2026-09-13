@@ -32,3 +32,4 @@ keywords:
   - yaml
   - validate
   - go
+version: 1.2.1
