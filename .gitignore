@@ -7,12 +7,14 @@
 # customise — direct edits here are overwritten on the next generation.
 # pf-cli-managed: yes
 
-# >>> user-include
+# >>> user-patterns
 *.out
 *.test
 .container/*/locale/*.mo
+.env
 .fetch
 .makefile/bootstrap
+.secrets/
 /bin/
 /dist/
 _specification
@@ -21,10 +23,5 @@ coverage.out
 internal/validate/embedded/v1.json
 internal/validate/embedded/v1.json.license
 reports/
-# <<< user-include
-
-# >>> user-extra
-.env
-.secrets/
-# <<< user-extra
+# <<< user-patterns
 
