@@ -3,8 +3,6 @@
 #
 # SPDX-License-Identifier: MIT
 $schema: https://projectfile.org/schema/v1.json
-copyright:
-  year: 2026
 identity:
   created: "2026-07-07"
   name: cli
@@ -17,6 +15,7 @@ identity:
     en: 'pf-cli is the command-line front end for the projectfile: it reads, writes and validates fields, resolves remote includes, and generates derived artifacts. It embeds the v1 JSON Schema for offline validation and is the canonical tool for editing projectfiles locally and in CI.'
     es: 'pf-cli es la interfaz de línea de órdenes del projectfile: lee, escribe y valida campos, resuelve includes remotos y genera artefactos derivados. Embebe el esquema JSON v1 para validación sin conexión y es la herramienta canónica para editar projectfiles localmente y en CI.'
     uk: 'pf-cli — командний інтерфейс projectfile: читає, записує та валідує поля, розвʼязує віддалені includes і генерує похідні артефакти. Містить вбудовану JSON-схему v1 для офлайн-валідації та є канонічним інструментом редагування projectfile-файлів локально й у CI.'
+  version: 1.2.1
 includes:
   - .makefile/b19/ci.yaml
   - .makefile/b19/images/go.yaml
@@ -28,7 +27,25 @@ includes:
   - .makefile/library/traits/torrent-binary.yaml
   - https://kiota.ch/damian-buho/metadata/raw/branch/main/include.yaml
   - https://kiota.ch/projectfile/metadata/raw/branch/main/include.yaml
+keywords:
+  - pf-cli
+  - projectfile
+  - cli
+  - yaml
+  - validate
+  - go
 kind: SoftwareSourceCode
+license:
+  covers: project
+  spdx: "MIT"
+links:
+  - label:
+      en: Projectfile CLI on kiota.ch
+      es: Projectfile CLI en kiota.ch
+      uk: Projectfile CLI на kiota.ch
+    preferred: true
+    type: source-code
+    url: https://kiota.ch/projectfile/cli
 org:
   projectfile:
     artifacts:
@@ -36,12 +53,7 @@ org:
         command: pf-cli
         kind: binary
         path: dist/pf-cli
-    build:
-      args:
-        GOPROXY: ""
     ci:
-      env:
-        GOPROXY: https://kiota.ch/api/packages/projectfile/go,direct
       forgejo:
         credentials:
           FORGEJO_TOKEN: ${{ secrets.RELEASE_TOKEN }}
@@ -152,23 +164,5 @@ repositories:
     role: origin
     type: git
     url: ssh://git@kiota.ch/projectfile/cli.git
-links:
-  - label:
-      en: Projectfile CLI on kiota.ch
-      es: Projectfile CLI en kiota.ch
-      uk: Projectfile CLI на kiota.ch
-    preferred: true
-    type: source-code
-    url: https://kiota.ch/projectfile/cli
-keywords:
-  - pf-cli
-  - projectfile
-  - cli
-  - yaml
-  - validate
-  - go
 technologies:
   - go
-license:
-  covers: project
-  spdx: "MIT"
