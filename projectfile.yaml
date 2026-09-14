@@ -37,7 +37,15 @@ keywords:
 kind: SoftwareSourceCode
 license:
   covers: project
-  spdx: "MIT"
+  spdx: ""
+links:
+  - label:
+      en: Projectfile CLI on kiota.ch
+      es: Projectfile CLI en kiota.ch
+      uk: Projectfile CLI на kiota.ch
+    preferred: true
+    type: source-code
+    url: https://kiota.ch/projectfile/cli
 org:
   projectfile:
     artifacts:
@@ -144,18 +152,10 @@ org:
           name: binary
           prefix: 'Read and write projectfile fields from the shell:'
     status: maintained
-technologies:
-  - go
 repositories:
   - branch: main
     role: origin
     type: git
     url: ssh://git@kiota.ch/projectfile/cli.git
-links:
-  - label:
-      en: Projectfile CLI on kiota.ch
-      es: Projectfile CLI en kiota.ch
-      uk: Projectfile CLI на kiota.ch
-    preferred: true
-    type: source-code
-    url: https://kiota.ch/projectfile/cli
+technologies:
+  - go
