@@ -37,7 +37,6 @@ keywords:
 kind: SoftwareSourceCode
 license:
   covers: project
-  spdx: ""
 links:
   - label:
       en: Projectfile CLI on kiota.ch

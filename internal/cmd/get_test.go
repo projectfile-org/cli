@@ -644,6 +644,117 @@ func TestGetDefaultBrokenStillErrors(t *testing.T) {
 	}
 }
 
+const (
+	testWantBarYAML = "BAR: two\n"
+	testWantFooYAML = "FOO: \"1\"\n"
+)
+
+// TestGetFormatYAMLSubtree checks --format yaml renders a queried map as a YAML
+// document, and a scalar as a bare YAML value.
+func TestGetFormatYAMLSubtree(t *testing.T) {
+	dir := t.TempDir()
+	path := writeFixture(t, dir, envFixtureTOML)
+
+	out, err := runGetCmd(t, "ext.com.example.env", "--path-file", path, "--format", "yaml")
+	if err != nil {
+		t.Fatalf("get env yaml: %v", err)
+	}
+	for _, want := range []string{testWantBarYAML, testWantFooYAML, "TARGET: ${TEST_VAR}\n"} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("yaml env missing %q in %q", want, out)
+		}
+	}
+
+	scalar, err := runGetCmd(t, "identity.name", "--path-file", path, "--format", "yaml")
+	if err != nil {
+		t.Fatalf("get scalar yaml: %v", err)
+	}
+	if strings.TrimSpace(scalar) != "demo" {
+		t.Fatalf("yaml scalar = %q, want demo", scalar)
+	}
+}
+
+// TestGetFormatYMLAlias checks yml spells the same encoder as yaml.
+func TestGetFormatYMLAlias(t *testing.T) {
+	dir := t.TempDir()
+	path := writeFixture(t, dir, envFixtureTOML)
+
+	yamlOut, err := runGetCmd(t, "ext.com.example.env", "--path-file", path, "--format", "yaml")
+	if err != nil {
+		t.Fatalf("get env yaml: %v", err)
+	}
+	ymlOut, err := runGetCmd(t, "ext.com.example.env", "--path-file", path, "--format", "yml")
+	if err != nil {
+		t.Fatalf("get env yml: %v", err)
+	}
+	if yamlOut != ymlOut {
+		t.Fatalf("yml = %q, want yaml-identical %q", ymlOut, yamlOut)
+	}
+}
+
+// TestGetFormatYAMLPairs checks a {} map projection renders as a YAML mapping.
+func TestGetFormatYAMLPairs(t *testing.T) {
+	dir := t.TempDir()
+	path := writeFixture(t, dir, envFixtureTOML)
+
+	out, err := runGetCmd(t, "ext.com.example.env{}", "--path-file", path, "--format", "yaml")
+	if err != nil {
+		t.Fatalf("get env{} yaml: %v", err)
+	}
+	for _, want := range []string{testWantBarYAML, testWantFooYAML} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("yaml env{} missing %q in %q", want, out)
+		}
+	}
+}
+
+// TestGetFormatYAMLBatch checks --batch wraps each entry under its key.
+func TestGetFormatYAMLBatch(t *testing.T) {
+	dir := t.TempDir()
+	path := writeFixture(t, dir, envFixtureTOML)
+
+	out, err := runGetCmd(t, "--batch", "--format", "yaml", "--path-file", path,
+		"--path", "NAME=identity.name",
+		"--path", "ENV=ext.com.example.env")
+	if err != nil {
+		t.Fatalf("get batch yaml: %v", err)
+	}
+	for _, want := range []string{"NAME: demo\n", "ENV:\n", testWantBarYAML} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("yaml batch missing %q in %q", want, out)
+		}
+	}
+}
+
+// TestGetFormatTOMLSubtree checks --format toml renders a queried map as a TOML
+// document with key = 'value' rows.
+func TestGetFormatTOMLSubtree(t *testing.T) {
+	dir := t.TempDir()
+	path := writeFixture(t, dir, envFixtureTOML)
+
+	out, err := runGetCmd(t, "ext.com.example.env", "--path-file", path, "--format", "toml")
+	if err != nil {
+		t.Fatalf("get env toml: %v", err)
+	}
+	for _, want := range []string{"BAR = 'two'\n", "FOO = '1'\n"} {
+		if !strings.Contains(out, want) {
+			t.Fatalf("toml env missing %q in %q", want, out)
+		}
+	}
+}
+
+// TestGetFormatTOMLScalarErrors checks a scalar query under --format toml fails
+// with a hint toward yaml/json, since a TOML document must be a table.
+func TestGetFormatTOMLScalarErrors(t *testing.T) {
+	dir := t.TempDir()
+	path := writeFixture(t, dir, envFixtureTOML)
+
+	_, err := runGetCmd(t, "identity.name", "--path-file", path, "--format", "toml")
+	if err == nil || !strings.Contains(err.Error(), "yaml or json") {
+		t.Fatalf("toml scalar should hint at yaml/json, got %v", err)
+	}
+}
+
 // TestGetUsageErrorType pins the type Execute() keys the exit-2 path on: a usage
 // mistake (unknown --format) must surface as *usageError, while a runtime failure
 // (broken document) must NOT — so the two map to distinct exit codes (2 vs 1).

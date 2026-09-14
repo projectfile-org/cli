@@ -13,7 +13,9 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/pelletier/go-toml/v2"
 	"github.com/spf13/cobra"
+	"go.yaml.in/yaml/v3"
 
 	"kiota.ch/projectfile/core/v2/pkg/fieldpath"
 	"kiota.ch/projectfile/core/v2/pkg/projectfile"
@@ -52,10 +54,12 @@ var getCmd = &cobra.Command{
 		"  image.namespace  the basename’s namespace half (before the last /)\n" +
 		"  image.name       the basename’s name half (after the last /, no :tag)\n" +
 		"\n" +
-		"Default output is raw — shell-friendly. Use --format json for a single\n" +
-		"JSON value, or --format sh to emit `export KEY=value` lines. --batch\n" +
-		"reads many paths from one process; combine with --path NAME=ADDR to\n" +
-		"control the export key.\n" +
+		"Default output is raw — shell-friendly. Use --format json, yaml or toml\n" +
+		"for a single encoded value, or --format sh to emit `export KEY=value`\n" +
+		"lines. --batch reads many paths from one process; combine with\n" +
+		"--path NAME=ADDR to control the export key.\n" +
+		"TOML documents are tables, so --format toml needs a map/object value\n" +
+		"(query a subtree); scalars and lists use yaml or json instead.\n" +
 		"\n" +
 		"Localized string fields (stored as {lang: value} maps) are unwrapped\n" +
 		"automatically for raw and sh output when only one language is present.\n" +
@@ -184,12 +188,20 @@ func runGet(cmd *cobra.Command, args []string) error {
 		if err := emitJSON(cmd, out, getBatch); err != nil {
 			return err
 		}
+	case "yaml", "yml":
+		if err := emitYAML(cmd, out, getBatch); err != nil {
+			return err
+		}
+	case "toml":
+		if err := emitTOML(cmd, out, getBatch); err != nil {
+			return err
+		}
 	case "sh":
 		emitSh(cmd, out)
 	case "flat":
 		emitFlat(cmd, out)
 	default:
-		return errUsage(fmt.Sprintf("unknown --format %q (raw|json|sh|flat)", getFormat))
+		return errUsage(fmt.Sprintf("unknown --format %q (raw|json|yaml|toml|sh|flat)", getFormat))
 	}
 
 	if missingAny && !getExists {
@@ -294,8 +306,9 @@ func emitRaw(cmd *cobra.Command, v any, isList, isPairs bool) {
 	fmt.Fprintln(out, fieldpath.FormatScalar(coerceLang(v, getLang)))
 }
 
-func emitJSON(cmd *cobra.Command, entries []resolvedEntry, batch bool) error {
-	var payload any
+// singleOrBatchPayload collapses resolved entries into the value the
+// structured encoders (json, yaml, toml) print: one value, or a key map.
+func singleOrBatchPayload(entries []resolvedEntry, batch bool) any {
 	if batch {
 		m := map[string]any{}
 		for _, r := range entries {
@@ -303,18 +316,42 @@ func emitJSON(cmd *cobra.Command, entries []resolvedEntry, batch bool) error {
 				m[r.key] = jsonValue(r)
 			}
 		}
-		payload = m
-	} else {
-		for _, r := range entries {
-			if r.present {
-				payload = jsonValue(r)
-				break
-			}
+		return m
+	}
+	for _, r := range entries {
+		if r.present {
+			return jsonValue(r)
 		}
 	}
+	return nil
+}
+
+func emitJSON(cmd *cobra.Command, entries []resolvedEntry, batch bool) error {
 	enc := json.NewEncoder(cmd.OutOrStdout())
 	enc.SetIndent("", "  ")
-	return enc.Encode(payload)
+	return enc.Encode(singleOrBatchPayload(entries, batch))
+}
+
+func emitYAML(cmd *cobra.Command, entries []resolvedEntry, batch bool) error {
+	data, err := yaml.Marshal(singleOrBatchPayload(entries, batch))
+	if err != nil {
+		return err
+	}
+	_, err = cmd.OutOrStdout().Write(data)
+	return err
+}
+
+func emitTOML(cmd *cobra.Command, entries []resolvedEntry, batch bool) error {
+	m, ok := singleOrBatchPayload(entries, batch).(map[string]any)
+	if !ok {
+		return fmt.Errorf("toml format needs a map/object value (query a subtree); scalars and lists use yaml or json instead")
+	}
+	data, err := toml.Marshal(m)
+	if err != nil {
+		return err
+	}
+	_, err = cmd.OutOrStdout().Write(data)
+	return err
 }
 
 // jsonValue collapses a resolvedEntry into a value json.Encoder will print
@@ -681,7 +718,7 @@ func init() {
 			"A broken or unreadable projectfile still errors (exit 1), so a non-zero\n"+
 			"exit tells an absent field apart from a broken document.")
 	getCmd.Flags().BoolVar(&getOrDefault, "or-default", false, "emit the spec-defined default when the path is absent")
-	getCmd.Flags().StringVar(&getFormat, "format", "raw", "output format: raw, json, sh, flat")
+	getCmd.Flags().StringVar(&getFormat, "format", "raw", "output format: raw, json, yaml (yml), toml, sh, flat")
 	getCmd.Flags().BoolVar(&getBatch, "batch", false, "read multiple paths in one invocation")
 	getCmd.Flags().BoolVar(&getExists, "exists", false, "exit 0 if path exists, 1 if missing (no stdout)")
 	getCmd.Flags().BoolVar(&getPrintPath, "print-path", false, "emit the resolved projectfile path and exit (no field query needed)")
