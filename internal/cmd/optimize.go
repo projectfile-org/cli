@@ -99,11 +99,11 @@ func runOptimizeInner(pfPath string) error {
 	}
 
 	for _, p := range removed {
-		genlog.Plain(fmt.Sprintf("  removed %s", p))
+		genlog.Debug(fmt.Sprintf("  removed %s", p))
 	}
 
 	if optimizeDryRun {
-		genlog.Plain(fmt.Sprintf("(%d field(s) would be removed — dry-run, not written)", len(removed)))
+		genlog.Success(fmt.Sprintf("(%d field(s) would be removed — dry-run, not written)", len(removed)))
 		return nil
 	}
 
@@ -112,7 +112,7 @@ func runOptimizeInner(pfPath string) error {
 		return fmt.Errorf("write projectfile: %w", err)
 	}
 
-	genlog.Plain(fmt.Sprintf("optimized: %d redundant field(s) removed", len(removed)))
+	genlog.Success(fmt.Sprintf("optimized: %d redundant field(s) removed", len(removed)))
 	return nil
 }
 

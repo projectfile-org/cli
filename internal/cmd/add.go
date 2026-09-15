@@ -83,7 +83,7 @@ func runAddInner(addr string, p fieldpath.Path, values []any, pfPath string) err
 	}
 
 	if addDryRun {
-		genlog.Plain(fmt.Sprintf("add %s: %d added, %d skipped (dry-run, not written)", addr, addedCount, skippedCount))
+		genlog.Success(fmt.Sprintf("add %s: %d added, %d skipped (dry-run, not written)", addr, addedCount, skippedCount))
 		return nil
 	}
 	if addedCount == 0 {
@@ -93,7 +93,7 @@ func runAddInner(addr string, p fieldpath.Path, values []any, pfPath string) err
 	if err := projectfile.Write(doc, pfPath); err != nil {
 		return fmt.Errorf("write projectfile: %w", err)
 	}
-	genlog.Plain(fmt.Sprintf("add %s: %d added, %d skipped", addr, addedCount, skippedCount))
+	genlog.Success(fmt.Sprintf("add %s: %d added, %d skipped", addr, addedCount, skippedCount))
 	return nil
 }
 

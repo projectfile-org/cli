@@ -108,7 +108,7 @@ func runConvert(_ *cobra.Command, args []string) error {
 		}
 	}
 
-	genlog.Plain(fmt.Sprintf("convert: reading %s", srcPath))
+	genlog.Debug(fmt.Sprintf("convert: reading %s", srcPath))
 
 	// Read the BASE document (no include resolution).  Converting must
 	// preserve the `includes` list as-is so the new encoding can still
@@ -121,7 +121,7 @@ func runConvert(_ *cobra.Command, args []string) error {
 	if err := validate.Validate(raw); err != nil {
 		return fmt.Errorf("input %s failed schema validation: %w", srcPath, err)
 	}
-	genlog.Plain(fmt.Sprintf("convert: input valid (%s)", srcPath))
+	genlog.Debug(fmt.Sprintf("convert: input valid (%s)", srcPath))
 
 	doc, err := projectfile.ReadBaseFromPath(srcPath)
 	if err != nil {
@@ -132,7 +132,7 @@ func runConvert(_ *cobra.Command, args []string) error {
 		if err := projectfile.WriteClean(doc, dstPath); err != nil {
 			return fmt.Errorf("write %s: %w", dstPath, err)
 		}
-		genlog.Plain(fmt.Sprintf("convert: wrote %s", dstPath))
+		genlog.Success(fmt.Sprintf("convert: wrote %s", dstPath))
 
 		outRaw, err := projectfile.ReadRawBaseFromPath(dstPath)
 		if err != nil {
@@ -141,13 +141,13 @@ func runConvert(_ *cobra.Command, args []string) error {
 		if err := validate.Validate(outRaw); err != nil {
 			return fmt.Errorf("output %s failed schema validation after write: %w", dstPath, err)
 		}
-		genlog.Plain(fmt.Sprintf("convert: output valid (%s)", dstPath))
+		genlog.Debug(fmt.Sprintf("convert: output valid (%s)", dstPath))
 
 		if convertDeleteSource {
 			if err := os.Remove(srcPath); err != nil {
 				return fmt.Errorf("remove source %s: %w", srcPath, err)
 			}
-			genlog.Plain(fmt.Sprintf("convert: removed %s", srcPath))
+			genlog.Success(fmt.Sprintf("convert: removed %s", srcPath))
 		}
 
 		return nil

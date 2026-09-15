@@ -160,7 +160,7 @@ func warmIncludes(dir string, force bool) error {
 		// No projectfile here is a legitimate no-op for warming includes, not a
 		// failure: pf-cli's cache is includes-only, and a directory with no
 		// projectfile simply has nothing to prefetch.
-		genlog.Info("no projectfile found; nothing to warm", "dir", dir)
+		genlog.Debug("no projectfile found; nothing to warm", "dir", dir)
 		return nil //nolint:nilerr // Intentional: missing projectfile is a valid no-op, not an error.
 	}
 	raw, err := projectfile.ReadRawBaseFromPath(pfPath)
@@ -187,7 +187,7 @@ func warmIncludes(dir string, force bool) error {
 		}
 		warmed++
 	}
-	genlog.Plain(fmt.Sprintf("includes: warmed %d/%d remote includes", warmed, len(includes)))
+	genlog.Success(fmt.Sprintf("includes: warmed %d/%d remote includes", warmed, len(includes)))
 	return nil
 }
 

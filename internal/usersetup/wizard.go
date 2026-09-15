@@ -41,7 +41,7 @@ func Run(opts Options) error {
 	cfg := userconfig.Load()
 	existingPath, _ := userconfig.ExistingPath()
 	if existingPath != "" {
-		genlog.Info("setup: editing existing config", "path", existingPath)
+		genlog.Debug("setup: editing existing config", "path", existingPath)
 	}
 
 	format, err := resolveFormat(opts.Format, existingPath)
@@ -66,7 +66,7 @@ func Run(opts Options) error {
 	if err != nil {
 		return fmt.Errorf("write user config: %w", err)
 	}
-	genlog.Info("setup: wrote", "path", path)
+	genlog.Success(fmt.Sprintf("setup: wrote %s", path))
 	if existingPath != "" && existingPath != path {
 		// Migration case: user previously had cli.toml and just wrote
 		// cli.yaml (or similar). The probe order (yaml > yml > toml > json)
@@ -85,20 +85,20 @@ func Run(opts Options) error {
 // load order still picks the new file first, so the leftover is cosmetic
 // rather than load-shadowing.
 func offerMigrationCleanup(oldPath, newPath string) error {
-	genlog.Info("setup: previous config remains on disk", "old", oldPath, "new", newPath)
+	genlog.Debug("setup: previous config remains on disk", "old", oldPath, "new", newPath)
 	del, err := yesNo(fmt.Sprintf("Delete the previous config at %s?", oldPath), false)
 	if err != nil {
 		if errors.Is(err, errCancelled) {
 			// Cancellation during the cleanup prompt is treated as "leave
 			// it alone" — same effect as picking "no". The write already
 			// happened; the user just opted out of the optional cleanup.
-			genlog.Info("setup: keeping previous config (cancelled)")
+			genlog.Debug("setup: keeping previous config (cancelled)")
 			return nil
 		}
 		return err
 	}
 	if !del {
-		genlog.Info("setup: keeping previous config")
+		genlog.Debug("setup: keeping previous config")
 		return nil
 	}
 	if err := os.Remove(oldPath); err != nil {
@@ -108,7 +108,7 @@ func offerMigrationCleanup(oldPath, newPath string) error {
 		genlog.Warn("setup: could not remove previous config", "path", oldPath, "err", err)
 		return nil
 	}
-	genlog.Info("setup: removed previous config", "path", oldPath)
+	genlog.Success(fmt.Sprintf("setup: removed previous config %s", oldPath))
 	return nil
 }
 
@@ -137,7 +137,7 @@ func resolveFormat(preset, existingPath string) (string, error) {
 		if ext == formatYML {
 			ext = formatYAML
 		}
-		genlog.Info("setup: keeping existing format; pass --format to change", "format", ext)
+		genlog.Debug("setup: keeping existing format; pass --format to change", "format", ext)
 		return ext, nil
 	}
 	type item struct{ name, desc string }

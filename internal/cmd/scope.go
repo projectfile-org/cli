@@ -50,13 +50,13 @@ func splitScopes(scopes []string) (global []string, perKey map[string][]string) 
 		brace := strings.IndexByte(s, '{')
 		if eq <= 0 || (brace >= 0 && brace < eq) {
 			global = append(global, s)
-			genlog.Decision("get_scope_global", s, "applies to every path", "")
+			genlog.Debug("get_scope_global", "scope", s, "note", "applies to every path")
 			continue
 		}
 		key := strings.TrimSpace(s[:eq])
 		addr := strings.TrimSpace(s[eq+1:])
 		perKey[key] = append(perKey[key], addr)
-		genlog.Decision("get_scope_bound", addr, key, "")
+		genlog.Debug("get_scope_bound", "scope", addr, "key", key)
 	}
 	return global, perKey
 }
@@ -90,7 +90,7 @@ func resolveScoped(doc *projectfile.Document, p fieldpath.Path, scopes []string)
 		if resolveErr != nil {
 			continue
 		}
-		genlog.Decision("get_scope", p.String(), scope, "")
+		genlog.Debug("get_scope", "path", p.String(), "scope", scope)
 		return singleOrList(r), r.IsList, r.IsPairs, true, nil
 	}
 	return resolveEntry(doc, p)

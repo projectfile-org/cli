@@ -68,13 +68,13 @@ func runDelInner(addr string, p fieldpath.Path, pfPath string) error {
 	}
 
 	if delDryRun {
-		genlog.Plain(fmt.Sprintf("del %s (dry-run, not written)", addr))
+		genlog.Success(fmt.Sprintf("del %s (dry-run, not written)", addr))
 		return nil
 	}
 	if err := projectfile.Write(out, pfPath); err != nil {
 		return fmt.Errorf("write projectfile: %w", err)
 	}
-	genlog.Plain(fmt.Sprintf("del %s", addr))
+	genlog.Success(fmt.Sprintf("del %s", addr))
 	return nil
 }
 

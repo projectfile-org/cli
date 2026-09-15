@@ -18,6 +18,7 @@ import (
 	"go.yaml.in/yaml/v3"
 
 	"kiota.ch/projectfile/core/v2/pkg/fieldpath"
+	"kiota.ch/projectfile/core/v2/pkg/genlog"
 	"kiota.ch/projectfile/core/v2/pkg/projectfile"
 )
 
@@ -165,6 +166,7 @@ func runGet(cmd *cobra.Command, args []string) error {
 	if getExists {
 		// --exists reports presence via exit code only; suppress stdout.
 		if missingAny {
+			genlog.FlushDebug()
 			os.Exit(1)
 		}
 		return nil
@@ -208,6 +210,7 @@ func runGet(cmd *cobra.Command, args []string) error {
 		// Missing values without a fallback are a soft failure: stdout
 		// already shows what we *could* resolve, but the process exits 1
 		// so shell pipelines can detect the partial result.
+		genlog.FlushDebug()
 		os.Exit(1)
 	}
 	return nil

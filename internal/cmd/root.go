@@ -54,7 +54,7 @@ var rootCmd = &cobra.Command{
 		userconfig.SetIgnored(ignoreUserConfigFlag)
 		projectfile.SetYAMLOutputSorted(sortedFlag)
 		if offlineFlag {
-			genlog.Info("offline mode", "message", "network fetches disabled")
+			genlog.Debug("offline mode", "message", "network fetches disabled")
 		}
 	},
 }
@@ -151,6 +151,7 @@ func Execute() {
 		if errors.As(err, &ue) {
 			os.Exit(2)
 		}
+		genlog.FlushDebug()
 		os.Exit(1)
 	}
 }
