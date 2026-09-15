@@ -100,7 +100,7 @@ jobs:
       - run: echo binaries-are-ok
   binaries-are-released:
     runs-on: docker
-    needs: ["binaries-are-torrented"]
+    needs: ["binaries-are-torrented", "image-is-attested"]
     if: startsWith(github.ref, 'refs/tags/')
     strategy:
       matrix:
@@ -838,6 +838,6 @@ jobs:
       - name: ignorelint-check
         uses: projectfile/actions/run-tool@v1
         with:
-          image: ${{ vars.D9T_IGNORELINT_IMAGE || format('{0}/d9t/ignorelint', vars.SOURCE_DOCKER_REGISTRY || 'kiota.ch') }}
+          image: ${{ vars.IGNORELINT_IMAGE || format('{0}/damian-buho/ignorelint', vars.SOURCE_DOCKER_REGISTRY || 'kiota.ch') }}
           version: ${{ env.M6E_TAG }}
           run: ignorelint
