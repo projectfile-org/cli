@@ -97,6 +97,12 @@ org:
         command: pf-cli
         kind: binary
         path: dist/pf-cli
+    architecture:
+      - amd64
+      - arm64
+      - riscv64
+    operating-system:
+      - linux
     ci:
       nodes:
         binaries-are-built:

@@ -31,6 +31,12 @@ Consulta [FEATURES.md](FEATURES.md) para ver la lista completa.
 - **Ejecutable** `pf-cli`
 - **Imagen de contenedor** `ghcr.io/projectfile-org/cli:latest`
 
+## Plataformas admitidas
+
+- `linux/amd64`
+- `linux/arm64`
+- `linux/riscv64`
+
 ## Instalación
 
 Descarga la imagen de contenedor publicada:
