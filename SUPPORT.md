@@ -11,6 +11,13 @@ pf-cli-managed: yes
 Thanks for using **Projectfile CLI**!
 This document explains where to get help and how to ask effective questions.
 
+## Before You Ask
+
+Please check these first — your question may already be answered:
+
+- [Issues on Codeberg](https://codeberg.org/projectfile/cli/issues)
+- [Issues on GitHub](https://github.com/projectfile-org/cli/issues)
+
 ## Where to Ask
 
 - **Report a security vulnerability** — [SECURITY.md](SECURITY.md)

@@ -25,6 +25,8 @@ includes:
   - .makefile/library/traits/go-binary.yaml
   - .makefile/library/traits/gpg-binary.yaml
   - .makefile/library/traits/torrent-binary.yaml
+  - https://kiota.ch/damian-buho/metadata/raw/branch/main/ghcr.yaml
+  - https://kiota.ch/damian-buho/metadata/raw/branch/main/github.yaml
   - https://kiota.ch/damian-buho/metadata/raw/branch/main/include.yaml
   - https://kiota.ch/projectfile/metadata/raw/branch/main/include.yaml
 keywords:
@@ -45,6 +47,49 @@ links:
     preferred: true
     type: source-code
     url: https://kiota.ch/projectfile/cli
+  - label:
+      en: Projectfile CLI on Codeberg
+      es: Projectfile CLI en Codeberg
+      uk: Projectfile CLI на Codeberg
+    tags:
+      - public
+      - badges
+      - badges-gitea
+    type: source-code
+    url: https://codeberg.org/projectfile/cli
+  - label:
+      en: Issues on Codeberg
+      es: Incidencias en Codeberg
+      uk: Задачі на Codeberg
+    tags:
+      - support
+    type: bugs
+    url: https://codeberg.org/projectfile/cli/issues
+  - label:
+      en: Projectfile CLI on GitHub
+      es: Projectfile CLI en GitHub
+      uk: Projectfile CLI на GitHub
+    tags:
+      - public
+      - badges
+      - badges-github
+    type: source-code
+    url: https://github.com/projectfile-org/cli
+  - label:
+      en: Issues on GitHub
+      es: Incidencias en GitHub
+      uk: Задачі на GitHub
+    tags:
+      - support
+    type: bugs
+    url: https://github.com/projectfile-org/cli/issues
+  - derived: true
+    label:
+      en: Packages on GHCR
+      es: Paquetes en GHCR
+      uk: Пакунки на GHCR
+    type: package-registry
+    url: https://github.com/projectfile-org/cli/pkgs/container/cli
 org:
   projectfile:
     artifacts:
@@ -153,5 +198,11 @@ repositories:
     role: origin
     type: git
     url: ssh://git@kiota.ch/projectfile/cli.git
+  - role: mirror
+    type: git
+    url: ssh://git@codeberg.org/projectfile/cli.git
+  - role: mirror
+    type: git
+    url: git@github.com:projectfile-org/cli.git
 technologies:
   - go

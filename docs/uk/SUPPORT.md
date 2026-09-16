@@ -12,6 +12,13 @@ pf-cli-managed: yes
 Дякуємо, що користуєтеся **Projectfile CLI**!
 Цей документ пояснює, де шукати допомогу та як ставити зрозумілі запитання.
 
+## Перш ніж питати
+
+Перегляньте це спершу — можливо, відповідь уже є:
+
+- [Задачі на Codeberg](https://codeberg.org/projectfile/cli/issues)
+- [Задачі на GitHub](https://github.com/projectfile-org/cli/issues)
+
 ## Куди звертатися
 
 - **Повідомити про вразливість безпеки** — [SECURITY.md](SECURITY.md)
