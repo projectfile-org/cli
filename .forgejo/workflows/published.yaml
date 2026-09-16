@@ -122,7 +122,7 @@ jobs:
           submodules: true
           persist-credentials: false
       - uses: actions/download-artifact@v3
-        if: (vars.CI_ONLY_GOARCH == '' || contains(format(',{0},', vars.CI_ONLY_GOARCH), format(',{0},', matrix.GOARCH))) && (vars.CI_ONLY_GOOS == '' || contains(format(',{0},', vars.CI_ONLY_GOOS), format(',{0},', matrix.GOOS)))
+        if: (vars.CI_ONLY_GOARCH == '' || contains(format(',{0},', vars.CI_ONLY_GOARCH), format(',{0},', matrix.GOARCH))) && (vars.CI_ONLY_GOOS == '' || contains(format(',{0},', vars.CI_ONLY_GOOS), format(',{0},', matrix.GOOS))) && vars.CI_SKIP_BINARIES_ARE_TORRENTED != 'true' && vars.CI_SKIP_TORRENT_CREATE != 'true'
         with:
           name: torrent-create-${{ github.run_id }}
           path: dist
@@ -157,7 +157,7 @@ jobs:
           submodules: true
           persist-credentials: false
       - uses: actions/download-artifact@v3
-        if: (vars.CI_ONLY_GOARCH == '' || contains(format(',{0},', vars.CI_ONLY_GOARCH), format(',{0},', matrix.GOARCH))) && (vars.CI_ONLY_GOOS == '' || contains(format(',{0},', vars.CI_ONLY_GOOS), format(',{0},', matrix.GOOS)))
+        if: (vars.CI_ONLY_GOARCH == '' || contains(format(',{0},', vars.CI_ONLY_GOARCH), format(',{0},', matrix.GOARCH))) && (vars.CI_ONLY_GOOS == '' || contains(format(',{0},', vars.CI_ONLY_GOOS), format(',{0},', matrix.GOOS))) && vars.CI_SKIP_BINARIES_ARE_BUILT != 'true' && vars.CI_SKIP_BUILD_BINARIES != 'true'
         with:
           name: build-binaries-${{ matrix.GOARCH }}-${{ matrix.GOOS }}-${{ github.run_id }}
           path: dist
@@ -193,22 +193,27 @@ jobs:
           submodules: true
           persist-credentials: false
       - uses: actions/download-artifact@v3
+        if: vars.CI_SKIP_BINARIES_ARE_SIGNED != 'true' && vars.CI_SKIP_GPG_SIGN != 'true'
         with:
           name: gpg-sign-amd64-linux-${{ github.run_id }}
           path: dist
       - uses: actions/download-artifact@v3
+        if: vars.CI_SKIP_BINARIES_ARE_SIGNED != 'true' && vars.CI_SKIP_GPG_SIGN != 'true'
         with:
           name: gpg-sign-amd64-darwin-${{ github.run_id }}
           path: dist
       - uses: actions/download-artifact@v3
+        if: vars.CI_SKIP_BINARIES_ARE_SIGNED != 'true' && vars.CI_SKIP_GPG_SIGN != 'true'
         with:
           name: gpg-sign-arm64-linux-${{ github.run_id }}
           path: dist
       - uses: actions/download-artifact@v3
+        if: vars.CI_SKIP_BINARIES_ARE_SIGNED != 'true' && vars.CI_SKIP_GPG_SIGN != 'true'
         with:
           name: gpg-sign-arm64-darwin-${{ github.run_id }}
           path: dist
       - uses: actions/download-artifact@v3
+        if: vars.CI_SKIP_BINARIES_ARE_SIGNED != 'true' && vars.CI_SKIP_GPG_SIGN != 'true'
         with:
           name: gpg-sign-riscv64-linux-${{ github.run_id }}
           path: dist
@@ -267,7 +272,7 @@ jobs:
         if: vars.CI_ONLY_M6E_ARCH != '' && !contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), ',amd64,') && vars.CI_SKIP_CONTAINER_IS_VERIFIED != 'true'
         run: echo "CI_ONLY_M6E_ARCH withholds M6E_ARCH=amd64, the one value this node runs on" >&2; exit 1
       - uses: actions/download-artifact@v3
-        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH)))
+        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && vars.CI_SKIP_IMAGE_IS_BUILT != 'true' && vars.CI_SKIP_CONTAINER_BUILD != 'true'
         with:
           name: image-${{ matrix.M6E_ARCH }}-${{ github.run_id }}
       # The archive enters the runner's SHARED image store, where a sibling job's reap
@@ -359,7 +364,7 @@ jobs:
           submodules: true
           persist-credentials: false
       - uses: actions/download-artifact@v3
-        if: (vars.CI_ONLY_GOARCH == '' || contains(format(',{0},', vars.CI_ONLY_GOARCH), format(',{0},', matrix.GOARCH))) && (vars.CI_ONLY_GOOS == '' || contains(format(',{0},', vars.CI_ONLY_GOOS), format(',{0},', matrix.GOOS)))
+        if: (vars.CI_ONLY_GOARCH == '' || contains(format(',{0},', vars.CI_ONLY_GOARCH), format(',{0},', matrix.GOARCH))) && (vars.CI_ONLY_GOOS == '' || contains(format(',{0},', vars.CI_ONLY_GOOS), format(',{0},', matrix.GOOS))) && vars.CI_SKIP_BINARIES_ARE_BUILT != 'true' && vars.CI_SKIP_BUILD_BINARIES != 'true'
         with:
           name: build-binaries-${{ matrix.GOARCH }}-${{ matrix.GOOS }}-${{ github.run_id }}
           path: dist
@@ -389,7 +394,7 @@ jobs:
           submodules: true
           persist-credentials: false
       - uses: actions/download-artifact@v3
-        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH)))
+        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && vars.CI_SKIP_IMAGE_IS_BUILT != 'true' && vars.CI_SKIP_CONTAINER_BUILD != 'true'
         with:
           name: image-${{ matrix.M6E_ARCH }}-${{ github.run_id }}
       - name: syft-sbom-tar
@@ -429,44 +434,44 @@ jobs:
           submodules: true
           persist-credentials: false
       - uses: actions/download-artifact@v3
-        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && (vars.CI_ONLY_M6E_PUBLISH_SINK == '' || contains(format(',{0},', vars.CI_ONLY_M6E_PUBLISH_SINK), format(',{0},', matrix.M6E_PUBLISH_SINK)))
+        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && (vars.CI_ONLY_M6E_PUBLISH_SINK == '' || contains(format(',{0},', vars.CI_ONLY_M6E_PUBLISH_SINK), format(',{0},', matrix.M6E_PUBLISH_SINK))) && vars.CI_SKIP_BINARIES_ARE_BUILT != 'true' && vars.CI_SKIP_BUILD_BINARIES != 'true'
         with:
           name: build-binaries-amd64-linux-${{ github.run_id }}
           path: dist
       - uses: actions/download-artifact@v3
-        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && (vars.CI_ONLY_M6E_PUBLISH_SINK == '' || contains(format(',{0},', vars.CI_ONLY_M6E_PUBLISH_SINK), format(',{0},', matrix.M6E_PUBLISH_SINK)))
+        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && (vars.CI_ONLY_M6E_PUBLISH_SINK == '' || contains(format(',{0},', vars.CI_ONLY_M6E_PUBLISH_SINK), format(',{0},', matrix.M6E_PUBLISH_SINK))) && vars.CI_SKIP_BINARIES_ARE_BUILT != 'true' && vars.CI_SKIP_BUILD_BINARIES != 'true'
         with:
           name: build-binaries-amd64-darwin-${{ github.run_id }}
           path: dist
       - uses: actions/download-artifact@v3
-        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && (vars.CI_ONLY_M6E_PUBLISH_SINK == '' || contains(format(',{0},', vars.CI_ONLY_M6E_PUBLISH_SINK), format(',{0},', matrix.M6E_PUBLISH_SINK)))
+        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && (vars.CI_ONLY_M6E_PUBLISH_SINK == '' || contains(format(',{0},', vars.CI_ONLY_M6E_PUBLISH_SINK), format(',{0},', matrix.M6E_PUBLISH_SINK))) && vars.CI_SKIP_BINARIES_ARE_BUILT != 'true' && vars.CI_SKIP_BUILD_BINARIES != 'true'
         with:
           name: build-binaries-arm64-linux-${{ github.run_id }}
           path: dist
       - uses: actions/download-artifact@v3
-        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && (vars.CI_ONLY_M6E_PUBLISH_SINK == '' || contains(format(',{0},', vars.CI_ONLY_M6E_PUBLISH_SINK), format(',{0},', matrix.M6E_PUBLISH_SINK)))
+        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && (vars.CI_ONLY_M6E_PUBLISH_SINK == '' || contains(format(',{0},', vars.CI_ONLY_M6E_PUBLISH_SINK), format(',{0},', matrix.M6E_PUBLISH_SINK))) && vars.CI_SKIP_BINARIES_ARE_BUILT != 'true' && vars.CI_SKIP_BUILD_BINARIES != 'true'
         with:
           name: build-binaries-arm64-darwin-${{ github.run_id }}
           path: dist
       - uses: actions/download-artifact@v3
-        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && (vars.CI_ONLY_M6E_PUBLISH_SINK == '' || contains(format(',{0},', vars.CI_ONLY_M6E_PUBLISH_SINK), format(',{0},', matrix.M6E_PUBLISH_SINK)))
+        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && (vars.CI_ONLY_M6E_PUBLISH_SINK == '' || contains(format(',{0},', vars.CI_ONLY_M6E_PUBLISH_SINK), format(',{0},', matrix.M6E_PUBLISH_SINK))) && vars.CI_SKIP_BINARIES_ARE_BUILT != 'true' && vars.CI_SKIP_BUILD_BINARIES != 'true'
         with:
           name: build-binaries-riscv64-linux-${{ github.run_id }}
           path: dist
       - uses: actions/download-artifact@v3
-        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && (vars.CI_ONLY_M6E_PUBLISH_SINK == '' || contains(format(',{0},', vars.CI_ONLY_M6E_PUBLISH_SINK), format(',{0},', matrix.M6E_PUBLISH_SINK))) && (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), ',amd64,'))
+        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && (vars.CI_ONLY_M6E_PUBLISH_SINK == '' || contains(format(',{0},', vars.CI_ONLY_M6E_PUBLISH_SINK), format(',{0},', matrix.M6E_PUBLISH_SINK))) && (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), ',amd64,')) && vars.CI_SKIP_IMAGE_IS_BUILT != 'true' && vars.CI_SKIP_CONTAINER_BUILD != 'true'
         with:
           name: image-amd64-${{ github.run_id }}
       - uses: actions/download-artifact@v3
-        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && (vars.CI_ONLY_M6E_PUBLISH_SINK == '' || contains(format(',{0},', vars.CI_ONLY_M6E_PUBLISH_SINK), format(',{0},', matrix.M6E_PUBLISH_SINK))) && (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), ',arm64,'))
+        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && (vars.CI_ONLY_M6E_PUBLISH_SINK == '' || contains(format(',{0},', vars.CI_ONLY_M6E_PUBLISH_SINK), format(',{0},', matrix.M6E_PUBLISH_SINK))) && (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), ',arm64,')) && vars.CI_SKIP_IMAGE_IS_BUILT != 'true' && vars.CI_SKIP_CONTAINER_BUILD != 'true'
         with:
           name: image-arm64-${{ github.run_id }}
       - uses: actions/download-artifact@v3
-        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && (vars.CI_ONLY_M6E_PUBLISH_SINK == '' || contains(format(',{0},', vars.CI_ONLY_M6E_PUBLISH_SINK), format(',{0},', matrix.M6E_PUBLISH_SINK))) && (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), ',riscv64,'))
+        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && (vars.CI_ONLY_M6E_PUBLISH_SINK == '' || contains(format(',{0},', vars.CI_ONLY_M6E_PUBLISH_SINK), format(',{0},', matrix.M6E_PUBLISH_SINK))) && (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), ',riscv64,')) && vars.CI_SKIP_IMAGE_IS_BUILT != 'true' && vars.CI_SKIP_CONTAINER_BUILD != 'true'
         with:
           name: image-riscv64-${{ github.run_id }}
       - uses: actions/download-artifact@v3
-        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && (vars.CI_ONLY_M6E_PUBLISH_SINK == '' || contains(format(',{0},', vars.CI_ONLY_M6E_PUBLISH_SINK), format(',{0},', matrix.M6E_PUBLISH_SINK)))
+        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && (vars.CI_ONLY_M6E_PUBLISH_SINK == '' || contains(format(',{0},', vars.CI_ONLY_M6E_PUBLISH_SINK), format(',{0},', matrix.M6E_PUBLISH_SINK))) && vars.CI_SKIP_IMAGE_HAS_SBOM != 'true' && vars.CI_SKIP_SYFT_SBOM_TAR != 'true'
         with:
           name: syft-sbom-tar-${{ matrix.M6E_ARCH }}-${{ github.run_id }}
           path: reports
@@ -564,7 +569,7 @@ jobs:
           submodules: true
           persist-credentials: false
       - uses: actions/download-artifact@v3
-        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH)))
+        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && vars.CI_SKIP_SCHEMA_FETCHED != 'true' && vars.CI_SKIP_FETCH_SCHEMA != 'true'
         with:
           name: fetch-schema-${{ github.run_id }}
           path: internal/validate/embedded
@@ -620,7 +625,7 @@ jobs:
           submodules: true
           persist-credentials: false
       - uses: actions/download-artifact@v3
-        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH)))
+        if: (vars.CI_ONLY_M6E_ARCH == '' || contains(format(',{0},', vars.CI_ONLY_M6E_ARCH), format(',{0},', matrix.M6E_ARCH))) && vars.CI_SKIP_IMAGE_IS_BUILT != 'true' && vars.CI_SKIP_CONTAINER_BUILD != 'true'
         with:
           name: image-${{ matrix.M6E_ARCH }}-${{ github.run_id }}
       - name: grype-scan-tar
@@ -840,6 +845,7 @@ jobs:
           submodules: true
           persist-credentials: false
       - uses: actions/download-artifact@v3
+        if: vars.CI_SKIP_SCHEMA_FETCHED != 'true' && vars.CI_SKIP_FETCH_SCHEMA != 'true'
         with:
           name: fetch-schema-${{ github.run_id }}
           path: internal/validate/embedded
@@ -862,6 +868,7 @@ jobs:
           submodules: true
           persist-credentials: false
       - uses: actions/download-artifact@v3
+        if: vars.CI_SKIP_SCHEMA_FETCHED != 'true' && vars.CI_SKIP_FETCH_SCHEMA != 'true'
         with:
           name: fetch-schema-${{ github.run_id }}
           path: internal/validate/embedded
