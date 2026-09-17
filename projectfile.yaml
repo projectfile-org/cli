@@ -25,8 +25,8 @@ includes:
   - .makefile/library/traits/go-binary.yaml
   - .makefile/library/traits/gpg-binary.yaml
   - .makefile/library/traits/torrent-binary.yaml
-  - https://kiota.ch/damian-buho/metadata/raw/branch/main/ghcr.yaml
-  - https://kiota.ch/damian-buho/metadata/raw/branch/main/github.yaml
+  - https://kiota.ch/damian-buho/metadata/raw/branch/main/registry/ghcr.yaml
+  - https://kiota.ch/damian-buho/metadata/raw/branch/main/forge/github.yaml
   - https://kiota.ch/damian-buho/metadata/raw/branch/main/include.yaml
   - https://kiota.ch/projectfile/metadata/raw/branch/main/include.yaml
 keywords:
