@@ -25,6 +25,7 @@ includes:
   - .makefile/library/traits/go-binary.yaml
   - .makefile/library/traits/gpg-binary.yaml
   - .makefile/library/traits/torrent-binary.yaml
+  - https://kiota.ch/damian-buho/metadata/raw/branch/main/forge/codeberg.yaml
   - https://kiota.ch/damian-buho/metadata/raw/branch/main/forge/github.yaml
   - https://kiota.ch/damian-buho/metadata/raw/branch/main/include.yaml
   - https://kiota.ch/damian-buho/metadata/raw/branch/main/registry/ghcr.yaml
@@ -74,6 +75,26 @@ links:
       uk: Пакунки на GHCR
     type: package-registry
     url: https://github.com/projectfile-org/cli/pkgs/container/cli
+  - label:
+      en: Projectfile CLI on Codeberg
+      es: Projectfile CLI en Codeberg
+      uk: Projectfile CLI на Codeberg
+    priority: 90
+    tags:
+      - public
+      - badges
+      - badges-gitea
+    type: source-code
+    url: https://codeberg.org/projectfile/cli
+  - label:
+      en: Issues on Codeberg
+      es: Incidencias en Codeberg
+      uk: Задачі на Codeberg
+    priority: 90
+    tags:
+      - support
+    type: bugs
+    url: https://codeberg.org/projectfile/cli/issues
 org:
   projectfile:
     artifacts:
@@ -191,5 +212,8 @@ repositories:
   - role: mirror
     type: git
     url: git@github.com:projectfile-org/cli.git
+  - role: mirror
+    type: git
+    url: git@codeberg.org:projectfile/cli.git
 technologies:
   - go

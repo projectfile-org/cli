@@ -16,6 +16,7 @@ Este documento explica dónde conseguir ayuda y cómo formular buenas preguntas.
 
 Revisa esto primero — puede que tu pregunta ya tenga respuesta:
 
+- [Incidencias en Codeberg](https://codeberg.org/projectfile/cli/issues)
 - [Incidencias en GitHub](https://github.com/projectfile-org/cli/issues)
 
 ## Dónde preguntar
