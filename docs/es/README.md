@@ -30,6 +30,7 @@ Consulta [FEATURES.md](FEATURES.md) para ver la lista completa.
 
 - **Ejecutable** `pf-cli`
 - **Imagen de contenedor** `ghcr.io/projectfile-org/cli:latest`
+- **Imagen de contenedor** `docker.io/damianbuho/projectfile-cli:latest`
 
 ## Plataformas admitidas
 
@@ -45,6 +46,12 @@ Descarga la imagen de contenedor publicada:
 
 ```sh
 docker pull ghcr.io/projectfile-org/cli:latest
+```
+
+### Descargar de DockerHub
+
+```sh
+docker pull docker.io/damianbuho/projectfile-cli:latest
 ```
 
 Las versiones estables también publican las etiquetas `X.Y.Z`, `X.Y` y `X`: descarga el nivel de precisión que quieras fijar.

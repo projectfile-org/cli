@@ -30,6 +30,7 @@ pf-cli — CLI для читання, запису та валідації proje
 
 - **Виконуваний файл** `pf-cli`
 - **Образ контейнера** `ghcr.io/projectfile-org/cli:latest`
+- **Образ контейнера** `docker.io/damianbuho/projectfile-cli:latest`
 
 ## Підтримувані платформи
 
@@ -45,6 +46,12 @@ pf-cli — CLI для читання, запису та валідації proje
 
 ```sh
 docker pull ghcr.io/projectfile-org/cli:latest
+```
+
+### Завантажити з DockerHub
+
+```sh
+docker pull docker.io/damianbuho/projectfile-cli:latest
 ```
 
 Стабільні випуски також публікують теґи `X.Y.Z`, `X.Y` і `X` — завантажте той рівень точності, який хочете зафіксувати.
