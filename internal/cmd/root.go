@@ -78,7 +78,7 @@ func rootLong() string {
 	if desc == "" {
 		desc = rootShort
 	}
-	return wrap80(desc) + "\n\nFile and forge sync (bridge, forge, scan, init): use pf-bridge."
+	return wrap80(desc) + "\n\nFile and forge sync (bridge, forge, scan): use pf-bridge."
 }
 
 // projectfileDescription reads identity.description.en out of the embedded projectfile.
@@ -117,7 +117,8 @@ var rootCmd = &cobra.Command{
 	Use:   "pf-cli [command]",
 	Short: rootShort,
 	Long:  rootLong(),
-	Example: "  pf-cli get identity.name\n" +
+	Example: "  pf-cli init --namespace org.example --name demo\n" +
+		"  pf-cli get identity.name\n" +
 		"  pf-cli set license.spdx MIT\n" +
 		"  pf-cli add keywords rust wasm\n" +
 		"  pf-cli del keywords[0]\n" +

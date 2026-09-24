@@ -25,8 +25,9 @@ consumers alongside `pf-bridge` (`projectfile/bridge`) and `pf-ci`
 `get`/`set`/`add`/`del` (dotted-path query + mutate), `convert` (encoding),
 `validate` (v1 JSON Schema), `optimize` (strip include-redundant fields),
 `cache` (warm/purge HTTP **includes** only — SPDX moved to pf-bridge),
-`setup` (per-user config). Projections onto
-external files/forges/the repository (`bridge`/`forge`/`scan`/`init`) live in
+`setup` (per-user config), `init` (scaffold a new document — delegates to
+`pf-bridge-init` when installed, else a basic local scaffold). Projections
+onto external files/forges/the repository (`bridge`/`forge`/`scan`) live in
 `pf-bridge`, not here.
 
 ### `get --scope` — reading a value the document COMPOSES
