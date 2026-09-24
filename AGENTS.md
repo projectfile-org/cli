@@ -149,7 +149,9 @@ make help             # every target
 version (a clean tag on the forge, `git describe`/`dev` on the make-plane).
 The root help Description is `identity.description.en` from `projectfile.yaml`,
 embedded via `main.go` (`//go:embed`, so the `Dockerfile` builder `COPY` must
-keep carrying that file). Every help line stays within 80 columns.
+keep carrying that file). Help headers and command names carry lipgloss
+color in the setup-wizard palette, auto-off when piped or under NO_COLOR;
+every help line stays within 80 visible columns.
 Iterate with `go build ./... && go test ./...`.
 
 ## Contracts (do NOT rename)

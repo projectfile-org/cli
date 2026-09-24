@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/spf13/cobra"
 	"go.yaml.in/yaml/v3"
 
@@ -31,24 +32,30 @@ func SetProjectfileYAML(b []byte) {
 
 const rootShort = "Read and edit projectfile documents"
 
+// Help palette mirrors the setup wizard so help and prompts feel like one product.
+var (
+	helpHeading = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("212"))
+	helpCommand = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("86"))
+)
+
 // helpTemplate orders every help screen as Description, Commands, Flags, Examples.
-const helpTemplate = `Usage:{{if .Runnable}}
+const helpTemplate = `{{hdr "Usage:"}}{{if .Runnable}}
   {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
   {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
 
-Aliases:
+{{hdr "Aliases:"}}
   {{.NameAndAliases}}{{end}}{{if .HasAvailableSubCommands}}
 
-Commands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
-  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+{{hdr "Commands:"}}{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+  {{cmd (rpad .Name .NamePadding)}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
 
-Flags:
+{{hdr "Flags:"}}
 {{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
 
-Global Flags:
+{{hdr "Global Flags:"}}
 {{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasExample}}
 
-Examples:
+{{hdr "Examples:"}}
 {{.Example}}{{end}}{{if .HasAvailableSubCommands}}
 
 Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
@@ -57,6 +64,12 @@ Use "{{.CommandPath}} [command] --help" for more information about a command.{{e
 // orderHelp pins the Description, Commands, Flags, Examples order onto one command.
 func orderHelp(c *cobra.Command) {
 	c.SetUsageTemplate(helpTemplate)
+}
+
+// registerHelpPalette exposes the lipgloss styles to the help template.
+func registerHelpPalette() {
+	cobra.AddTemplateFunc("hdr", helpHeading.Render)
+	cobra.AddTemplateFunc("cmd", helpCommand.Render)
 }
 
 // rootLong builds the Description from the projectfile identity text baked in at build time.
@@ -197,6 +210,7 @@ func readOpts() projectfile.ReadOptions {
 }
 
 func init() {
+	registerHelpPalette()
 	orderHelp(rootCmd)
 	rootCmd.PersistentFlags().BoolVarP(&quietFlag, "quiet", "q", false,
 		"mute info; warnings and errors still print")
