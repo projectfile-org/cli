@@ -29,8 +29,11 @@ var (
 var setCmd = &cobra.Command{
 	Use:   "set <path> [value]",
 	Short: "Write a value into a projectfile field",
-	Long: "Replace the value at <path>, creating maps as needed.\n" +
-		"Objects need --value-json; string lists take --csv.",
+	Long: "Replace the value at <path>.\n" +
+		"Missing sections are created.",
+	Example: "  pf-cli set license.spdx MIT\n" +
+		"  pf-cli set keywords --csv rust,wasm\n" +
+		"  pf-cli set contacts --value-json '{\"email\":\"a@example.com\"}'",
 	Args: cobra.RangeArgs(1, 2),
 	RunE: runSet,
 }

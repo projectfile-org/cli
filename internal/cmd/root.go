@@ -78,7 +78,7 @@ func rootLong() string {
 	if desc == "" {
 		desc = rootShort
 	}
-	return wrap80(desc) + "\n\nProjections (bridge, forge, scan, init) live in pf-bridge."
+	return wrap80(desc) + "\n\nFile and forge sync (bridge, forge, scan, init): use pf-bridge."
 }
 
 // projectfileDescription reads identity.description.en out of the embedded projectfile.
@@ -215,7 +215,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&quietFlag, "quiet", "q", false,
 		"mute info; warnings and errors still print")
 	rootCmd.PersistentFlags().BoolVarP(&verboseFlag, "verbose", "v", false,
-		"show operational log lines; also PF_CLI_VERBOSE=1")
+		"show each step; also PF_CLI_VERBOSE=1")
 	rootCmd.PersistentFlags().BoolVar(&ignoreUserConfigFlag, "ignore-user-config", false,
 		"skip $XDG_CONFIG_HOME/projectfile/cli.* loading")
 	rootCmd.PersistentFlags().BoolVar(&offlineFlag, "offline", false,

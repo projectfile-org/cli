@@ -29,8 +29,10 @@ var addCmd = &cobra.Command{
 	Use:   "add <path> [value…]",
 	Short: "Append items to a projectfile list",
 	Long: "Append items to the list at <path>.\n" +
-		"Items already present are skipped; --allow-duplicate\n" +
-		"forces the append. Objects take --field k=v or --value-json.",
+		"Skips items that are already there.",
+	Example: "  pf-cli add keywords rust wasm\n" +
+		"  pf-cli add repositories --field url=https://example.com/r\n" +
+		"  pf-cli add keywords rust -n",
 	Args: cobra.MinimumNArgs(1),
 	RunE: runAdd,
 }
@@ -169,8 +171,8 @@ func isStringListField(k string) bool {
 }
 
 func init() {
-	addCmd.Flags().StringArrayVar(&addFields, "field", nil, "object field as k=v (repeatable)")
-	addCmd.Flags().StringVar(&addValueJSON, "value-json", "", "value or object as JSON")
+	addCmd.Flags().StringArrayVar(&addFields, "field", nil, "set one item field as k=v (repeatable)")
+	addCmd.Flags().StringVar(&addValueJSON, "value-json", "", "the whole item as JSON")
 	addCmd.Flags().BoolVar(&addAllowDup, "allow-duplicate", false, "append even if already present")
 	addCmd.Flags().BoolVarP(&addDryRun, "dry-run", "n", false, "show the append without saving it")
 	addCmd.Flags().StringVarP(&addPathFile, "path-file", "f", "", "explicit projectfile path (skips detection)")

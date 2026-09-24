@@ -41,12 +41,13 @@ var (
 var getCmd = &cobra.Command{
 	Use:   "get <path>…",
 	Short: "Read one or more projectfile fields",
-	Long: "Read field values by dotted address. Raw output prints\n" +
-		"one value per line; --format switches to json, yaml,\n" +
-		"toml, sh or flat. A missing path exits 1 unless --default.",
+	Long: "Read values out of the projectfile by path.\n" +
+		"Prints plain text, one value per line.\n" +
+		"Exits 1 when a path is missing.",
 	Example: "  pf-cli get identity.name\n" +
 		"  pf-cli get repositories[role=origin].url\n" +
 		"  pf-cli get repositories[].url\n" +
+		"  pf-cli get identity --format json\n" +
 		"  pf-cli get org.projectfile.sinks.kiota.ref --scope org.projectfile.image",
 	Args: cobra.ArbitraryArgs,
 	RunE: runGet,
@@ -700,18 +701,18 @@ func (e *usageError) Error() string { return e.msg }
 func init() {
 	orderHelp(getCmd)
 	getCmd.Flags().StringVar(&getDefault, "default", "",
-		"fallback value when the path is absent (exit 0)")
-	getCmd.Flags().BoolVar(&getOrDefault, "or-default", false, "emit the spec default when the path is absent")
+		"value to print when the path is missing")
+	getCmd.Flags().BoolVar(&getOrDefault, "or-default", false, "use the built-in default if missing")
 	getCmd.Flags().StringVar(&getFormat, "format", "raw", "raw, json, yaml, toml, sh, flat")
 	getCmd.Flags().BoolVar(&getBatch, "batch", false, "read several paths in one run")
 	getCmd.Flags().BoolVar(&getExists, "exists", false, "exit 0 if present, 1 if absent; prints nothing")
 	getCmd.Flags().BoolVar(&getPrintPath, "print-path", false, "print the projectfile path and exit")
 	getCmd.Flags().BoolVar(&getExpandEnv, "expand-env", false,
-		"expand ${VAR} in the file before parsing")
+		"fill ${VAR} from the environment first")
 	getCmd.Flags().StringVarP(&getPathFile, "path-file", "f", "", "explicit projectfile path (skips detection)")
-	getCmd.Flags().StringArrayVar(&getNamedPaths, "path", nil, "named path KEY=ADDR (repeatable)")
-	getCmd.Flags().StringVar(&getLang, "lang", "", "pick a language from localized string maps")
+	getCmd.Flags().StringArrayVar(&getNamedPaths, "path", nil, "label a path as KEY=ADDR (repeatable)")
+	getCmd.Flags().StringVar(&getLang, "lang", "", "choose a language for translated fields")
 	getCmd.Flags().StringArrayVar(&getScopes, "scope", nil,
-		"compose ${…} refs under this address (repeatable)")
+		"fill ${…} from this address (repeatable)")
 	rootCmd.AddCommand(getCmd)
 }

@@ -23,8 +23,10 @@ var (
 var optimizeCmd = &cobra.Command{
 	Use:   "optimize [directory]",
 	Short: "Remove local fields that duplicate include values",
-	Long: "Drop local fields that repeat an include value.\n" +
+	Long: "Remove values your includes already provide.\n" +
 		"Keeps includes, $schema and spec_version.",
+	Example: "  pf-cli optimize\n" +
+		"  pf-cli optimize --dry-run",
 	Aliases: []string{"opt"},
 	Args:    cobra.MaximumNArgs(1),
 	RunE:    runOptimize,

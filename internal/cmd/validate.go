@@ -24,8 +24,11 @@ var strictIncludesFlag bool
 var validateCmd = &cobra.Command{
 	Use:   "validate [directory]",
 	Short: "Validate a projectfile against the v1 JSON Schema",
-	Long: "Check the document against the embedded v1 schema.\n" +
-		"Warns on redundant includes; --strict-includes fails instead.",
+	Long: "Check that the projectfile is well-formed.\n" +
+		"Warns about repeated includes.",
+	Example: "  pf-cli validate\n" +
+		"  pf-cli validate /tmp/demo\n" +
+		"  pf-cli validate --strict-includes",
 	Aliases: []string{"v", "lint"},
 	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -120,6 +123,6 @@ func flattenViolations(ve *jsonschema.ValidationError) []string {
 
 func init() {
 	validateCmd.Flags().BoolVar(&strictIncludesFlag, "strict-includes", false,
-		"fail on redundant includes (default: warn)")
+		"fail on repeated includes (default: warn)")
 	rootCmd.AddCommand(validateCmd)
 }

@@ -25,8 +25,10 @@ var delCmd = &cobra.Command{
 	Use:     "del <path>",
 	Aliases: []string{"delete", "rm"},
 	Short:   "Remove a field, list item, or map entry from projectfile",
-	Long: "Delete the value at <path>. A missing path exits 0\n" +
-		"unless --strict is given.",
+	Long: "Delete the value at <path>.\n" +
+		"Missing paths are not an error.",
+	Example: "  pf-cli del keywords[0]\n" +
+		"  pf-cli del keywords[99] --strict",
 	Args: cobra.ExactArgs(1),
 	RunE: runDel,
 }

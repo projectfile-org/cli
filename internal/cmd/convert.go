@@ -55,9 +55,11 @@ func encoderFor(token string) string {
 var convertCmd = &cobra.Command{
 	Use:   "convert <from-format> <to-format> [directory]",
 	Short: "Convert a projectfile between encodings (toml/yaml/json)",
-	Long: "Rewrite projectfile.<from> as projectfile.<to>.\n" +
-		"Formats: toml, yaml (yml), json. Validates both ends;\n" +
-		"keeps the source unless --delete-source is given.",
+	Long: "Rewrite the projectfile from one format to another.\n" +
+		"Checks the result before writing; keeps the source file.",
+	Example: "  pf-cli convert yaml toml\n" +
+		"  pf-cli convert yaml json --delete-source\n" +
+		"  pf-cli convert toml yaml --force",
 	Aliases: []string{"conv"},
 	Args:    cobra.RangeArgs(2, 3),
 	RunE:    runConvert,
