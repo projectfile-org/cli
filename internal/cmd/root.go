@@ -34,7 +34,6 @@ var rootCmd = &cobra.Command{
 		"  pf-cli validate                    check the document is well-formed\n" +
 		"  pf-cli convert yaml toml           switch file format\n" +
 		"  pf-cli optimize                    drop fields an include already supplies\n" +
-		"  pf-cli sink ref --sink ghcr        compose a publish destination’s reference\n" +
 		"  pf-cli cache                       manage the local cache for offline use\n" +
 		"  pf-cli setup                       edit your personal defaults\n" +
 		"\n" +
