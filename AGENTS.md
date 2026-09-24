@@ -147,6 +147,9 @@ make help             # every target
 
 `-X projectfile.org/projectfile/cli/internal/cmd.version` carries the release
 version (a clean tag on the forge, `git describe`/`dev` on the make-plane).
+The root help Description is `identity.description.en` from `projectfile.yaml`,
+embedded via `main.go` (`//go:embed`, so the `Dockerfile` builder `COPY` must
+keep carrying that file). Every help line stays within 80 columns.
 Iterate with `go build ./... && go test ./...`.
 
 ## Contracts (do NOT rename)

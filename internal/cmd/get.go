@@ -39,32 +39,15 @@ var (
 )
 
 var getCmd = &cobra.Command{
-	Use:   "get <path>...",
+	Use:   "get <path>…",
 	Short: "Read one or more projectfile fields",
-	Long: "Read field values from the projectfile in the current (or named)\n" +
-		"directory. Each path uses the dotted + selector + projection grammar:\n" +
-		"  identity.namespace\n" +
-		"  keywords[0]            keywords[-1]\n" +
-		"  repositories[role=origin].url\n" +
-		"  repositories[].url     — projection: one item per line\n" +
-		"  ext.example.build.user — extension shortcut\n" +
-		"\n" +
-		"Synthetic (derived) addresses compute a value from other fields:\n" +
-		"  image.basename   org.projectfile.ci.image, else\n" +
-		"                   <last-label(identity.namespace)>/<identity.name>\n" +
-		"  image.namespace  the basename’s namespace half (before the last /)\n" +
-		"  image.name       the basename’s name half (after the last /, no :tag)\n" +
-		"\n" +
-		"Default output is raw — shell-friendly. Use --format json, yaml or toml\n" +
-		"for a single encoded value, or --format sh to emit `export KEY=value`\n" +
-		"lines. --batch reads many paths from one process; combine with\n" +
-		"--path NAME=ADDR to control the export key.\n" +
-		"TOML documents are tables, so --format toml needs a map/object value\n" +
-		"(query a subtree); scalars and lists use yaml or json instead.\n" +
-		"\n" +
-		"Localized string fields (stored as {lang: value} maps) are unwrapped\n" +
-		"automatically for raw and sh output when only one language is present.\n" +
-		"Use --lang to select a specific language when several are available.",
+	Long: "Read field values by dotted address. Raw output prints\n" +
+		"one value per line; --format switches to json, yaml,\n" +
+		"toml, sh or flat. A missing path exits 1 unless --default.",
+	Example: "  pf-cli get identity.name\n" +
+		"  pf-cli get repositories[role=origin].url\n" +
+		"  pf-cli get repositories[].url\n" +
+		"  pf-cli get org.projectfile.sinks.kiota.ref --scope org.projectfile.image",
 	Args: cobra.ArbitraryArgs,
 	RunE: runGet,
 }
@@ -715,35 +698,20 @@ type usageError struct{ msg string }
 func (e *usageError) Error() string { return e.msg }
 
 func init() {
+	orderHelp(getCmd)
 	getCmd.Flags().StringVar(&getDefault, "default", "",
-		"fallback value emitted when the path is absent (exit 0). Detected by the\n"+
-			"flag being set, so --default='' is honoured and yields the empty string.\n"+
-			"A broken or unreadable projectfile still errors (exit 1), so a non-zero\n"+
-			"exit tells an absent field apart from a broken document.")
-	getCmd.Flags().BoolVar(&getOrDefault, "or-default", false, "emit the spec-defined default when the path is absent")
-	getCmd.Flags().StringVar(&getFormat, "format", "raw", "output format: raw, json, yaml (yml), toml, sh, flat")
-	getCmd.Flags().BoolVar(&getBatch, "batch", false, "read multiple paths in one invocation")
-	getCmd.Flags().BoolVar(&getExists, "exists", false, "exit 0 if path exists, 1 if missing (no stdout)")
-	getCmd.Flags().BoolVar(&getPrintPath, "print-path", false, "emit the resolved projectfile path and exit (no field query needed)")
+		"fallback value when the path is absent (exit 0)")
+	getCmd.Flags().BoolVar(&getOrDefault, "or-default", false, "emit the spec default when the path is absent")
+	getCmd.Flags().StringVar(&getFormat, "format", "raw", "raw, json, yaml, toml, sh, flat")
+	getCmd.Flags().BoolVar(&getBatch, "batch", false, "read several paths in one run")
+	getCmd.Flags().BoolVar(&getExists, "exists", false, "exit 0 if present, 1 if absent; prints nothing")
+	getCmd.Flags().BoolVar(&getPrintPath, "print-path", false, "print the projectfile path and exit")
 	getCmd.Flags().BoolVar(&getExpandEnv, "expand-env", false,
-		"expand ${VAR} (braced form only) against the environment before parsing;\n"+
-			"unknown variables become the empty string. Bare $VAR is left alone so the\n"+
-			"YAML/JSON `$schema` discriminator survives. Expanded values that contain\n"+
-			"unquoted format-control characters (newline, TOML/YAML quote chars) can\n"+
-			"break the subsequent parse — caller responsibility.")
+		"expand ${VAR} in the file before parsing")
 	getCmd.Flags().StringVarP(&getPathFile, "path-file", "f", "", "explicit projectfile path (skips detection)")
-	getCmd.Flags().StringArrayVar(&getNamedPaths, "path", nil, "named path KEY=ADDR (repeatable, batch mode)")
-	getCmd.Flags().StringVar(&getLang, "lang", "", "language to select from localized string maps (e.g. en, es, uk)")
+	getCmd.Flags().StringArrayVar(&getNamedPaths, "path", nil, "named path KEY=ADDR (repeatable)")
+	getCmd.Flags().StringVar(&getLang, "lang", "", "pick a language from localized string maps")
 	getCmd.Flags().StringArrayVar(&getScopes, "scope", nil,
-		"address whose subtree answers a `${…}` reference before the document root\n"+
-			"(repeatable, first match wins). Setting it also EXPANDS the resolved value,\n"+
-			"so a declared template is read composed rather than verbatim:\n"+
-			"  get org.projectfile.sinks.kiota.ref --scope org.projectfile.image\n"+
-			"Prefix it with a --path key to bind it to that entry alone, which is how\n"+
-			"one batch reads MANY subjects — without the key every entry composes\n"+
-			"under the first scope that answers, yielding copies of one subject:\n"+
-			"  --path GO=…images.go-tools.ref --scope GO=org.projectfile.images.go-tools\n"+
-			"A bound scope outranks the global ones for its own key. Without any\n"+
-			"scope, `get` resolves exactly what it always did.")
+		"compose ${…} refs under this address (repeatable)")
 	rootCmd.AddCommand(getCmd)
 }

@@ -55,12 +55,9 @@ func encoderFor(token string) string {
 var convertCmd = &cobra.Command{
 	Use:   "convert <from-format> <to-format> [directory]",
 	Short: "Convert a projectfile between encodings (toml/yaml/json)",
-	Long: "Read projectfile.<from-format> from [directory] (default: current\n" +
-		"directory), validate it against the v1 schema, write\n" +
-		"projectfile.<to-format>, and re-validate the result. Supported\n" +
-		"formats: toml, yaml (yml), json. The source file is kept by\n" +
-		"default; pass --delete-source to remove it after a successful\n" +
-		"write. Refuses to overwrite an existing output file unless --force.",
+	Long: "Rewrite projectfile.<from> as projectfile.<to>.\n" +
+		"Formats: toml, yaml (yml), json. Validates both ends;\n" +
+		"keeps the source unless --delete-source is given.",
 	Aliases: []string{"conv"},
 	Args:    cobra.RangeArgs(2, 3),
 	RunE:    runConvert,
@@ -167,6 +164,6 @@ func init() {
 	convertCmd.Flags().BoolVarP(&convertForce, "force", "f", false,
 		"overwrite the output file if it already exists")
 	convertCmd.Flags().BoolVar(&convertDeleteSource, "delete-source", false,
-		"delete the source projectfile after a successful conversion")
+		"remove the source file after converting")
 	rootCmd.AddCommand(convertCmd)
 }

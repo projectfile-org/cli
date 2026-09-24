@@ -27,15 +27,8 @@ func cacheRoot() (string, error) {
 var cacheCmd = &cobra.Command{
 	Use:   "cache",
 	Short: "Manage pf-cli’s local cache for offline use",
-	Long: "pf-cli keeps a local copy of every HTTP include it fetches, so that\n" +
-		"reading a projectfile works without a network connection once warmed.\n" +
-		"\n" +
-		"The cache lives at:\n" +
-		"  ${XDG_CACHE_HOME:-~/.cache}/pf/\n" +
-		"\n" +
-		"This slot is shared with pf-bridge and pf-ci — a purge here clears the\n" +
-		"cache they all read. SPDX license texts are warmed and read by pf-bridge;\n" +
-		"run `pf-bridge cache` to manage them.",
+	Long: "Local copies of HTTP includes live under $XDG_CACHE_HOME/pf/,\n" +
+		"shared with pf-bridge and pf-ci. SPDX texts belong to pf-bridge.",
 }
 
 var cacheWarmForce bool
@@ -73,20 +66,8 @@ var cacheStatusCmd = &cobra.Command{
 var cacheWarmCmd = &cobra.Command{
 	Use:   "warm [directory]",
 	Short: "Pre-fetch HTTP includes so pf-cli works offline",
-	Long: "Download every HTTP include referenced by the projectfile in\n" +
-		"[directory] (default: the current directory) and store it in the cache.\n" +
-		"After warming, `pf-cli` reads those includes from disk even with\n" +
-		"--offline set.\n" +
-		"\n" +
-		"By default, a cached include whose freshness window has not elapsed is\n" +
-		"served from cache without a network round-trip; a stale entry is\n" +
-		"revalidated with a conditional request (304 reuses the cached body).\n" +
-		"\n" +
-		"--force forces a conditional revalidation for every entry, regardless\n" +
-		"of freshness.\n" +
-		"\n" +
-		"If there is no projectfile in the directory, warm does nothing and\n" +
-		"exits successfully (warming SPDX license texts is a pf-bridge job).",
+	Long: "Fetch every HTTP include for [directory] into the cache.\n" +
+		"Warmed entries satisfy later reads, even with --offline.",
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
 		if offlineFlag {
@@ -102,10 +83,9 @@ var cacheWarmCmd = &cobra.Command{
 
 var cacheRefreshCmd = &cobra.Command{
 	Use:   "refresh [directory]",
-	Short: "Alias for `cache warm --force`",
-	Long: "Force a conditional revalidation of every HTTP include referenced\n" +
-		"by the projectfile in [directory]. Shorthand for `cache warm --force`.",
-	Args: cobra.MaximumNArgs(1),
+	Short: "Alias for cache warm --force",
+	Long:  "Shorthand for cache warm --force.",
+	Args:  cobra.MaximumNArgs(1),
 	RunE: func(_ *cobra.Command, args []string) error {
 		if offlineFlag {
 			return fmt.Errorf("cannot refresh cache in offline mode; remove --offline to proceed")
@@ -121,10 +101,8 @@ var cacheRefreshCmd = &cobra.Command{
 var cachePurgeCmd = &cobra.Command{
 	Use:   "purge [url]",
 	Short: "Delete cached HTTP includes (all, or one URL)",
-	Long: "Without arguments, remove every HTTP include pf-cli has cached,\n" +
-		"freeing the disk they use. With one argument, remove only the cached\n" +
-		"entry for that URL (by hash). The next read that needs an include\n" +
-		"fetches it fresh. This does not touch the projectfile or any other file.",
+	Long: "Drop every cached include, or only the entry for one URL.\n" +
+		"The next read fetches it fresh.",
 	Args: cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		out := cmd.OutOrStdout()
@@ -196,6 +174,6 @@ func init() {
 	cacheCmd.AddCommand(cacheWarmCmd)
 	cacheCmd.AddCommand(cacheRefreshCmd)
 	cacheCmd.AddCommand(cachePurgeCmd)
-	cacheWarmCmd.Flags().BoolVar(&cacheWarmForce, "force", false, "force conditional revalidation even when cache is fresh")
+	cacheWarmCmd.Flags().BoolVar(&cacheWarmForce, "force", false, "revalidate every entry, even when fresh")
 	rootCmd.AddCommand(cacheCmd)
 }

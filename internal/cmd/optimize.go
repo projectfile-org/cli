@@ -23,13 +23,8 @@ var (
 var optimizeCmd = &cobra.Command{
 	Use:   "optimize [directory]",
 	Short: "Remove local fields that duplicate include values",
-	Long: "Read the projectfile and its includes, then remove any local fields\n" +
-		"whose values are identical to the merged include values. This prevents\n" +
-		"drift where includes were supposed to centralise shared data but local\n" +
-		"copies were left behind.\n\n" +
-		"Fields \"includes\", \"$schema\", and \"spec_version\" are always preserved\n" +
-		"since they are local-file concerns.\n\n" +
-		"--dry-run reports what would be removed without modifying the file.",
+	Long: "Drop local fields that repeat an include value.\n" +
+		"Keeps includes, $schema and spec_version.",
 	Aliases: []string{"opt"},
 	Args:    cobra.MaximumNArgs(1),
 	RunE:    runOptimize,
@@ -118,7 +113,7 @@ func runOptimizeInner(pfPath string) error {
 
 func init() {
 	optimizeCmd.Flags().BoolVarP(&optimizeDryRun, "dry-run", "n", false,
-		"report what would be removed without writing")
+		"list removals without saving")
 	optimizeCmd.Flags().StringVarP(&optimizePathFile, "path-file", "f", "",
 		"explicit projectfile path (skips detection)")
 	rootCmd.AddCommand(optimizeCmd)

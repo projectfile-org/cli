@@ -9,8 +9,10 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/spf13/cobra"
+	"go.yaml.in/yaml/v3"
 
 	"kiota.ch/projectfile/core/v2/pkg/genlog"
 	"kiota.ch/projectfile/core/v2/pkg/projectfile"
@@ -19,26 +21,97 @@ import (
 
 var version = "unknown"
 
+// projectfileYAML carries the root projectfile bytes main embeds at build time.
+var projectfileYAML []byte
+
+// SetProjectfileYAML hands the embedded projectfile to the help renderer.
+func SetProjectfileYAML(b []byte) {
+	projectfileYAML = b
+}
+
+const rootShort = "Read and edit projectfile documents"
+
+// helpTemplate orders every help screen as Description, Commands, Flags, Examples.
+const helpTemplate = `Usage:{{if .Runnable}}
+  {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
+  {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
+
+Aliases:
+  {{.NameAndAliases}}{{end}}{{if .HasAvailableSubCommands}}
+
+Commands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+
+Flags:
+{{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+
+Global Flags:
+{{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasExample}}
+
+Examples:
+{{.Example}}{{end}}{{if .HasAvailableSubCommands}}
+
+Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
+`
+
+// orderHelp pins the Description, Commands, Flags, Examples order onto one command.
+func orderHelp(c *cobra.Command) {
+	c.SetUsageTemplate(helpTemplate)
+}
+
+// rootLong builds the Description from the projectfile identity text baked in at build time.
+func rootLong() string {
+	desc := projectfileDescription()
+	if desc == "" {
+		desc = rootShort
+	}
+	return wrap80(desc) + "\n\nProjections (bridge, forge, scan, init) live in pf-bridge."
+}
+
+// projectfileDescription reads identity.description.en out of the embedded projectfile.
+func projectfileDescription() string {
+	var doc map[string]any
+	if err := yaml.Unmarshal(projectfileYAML, &doc); err != nil {
+		return ""
+	}
+	identity, _ := doc["identity"].(map[string]any)
+	description, _ := identity["description"].(map[string]any)
+	en, _ := description["en"].(string)
+	return strings.TrimSpace(en)
+}
+
+// wrap80 folds s to word boundaries so no help line exceeds 80 columns.
+func wrap80(s string) string {
+	words := strings.Fields(s)
+	if len(words) == 0 {
+		return ""
+	}
+	var b strings.Builder
+	line := words[0]
+	for _, w := range words[1:] {
+		if len(line)+1+len(w) > 80 {
+			b.WriteString(line + "\n")
+			line = w
+			continue
+		}
+		line += " " + w
+	}
+	b.WriteString(line)
+	return b.String()
+}
+
 var rootCmd = &cobra.Command{
 	Use:   "pf-cli [command]",
-	Short: "Read and edit projectfile documents",
-	Long: "pf-cli reads and edits a projectfile document (projectfile.yaml, .toml,\n" +
-		"or .json) — the single file at a project root that carries its identity,\n" +
-		"licence, authorship, and technical metadata.\n" +
-		"\n" +
-		"Common tasks:\n" +
-		"  pf-cli get identity.namespace      read a field\n" +
-		"  pf-cli set license.spdx MIT        change a field\n" +
-		"  pf-cli add keywords rust wasm      append to a list\n" +
-		"  pf-cli del keywords[0]             remove a field or list item\n" +
-		"  pf-cli validate                    check the document is well-formed\n" +
-		"  pf-cli convert yaml toml           switch file format\n" +
-		"  pf-cli optimize                    drop fields an include already supplies\n" +
-		"  pf-cli cache                       manage the local cache for offline use\n" +
-		"  pf-cli setup                       edit your personal defaults\n" +
-		"\n" +
-		"To project the document onto package files, forges, or the repo\n" +
-		"(bridge, forge, scan, init), use the pf-bridge binary.",
+	Short: rootShort,
+	Long:  rootLong(),
+	Example: "  pf-cli get identity.name\n" +
+		"  pf-cli set license.spdx MIT\n" +
+		"  pf-cli add keywords rust wasm\n" +
+		"  pf-cli del keywords[0]\n" +
+		"  pf-cli validate\n" +
+		"  pf-cli convert yaml toml\n" +
+		"  pf-cli optimize\n" +
+		"  pf-cli cache status",
 	Version:       version,
 	SilenceUsage:  true,
 	SilenceErrors: true,
@@ -124,23 +197,23 @@ func readOpts() projectfile.ReadOptions {
 }
 
 func init() {
+	orderHelp(rootCmd)
 	rootCmd.PersistentFlags().BoolVarP(&quietFlag, "quiet", "q", false,
-		"suppress info/decision-trace output; warnings and errors still print")
+		"mute info; warnings and errors still print")
 	rootCmd.PersistentFlags().BoolVarP(&verboseFlag, "verbose", "v", false,
-		"show operational log lines (file detection, includes, locks); also PF_CLI_VERBOSE=1")
+		"show operational log lines; also PF_CLI_VERBOSE=1")
 	rootCmd.PersistentFlags().BoolVar(&ignoreUserConfigFlag, "ignore-user-config", false,
-		"skip $XDG_CONFIG_HOME/projectfile/cli.* loading — run as if no personal config existed")
+		"skip $XDG_CONFIG_HOME/projectfile/cli.* loading")
 	rootCmd.PersistentFlags().BoolVar(&offlineFlag, "offline", false,
-		"refuse all network fetches; use embedded and cached data only")
+		"refuse network; use cache and embedded data")
 	rootCmd.PersistentFlags().BoolVar(&sortedFlag, "sorted", false,
-		"write YAML keys in sorted (alphabetical) order; disable canvas round-trip key preservation")
+		"write YAML keys in sorted order")
 	rootCmd.PersistentFlags().Var(&failOnFlag, "fail-on",
-		"abort when an include-resolution problem reaches this severity: "+
-			"'error' (default; a missing local include warns and is skipped) or "+
-			"'warning' (a missing local include aborts the command)")
+		"abort includes at error|warning")
 }
 
 func Execute() {
+	rootCmd.Long = rootLong()
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		// Usage mistakes (bad flags/args) exit 2, distinct from a runtime

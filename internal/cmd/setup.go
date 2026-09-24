@@ -14,14 +14,9 @@ var setupFormat string
 
 var setupCmd = &cobra.Command{
 	Use:   "setup",
-	Short: "Interactively edit the per-user pf-cli configuration",
-	Long: "Walks every section of $XDG_CONFIG_HOME/projectfile/cli.{yaml,toml,json},\n" +
-		"pre-filling fields from the existing file when present, and from git config\n" +
-		"(`user.name`, `user.email`, `user.signingKey`) for the small overlap it carries.\n" +
-		"Each section can be submitted with Enter (accept current values) or cancelled\n" +
-		"with Esc. Values set here are consumed by `pf-cli init`, generators (FUNDING/\n" +
-		"SECURITY/CONTRIBUTING), and the git scanner — most of what the wizard captures\n" +
-		"is what git config can’t carry (ORCID, funding URLs, private-host redaction, …).",
+	Short: "Edit your per-user configuration interactively",
+	Long: "Walk every config section, prefilling from the file\n" +
+		"and git config. Enter accepts, Esc skips a section.",
 	RunE: func(_ *cobra.Command, _ []string) error {
 		return usersetup.Run(usersetup.Options{Format: setupFormat})
 	},

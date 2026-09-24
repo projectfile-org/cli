@@ -25,9 +25,8 @@ var delCmd = &cobra.Command{
 	Use:     "del <path>",
 	Aliases: []string{"delete", "rm"},
 	Short:   "Remove a field, list item, or map entry from projectfile",
-	Long: "Delete the value at <path>. Idempotent by default (deleting an absent\n" +
-		"path exits 0); --strict flips that to exit 1 when the path was already\n" +
-		"missing. --dry-run reports what would change without writing.",
+	Long: "Delete the value at <path>. A missing path exits 0\n" +
+		"unless --strict is given.",
 	Args: cobra.ExactArgs(1),
 	RunE: runDel,
 }
@@ -79,8 +78,8 @@ func runDelInner(addr string, p fieldpath.Path, pfPath string) error {
 }
 
 func init() {
-	delCmd.Flags().BoolVar(&delStrict, "strict", false, "exit 1 if the path was already absent")
-	delCmd.Flags().BoolVarP(&delDryRun, "dry-run", "n", false, "compute the deletion without persisting")
+	delCmd.Flags().BoolVar(&delStrict, "strict", false, "exit 1 when the path is already absent")
+	delCmd.Flags().BoolVarP(&delDryRun, "dry-run", "n", false, "show the deletion without saving it")
 	delCmd.Flags().StringVarP(&delPathFile, "path-file", "f", "", "explicit projectfile path (skips detection)")
 	rootCmd.AddCommand(delCmd)
 }

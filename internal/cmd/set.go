@@ -29,10 +29,8 @@ var (
 var setCmd = &cobra.Command{
 	Use:   "set <path> [value]",
 	Short: "Write a value into a projectfile field",
-	Long: "Replace the value at <path>. Creates intermediate maps as needed.\n" +
-		"For object/array values, use --value-json; for comma-separated string\n" +
-		"lists, use --csv. --create-only refuses to overwrite an existing value.\n" +
-		"--dry-run prints the would-be write to stderr without touching disk.",
+	Long: "Replace the value at <path>, creating maps as needed.\n" +
+		"Objects need --value-json; string lists take --csv.",
 	Args: cobra.RangeArgs(1, 2),
 	RunE: runSet,
 }
@@ -153,10 +151,10 @@ func readDocumentFromPath(path string) (*projectfile.Document, error) {
 }
 
 func init() {
-	setCmd.Flags().StringVar(&setValueJSON, "value-json", "", "value as JSON (required for objects/arrays)")
-	setCmd.Flags().StringVar(&setCSV, "csv", "", "value as comma-separated string list")
-	setCmd.Flags().BoolVar(&setCreateOnly, "create-only", false, "refuse to overwrite an existing value")
-	setCmd.Flags().BoolVarP(&setDryRun, "dry-run", "n", false, "compute the write without persisting")
+	setCmd.Flags().StringVar(&setValueJSON, "value-json", "", "value as JSON (needed for objects and arrays)")
+	setCmd.Flags().StringVar(&setCSV, "csv", "", "value as a comma-separated string list")
+	setCmd.Flags().BoolVar(&setCreateOnly, "create-only", false, "fail if the path already has a value")
+	setCmd.Flags().BoolVarP(&setDryRun, "dry-run", "n", false, "show the write without saving it")
 	setCmd.Flags().StringVarP(&setPathFile, "path-file", "f", "", "explicit projectfile path (skips detection)")
 	rootCmd.AddCommand(setCmd)
 }

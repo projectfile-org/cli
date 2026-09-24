@@ -24,13 +24,8 @@ var strictIncludesFlag bool
 var validateCmd = &cobra.Command{
 	Use:   "validate [directory]",
 	Short: "Validate a projectfile against the v1 JSON Schema",
-	Long: "Read the projectfile in the given directory (default: current directory)\n" +
-		"and validate it against the embedded projectfile v1 JSON Schema. Exits 1\n" +
-		"if the document does not conform; prints each violation with the offending\n" +
-		"location and reason.\n\n" +
-		"Also checks include hygiene: any direct include already provided by a\n" +
-		"sibling (transitively pulled in, or listed twice) is reported as a warning.\n" +
-		"Pass --strict-includes to turn those warnings into a failure.",
+	Long: "Check the document against the embedded v1 schema.\n" +
+		"Warns on redundant includes; --strict-includes fails instead.",
 	Aliases: []string{"v", "lint"},
 	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -125,6 +120,6 @@ func flattenViolations(ve *jsonschema.ValidationError) []string {
 
 func init() {
 	validateCmd.Flags().BoolVar(&strictIncludesFlag, "strict-includes", false,
-		"fail (exit 1) when an include is already provided by a sibling; default is warn-only")
+		"fail on redundant includes (default: warn)")
 	rootCmd.AddCommand(validateCmd)
 }
