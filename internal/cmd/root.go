@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"runtime/debug"
 	"strconv"
 	"strings"
 
@@ -225,10 +226,36 @@ func init() {
 		"write YAML keys in sorted order")
 	rootCmd.PersistentFlags().Var(&failOnFlag, "fail-on",
 		"abort includes at error|warning")
+	rootCmd.Flags().BoolP("version", "V", false, "print the version")
+}
+
+// resolveVersion falls back to the Go build info when no release stamp was linked in.
+func resolveVersion() string {
+	info, ok := debug.ReadBuildInfo()
+	if version != "unknown" || !ok {
+		return version
+	}
+	if v := info.Main.Version; v != "" && v != "(devel)" {
+		return v
+	}
+	rev, dirty := "", ""
+	for _, s := range info.Settings {
+		switch {
+		case s.Key == "vcs.revision" && len(s.Value) >= 12:
+			rev = s.Value[:12]
+		case s.Key == "vcs.modified" && s.Value == "true":
+			dirty = "-dirty"
+		}
+	}
+	if rev == "" {
+		return version + " (built without a release stamp or VCS metadata)"
+	}
+	return "dev-" + rev + dirty
 }
 
 func Execute() {
 	rootCmd.Long = rootLong()
+	rootCmd.Version = resolveVersion()
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		// Usage mistakes (bad flags/args) exit 2, distinct from a runtime
