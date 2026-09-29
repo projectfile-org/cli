@@ -108,12 +108,16 @@ func resolveScoped(doc *projectfile.Document, p fieldpath.Path, scopes []string)
 // than one that visibly did not resolve: the first is a push to the wrong place,
 // the second stops the build.
 func expandScoped(value any, doc *projectfile.Document, scopes []string) any {
-	if len(scopes) == 0 {
+	if len(scopes) == 0 && !getExpand {
 		return value
 	}
 	switch v := value.(type) {
 	case string:
 		out, resolved := interp.ExpandIn(doc, v, scopes...)
+		if !resolved && getExpand {
+			genlog.Debug("get: partial expansion kept", "template", v, "composed", out)
+			return out
+		}
 		if !resolved {
 			genlog.Warn("get: value did not fully resolve under the given scopes",
 				"template", v, "composed", out, "scopes", len(scopes))

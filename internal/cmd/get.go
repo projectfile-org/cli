@@ -36,6 +36,7 @@ var (
 	getNamedPaths []string
 	getLang       string
 	getScopes     []string
+	getExpand     bool
 )
 
 var getCmd = &cobra.Command{
@@ -714,5 +715,7 @@ func init() {
 	getCmd.Flags().StringVar(&getLang, "lang", "", "choose a language for translated fields")
 	getCmd.Flags().StringArrayVar(&getScopes, "scope", nil,
 		"fill ${…} from this address (repeatable)")
+	getCmd.Flags().BoolVar(&getExpand, "expand", false,
+		"fill ${…} from the document; leave the rest as written")
 	rootCmd.AddCommand(getCmd)
 }

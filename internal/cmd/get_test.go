@@ -46,6 +46,7 @@ func resetGetFlags(t *testing.T) {
 	getBatch = false
 	getExists = false
 	getExpandEnv = false
+	getExpand = false
 	getPathFile = ""
 	getNamedPaths = nil
 	getLang = ""
@@ -775,5 +776,17 @@ func TestGetUsageErrorType(t *testing.T) {
 	_, rErr := runGetCmd(t, "identity.name", "--path-file", broken)
 	if rErr == nil || errors.As(rErr, &ue) {
 		t.Fatalf("broken doc should be a non-usage runtime error (exit 1), got %v", rErr)
+	}
+}
+
+// TestGetExpandResolvesDocumentRefsOnly pins that --expand fills document references and leaves a make variable as written.
+func TestGetExpandResolvesDocumentRefsOnly(t *testing.T) {
+	path := writeFixture(t, t.TempDir(), "[identity]\nname = \"pg\"\n\n[\"org.projectfile\".build.args]\nIMG = \"${B19_DOCKER_REGISTRY}/${identity.name}\"\n")
+	out, err := runGetCmd(t, "--expand", "--format", "flat", "org.projectfile.build", "--path-file", path)
+	if err != nil {
+		t.Fatalf("get --expand: %v", err)
+	}
+	if want := "args.IMG=${B19_DOCKER_REGISTRY}/pg\n"; out != want {
+		t.Fatalf("get --expand = %q, want %q", out, want)
 	}
 }
