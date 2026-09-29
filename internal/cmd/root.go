@@ -189,7 +189,7 @@ func (f *failOnFlagValue) String() string {
 
 func (f *failOnFlagValue) Set(s string) error {
 	switch s {
-	case "", "error":
+	case "error":
 		f.level = projectfile.FailOnError
 	case "warning":
 		f.level = projectfile.FailOnWarning
