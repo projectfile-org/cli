@@ -4,7 +4,10 @@
 
 package cmd
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestVersionShortFlagIsCapitalV(t *testing.T) {
 	if f := rootCmd.Flags().ShorthandLookup("V"); f == nil || f.Name != "version" {
@@ -25,5 +28,22 @@ func TestFailOnRejectsEmptyValue(t *testing.T) {
 	var f failOnFlagValue
 	if err := f.Set(""); err == nil {
 		t.Fatal("empty --fail-on was accepted")
+	}
+}
+
+func TestDroppedAliasesAndPrefixesAreUnknown(t *testing.T) {
+	for _, name := range []string{"rm", "v", "val", "sett"} {
+		if _, _, err := rootCmd.Find([]string{name}); err == nil || !strings.Contains(err.Error(), "unknown command") {
+			t.Errorf("pf-cli %s: got %v, want unknown command", name, err)
+		}
+	}
+}
+
+func TestKeptAliasesResolve(t *testing.T) {
+	for alias, want := range map[string]string{"lint": "validate", "delete": "del", "conv": "convert", "opt": "optimize", "scaffold": "init"} {
+		c, _, err := rootCmd.Find([]string{alias})
+		if err != nil || c.Name() != want {
+			t.Errorf("pf-cli %s: got %v %v, want %s", alias, c, err, want)
+		}
 	}
 }

@@ -29,7 +29,7 @@ var validateCmd = &cobra.Command{
 	Example: "  pf-cli validate\n" +
 		"  pf-cli validate /tmp/demo\n" +
 		"  pf-cli validate --strict-includes",
-	Aliases: []string{"v", "lint"},
+	Aliases: []string{"lint"},
 	Args:    cobra.MaximumNArgs(1),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir := "."

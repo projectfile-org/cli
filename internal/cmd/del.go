@@ -23,7 +23,7 @@ var (
 
 var delCmd = &cobra.Command{
 	Use:     "del <path>",
-	Aliases: []string{"delete", "rm"},
+	Aliases: []string{"delete"},
 	Short:   "Remove a field, list item, or map entry from projectfile",
 	Long: "Delete the value at <path>.\n" +
 		"Missing paths are not an error.",
