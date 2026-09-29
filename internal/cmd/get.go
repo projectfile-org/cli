@@ -195,6 +195,7 @@ func runGet(cmd *cobra.Command, args []string) error {
 		// Missing values without a fallback are a soft failure: stdout
 		// already shows what we *could* resolve, but the process exits 1
 		// so shell pipelines can detect the partial result.
+		reportMissing(cmd, out)
 		genlog.FlushDebug()
 		os.Exit(1)
 	}
@@ -718,4 +719,22 @@ func init() {
 	getCmd.Flags().BoolVar(&getExpand, "expand", false,
 		"fill ${…} from the document; leave the rest as written")
 	rootCmd.AddCommand(getCmd)
+}
+
+// reportMissing names each unresolved path on stderr with the next command to run, unless --quiet.
+func reportMissing(cmd *cobra.Command, entries []resolvedEntry) {
+	if quietFlag {
+		return
+	}
+	for _, r := range entries {
+		if r.present {
+			continue
+		}
+		hint := "pass --default <value> to fall back"
+		if n := len(r.path.Segments); n > 1 {
+			parent := fieldpath.Path{Segments: r.path.Segments[:n-1]}.String()
+			hint = fmt.Sprintf("list what is there with pf-cli get %s --format yaml, or %s", parent, hint)
+		}
+		fmt.Fprintf(cmd.ErrOrStderr(), "%s: no such field. To continue, %s.\n", r.path.String(), hint)
+	}
 }

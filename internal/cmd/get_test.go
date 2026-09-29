@@ -12,6 +12,7 @@ import (
 	"strings"
 	"testing"
 
+	"kiota.ch/projectfile/core/v2/pkg/fieldpath"
 	"kiota.ch/projectfile/core/v2/pkg/genlog"
 )
 
@@ -788,5 +789,17 @@ func TestGetExpandResolvesDocumentRefsOnly(t *testing.T) {
 	}
 	if want := "args.IMG=${B19_DOCKER_REGISTRY}/pg\n"; out != want {
 		t.Fatalf("get --expand = %q, want %q", out, want)
+	}
+}
+
+func TestReportMissingNamesParentAndDefault(t *testing.T) {
+	p, _ := fieldpath.Parse("identity.bogus")
+	var buf bytes.Buffer
+	getCmd.SetErr(&buf)
+	t.Cleanup(func() { getCmd.SetErr(nil) })
+	reportMissing(getCmd, []resolvedEntry{{path: p}})
+	want := "identity.bogus: no such field. To continue, list what is there with pf-cli get identity --format yaml, or pass --default <value> to fall back.\n"
+	if buf.String() != want {
+		t.Fatalf("got %q", buf.String())
 	}
 }
