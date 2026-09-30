@@ -12,7 +12,7 @@ pf-cli-managed: yes
 
 pf-cli — командний інтерфейс projectfile: читає, записує та валідує поля, розвʼязує віддалені includes і генерує похідні артефакти. Містить вбудовану JSON-схему v1 для офлайн-валідації та є канонічним інструментом редагування projectfile-файлів локально й у CI.
 
-[![Stand with Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://damian-buho.github.io/support-ukraine/) [![Projectfile inside](https://badges.kiota.ch/static/v1?label=projectfile&message=inside&labelColor=0d0d0d&color=8c6723&style=flat-square)](https://projectfile.org) [![License](https://badges.kiota.ch/static/v1?label=license&message=MIT&color=1e5913&style=flat-square)](LICENSE) [![Commit style](https://badges.kiota.ch/static/v1?label=commits&message=conventional%20v1.0.0&color=1877aa&style=flat-square)](https://www.conventionalcommits.org/uk/v1.0.0/) ![Workflow](https://badges.kiota.ch/static/v1?label=workflow&message=git-flow&color=1877aa&style=flat-square) [![Versioning](https://badges.kiota.ch/static/v1?label=versioning&message=semantic%20v2.0.0&color=1877aa&style=flat-square)](https://semver.org/lang/uk/) [![Cosign](https://badges.kiota.ch/static/v1?label=cosign&message=enabled&color=1e5913&style=flat-square)](https://docs.sigstore.dev/cosign/verifying/verify/) [![PRs welcome](https://badges.kiota.ch/static/v1?label=PRs&message=welcome&color=1e5913&style=flat-square)](CONTRIBUTING.md) [![Citation](https://badges.kiota.ch/static/v1?label=citation&message=cff&color=1877aa&style=flat-square)](CITATION.cff) [![REUSE compliance](https://api.reuse.software/badge/codeberg.org/projectfile/cli)](https://api.reuse.software/info/codeberg.org/projectfile/cli)
+[![Stand with Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://damian-buho.github.io/support-ukraine/) [![Projectfile inside](https://badges.kiota.ch/static/v1?label=projectfile&message=inside&labelColor=0d0d0d&color=8c6723&style=flat-square)](https://projectfile.org) [![License](https://badges.kiota.ch/static/v1?label=license&message=MIT&color=1e5913&style=flat-square)](LICENSE) [![Cosign](https://badges.kiota.ch/static/v1?label=cosign&message=enabled&color=1e5913&style=flat-square)](https://docs.sigstore.dev/cosign/verifying/verify/) [![PRs welcome](https://badges.kiota.ch/static/v1?label=PRs&message=welcome&color=1e5913&style=flat-square)](CONTRIBUTING.md) [![REUSE compliance](https://api.reuse.software/badge/codeberg.org/projectfile/cli)](https://api.reuse.software/info/codeberg.org/projectfile/cli)
 
 ![Project status](https://badges.kiota.ch/static/v1?label=status&message=maintained&color=1d63ed&style=flat-square) [![Last commit on kiota.ch](https://badges.kiota.ch/gitea/last-commit/projectfile/cli?gitea_url=https://kiota.ch&label=last%20commit%20on%20kiota.ch&style=flat-square)](https://kiota.ch/projectfile/cli) [![Last commit on Codeberg](https://badges.kiota.ch/gitea/last-commit/projectfile/cli?gitea_url=https://codeberg.org&label=last%20commit%20on%20Codeberg&style=flat-square)](https://codeberg.org/projectfile/cli) [![Last commit on GitHub](https://badges.kiota.ch/github/last-commit/projectfile-org/cli?label=last%20commit%20on%20GitHub&style=flat-square)](https://github.com/projectfile-org/cli)
 
@@ -38,8 +38,6 @@ pf-cli — командний інтерфейс projectfile: читає, зап
 
 Завантажте опублікований образ контейнера:
 
-Створіть псевдонім команди на образ, щоб кожен приклад працював як написано в поточному каталозі:
-
 #### Завантажити з GHCR — linux/amd64, linux/arm64, linux/riscv64
 
 ```sh
@@ -62,9 +60,10 @@ alias pf-cli='docker run --rm --user "$(id -u):$(id -g)" --group-add 0 --volume 
 
 ```sh
 docker pull kiota.ch/projectfile/cli:latest
+alias pf-cli='docker run --rm --user "$(id -u):$(id -g)" --group-add 0 --volume "$PWD:/app/ws" --workdir /app/ws kiota.ch/projectfile/cli:latest pf-cli'
 ```
 
-Потім запускайте його так, ніби його встановлено:
+Потім запускайте його так, ніби його встановлено, — псевдонім виконує кожен приклад як написано в поточному каталозі:
 
 ```sh
 pf-cli --help
@@ -74,40 +73,12 @@ pf-cli --help
 
 Завантажте готовий бінарний файл для своєї платформи з останнього випуску на GitHub:
 
-#### Завантажити для linux/amd64
-
 ```sh
-curl --fail --location --output pf-cli https://github.com/projectfile-org/cli/releases/latest/download/pf-cli-linux-amd64 && chmod +x pf-cli
+curl --fail --location --output pf-cli https://github.com/projectfile-org/cli/releases/latest/download/pf-cli-$(uname -s | tr A-Z a-z)-$(uname -m | sed -e s/x86_64/amd64/ -e s/aarch64/arm64/) && chmod +x pf-cli
 ./pf-cli --help
 ```
 
-#### Завантажити для linux/arm64
-
-```sh
-curl --fail --location --output pf-cli https://github.com/projectfile-org/cli/releases/latest/download/pf-cli-linux-arm64 && chmod +x pf-cli
-./pf-cli --help
-```
-
-#### Завантажити для linux/riscv64
-
-```sh
-curl --fail --location --output pf-cli https://github.com/projectfile-org/cli/releases/latest/download/pf-cli-linux-riscv64 && chmod +x pf-cli
-./pf-cli --help
-```
-
-#### Завантажити для darwin/amd64
-
-```sh
-curl --fail --location --output pf-cli https://github.com/projectfile-org/cli/releases/latest/download/pf-cli-darwin-amd64 && chmod +x pf-cli
-./pf-cli --help
-```
-
-#### Завантажити для darwin/arm64
-
-```sh
-curl --fail --location --output pf-cli https://github.com/projectfile-org/cli/releases/latest/download/pf-cli-darwin-arm64 && chmod +x pf-cli
-./pf-cli --help
-```
+Опубліковано для: `linux/amd64`, `linux/arm64`, `linux/riscv64`, `darwin/amd64`, `darwin/arm64`
 
 ## Використання
 

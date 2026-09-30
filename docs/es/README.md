@@ -12,7 +12,7 @@ pf-cli-managed: yes
 
 pf-cli es la interfaz de línea de órdenes del projectfile: lee, escribe y valida campos, resuelve includes remotos y genera artefactos derivados. Embebe el esquema JSON v1 para validación sin conexión y es la herramienta canónica para editar projectfiles localmente y en CI.
 
-[![Stand with Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://damian-buho.github.io/support-ukraine/) [![Projectfile inside](https://badges.kiota.ch/static/v1?label=projectfile&message=inside&labelColor=0d0d0d&color=8c6723&style=flat-square)](https://projectfile.org) [![License](https://badges.kiota.ch/static/v1?label=license&message=MIT&color=1e5913&style=flat-square)](LICENSE) [![Commit style](https://badges.kiota.ch/static/v1?label=commits&message=conventional%20v1.0.0&color=1877aa&style=flat-square)](https://www.conventionalcommits.org/es/v1.0.0/) ![Workflow](https://badges.kiota.ch/static/v1?label=workflow&message=git-flow&color=1877aa&style=flat-square) [![Versioning](https://badges.kiota.ch/static/v1?label=versioning&message=semantic%20v2.0.0&color=1877aa&style=flat-square)](https://semver.org/lang/es/) [![Cosign](https://badges.kiota.ch/static/v1?label=cosign&message=enabled&color=1e5913&style=flat-square)](https://docs.sigstore.dev/cosign/verifying/verify/) [![PRs welcome](https://badges.kiota.ch/static/v1?label=PRs&message=welcome&color=1e5913&style=flat-square)](CONTRIBUTING.md) [![Citation](https://badges.kiota.ch/static/v1?label=citation&message=cff&color=1877aa&style=flat-square)](CITATION.cff) [![REUSE compliance](https://api.reuse.software/badge/codeberg.org/projectfile/cli)](https://api.reuse.software/info/codeberg.org/projectfile/cli)
+[![Stand with Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://damian-buho.github.io/support-ukraine/) [![Projectfile inside](https://badges.kiota.ch/static/v1?label=projectfile&message=inside&labelColor=0d0d0d&color=8c6723&style=flat-square)](https://projectfile.org) [![License](https://badges.kiota.ch/static/v1?label=license&message=MIT&color=1e5913&style=flat-square)](LICENSE) [![Cosign](https://badges.kiota.ch/static/v1?label=cosign&message=enabled&color=1e5913&style=flat-square)](https://docs.sigstore.dev/cosign/verifying/verify/) [![PRs welcome](https://badges.kiota.ch/static/v1?label=PRs&message=welcome&color=1e5913&style=flat-square)](CONTRIBUTING.md) [![REUSE compliance](https://api.reuse.software/badge/codeberg.org/projectfile/cli)](https://api.reuse.software/info/codeberg.org/projectfile/cli)
 
 ![Project status](https://badges.kiota.ch/static/v1?label=status&message=maintained&color=1d63ed&style=flat-square) [![Last commit on kiota.ch](https://badges.kiota.ch/gitea/last-commit/projectfile/cli?gitea_url=https://kiota.ch&label=last%20commit%20on%20kiota.ch&style=flat-square)](https://kiota.ch/projectfile/cli) [![Last commit on Codeberg](https://badges.kiota.ch/gitea/last-commit/projectfile/cli?gitea_url=https://codeberg.org&label=last%20commit%20on%20Codeberg&style=flat-square)](https://codeberg.org/projectfile/cli) [![Last commit on GitHub](https://badges.kiota.ch/github/last-commit/projectfile-org/cli?label=last%20commit%20on%20GitHub&style=flat-square)](https://github.com/projectfile-org/cli)
 
@@ -38,8 +38,6 @@ Consulta [Características](FEATURES.md) para ver la lista completa.
 
 Descarga la imagen de contenedor publicada:
 
-Crea un alias del comando a la imagen para que cada ejemplo funcione tal cual sobre el directorio actual:
-
 #### Descargar de GHCR — linux/amd64, linux/arm64, linux/riscv64
 
 ```sh
@@ -62,9 +60,10 @@ Si los registros anteriores no están disponibles, descarga desde el origen:
 
 ```sh
 docker pull kiota.ch/projectfile/cli:latest
+alias pf-cli='docker run --rm --user "$(id -u):$(id -g)" --group-add 0 --volume "$PWD:/app/ws" --workdir /app/ws kiota.ch/projectfile/cli:latest pf-cli'
 ```
 
-Después, ejecútalo como si estuviera instalado:
+Después, ejecútalo como si estuviera instalado; el alias ejecuta cada ejemplo tal cual sobre el directorio actual:
 
 ```sh
 pf-cli --help
@@ -74,40 +73,12 @@ pf-cli --help
 
 Descarga el binario precompilado para tu plataforma desde la última versión en GitHub:
 
-#### Descargar para linux/amd64
-
 ```sh
-curl --fail --location --output pf-cli https://github.com/projectfile-org/cli/releases/latest/download/pf-cli-linux-amd64 && chmod +x pf-cli
+curl --fail --location --output pf-cli https://github.com/projectfile-org/cli/releases/latest/download/pf-cli-$(uname -s | tr A-Z a-z)-$(uname -m | sed -e s/x86_64/amd64/ -e s/aarch64/arm64/) && chmod +x pf-cli
 ./pf-cli --help
 ```
 
-#### Descargar para linux/arm64
-
-```sh
-curl --fail --location --output pf-cli https://github.com/projectfile-org/cli/releases/latest/download/pf-cli-linux-arm64 && chmod +x pf-cli
-./pf-cli --help
-```
-
-#### Descargar para linux/riscv64
-
-```sh
-curl --fail --location --output pf-cli https://github.com/projectfile-org/cli/releases/latest/download/pf-cli-linux-riscv64 && chmod +x pf-cli
-./pf-cli --help
-```
-
-#### Descargar para darwin/amd64
-
-```sh
-curl --fail --location --output pf-cli https://github.com/projectfile-org/cli/releases/latest/download/pf-cli-darwin-amd64 && chmod +x pf-cli
-./pf-cli --help
-```
-
-#### Descargar para darwin/arm64
-
-```sh
-curl --fail --location --output pf-cli https://github.com/projectfile-org/cli/releases/latest/download/pf-cli-darwin-arm64 && chmod +x pf-cli
-./pf-cli --help
-```
+Publicado para: `linux/amd64`, `linux/arm64`, `linux/riscv64`, `darwin/amd64`, `darwin/arm64`
 
 ## Uso
 
