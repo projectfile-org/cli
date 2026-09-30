@@ -75,6 +75,9 @@ func runSetInner(addr string, p fieldpath.Path, value any, pfPath string) error 
 	}
 
 	out, err := fieldpath.Set(doc, p, value)
+	if errors.Is(err, fieldpath.ErrTypeMismatch) {
+		return fmt.Errorf("%s was not changed: it cannot hold %v. To store it as text, quote it: pf-cli set %s '\"%v\"'", addr, value, addr, value)
+	}
 	if err != nil {
 		return err
 	}
