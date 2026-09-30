@@ -12,7 +12,7 @@ identity:
     uk: pf-cli — CLI для читання, запису та валідації projectfile-файлів
   title: Projectfile CLI
   description:
-    en: 'pf-cli is the command-line front end for the projectfile: it reads, writes and validates fields, resolves remote includes, and generates derived artifacts. It embeds the v1 JSON Schema for offline validation and is the canonical tool for editing projectfiles locally and in CI.'
+    en: 'pf-cli is the command-line frontend for the projectfile: it reads, writes and validates fields, resolves remote includes, and generates derived artifacts. It embeds the v1 JSON Schema for offline validation and is the canonical tool for editing projectfiles locally and in CI.'
     es: 'pf-cli es la interfaz de línea de órdenes del projectfile: lee, escribe y valida campos, resuelve includes remotos y genera artefactos derivados. Embebe el esquema JSON v1 para validación sin conexión y es la herramienta canónica para editar projectfiles localmente y en CI.'
     uk: 'pf-cli — командний інтерфейс projectfile: читає, записує та валідує поля, розвʼязує віддалені includes і генерує похідні артефакти. Містить вбудовану JSON-схему v1 для офлайн-валідації та є канонічним інструментом редагування projectfile-файлів локально й у CI.'
   version: 1.2.1
@@ -22,6 +22,7 @@ includes:
   - .makefile/b19/images/ubuntu.yaml
   - .makefile/b19/traits/signed-images.yaml
   - .makefile/b19/traits/attested-images.yaml
+  - .makefile/container/traits/readme-tool-image.yaml
   - .makefile/library/languages/go.yaml
   - .makefile/library/traits/go-binary.yaml
   - .makefile/library/traits/signed-binaries.yaml
@@ -107,6 +108,7 @@ org:
     artifacts:
       go-binary:
         command: pf-cli
+        help: ["", add, cache, cache purge, cache refresh, cache status, cache warm, completion, convert, del, get, init, optimize, set, setup, validate]
         kind: binary
         path: dist/pf-cli
     architecture:
@@ -201,15 +203,6 @@ org:
           - _specification
           - internal/validate/embedded/v1.json
           - internal/validate/embedded/v1.json.license
-    readme:
-      usage:
-        - commands:
-            - pf-cli get identity.name
-            - pf-cli get 'links[type=source-code].url'
-            - pf-cli set org.projectfile.status maintained
-            - pf-cli validate
-          name: binary
-          prefix: 'Read and write projectfile fields from the shell:'
     status: maintained
 repositories:
   - branch: main
