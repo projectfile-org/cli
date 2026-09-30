@@ -54,6 +54,10 @@ var validateCmd = &cobra.Command{
 			genlog.Warn("include check skipped: cannot read base document", "path", path, "error", berr)
 		}
 		for _, r := range redundant {
+			if r.Reason == "duplicate" {
+				genlog.Warn("include listed twice", "include", r.Ref)
+				continue
+			}
 			genlog.Warn("redundant include", "include", r.Ref, "already-provided-by", r.Via, "kind", r.Reason)
 		}
 
