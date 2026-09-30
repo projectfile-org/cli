@@ -462,6 +462,12 @@ jobs:
           # one `latest-<branch>` tag on the primary sink, so a branch build is testable
           # without a tag and without moving anything a consumer floats on.
           preview: ${{ github.ref_type == 'branch' && github.ref_name || '' }}
+          # Head templates per build kind, as org.projectfile.image.heads declares them
+          heads: |
+            release ${version} ${major}.${minor} ${major} latest
+            prerelease ${version}
+            trunk edge
+            branch latest-${branch}
           # OUTPUT_REGISTRY: the forge-dependent PUSH target (kiota.ch / ghcr.io / …),
           # always threaded — empty => Docker Hub. NOT the per-namespace INPUT registries
           # (B19_DOCKER_REGISTRY & friends answer "where base images come FROM"); this
@@ -531,7 +537,7 @@ jobs:
       B19_FETCH_LOCAL_CACHE: ${{ inputs.B19_FETCH_LOCAL_CACHE || vars.B19_FETCH_LOCAL_CACHE || 'Y' }}
       B19_GO_BASE_IMAGE: ${{ vars.B19_GO_BASE_IMAGE || format('{0}/b19/go:{1}', vars.SOURCE_DOCKER_REGISTRY || 'ghcr.io/damian-buho', vars.BASE_IMAGE_DEFAULT_VERSION || 'latest') }}
       B19_OFFGRID_MODE: ${{ inputs.B19_OFFGRID_MODE || vars.B19_OFFGRID_MODE || 'N' }}
-      B19_UBUNTU_BASE_IMAGE: ${{ vars.B19_UBUNTU_BASE_IMAGE || format('{0}/b19/ubuntu/{1}:{2}', vars.SOURCE_DOCKER_REGISTRY || 'ghcr.io/damian-buho', vars.B19_UBUNTU_SERIES || 'resolute', vars.BASE_IMAGE_DEFAULT_VERSION || 'latest') }}
+      B19_UBUNTU_BASE_IMAGE: ${{ vars.B19_UBUNTU_BASE_IMAGE || format('{0}/b19/ubuntu:{1}{2}', vars.SOURCE_DOCKER_REGISTRY || 'ghcr.io/damian-buho', vars.M6E_BASE_IMAGE_VARIANT_PREFIX, vars.B19_UBUNTU_SERIES || 'resolute') }}
       B19_UBUNTU_SERIES: ${{ inputs.B19_UBUNTU_SERIES || vars.B19_UBUNTU_SERIES || 'resolute' }}
       B19_VERBOSITY: ${{ inputs.B19_VERBOSITY || vars.B19_VERBOSITY || 'info' }}
       DESTINATION_DOCKER_REGISTRY: ${{ inputs.DESTINATION_DOCKER_REGISTRY || vars.DESTINATION_DOCKER_REGISTRY }}
@@ -569,7 +575,7 @@ jobs:
             B19_FETCH_LOCAL_CACHE=${{ inputs.B19_FETCH_LOCAL_CACHE || vars.B19_FETCH_LOCAL_CACHE || 'Y' }}
             B19_GO_BASE_IMAGE=${{ vars.B19_GO_BASE_IMAGE || format('{0}/b19/go:{1}', vars.SOURCE_DOCKER_REGISTRY || 'ghcr.io/damian-buho', env.M6E_TAG) }}
             B19_OFFGRID_MODE=${{ inputs.B19_OFFGRID_MODE || vars.B19_OFFGRID_MODE || 'N' }}
-            B19_UBUNTU_BASE_IMAGE=${{ vars.B19_UBUNTU_BASE_IMAGE || format('{0}/b19/ubuntu/{1}:{2}', vars.SOURCE_DOCKER_REGISTRY || 'ghcr.io/damian-buho', vars.B19_UBUNTU_SERIES || 'resolute', env.M6E_TAG) }}
+            B19_UBUNTU_BASE_IMAGE=${{ vars.B19_UBUNTU_BASE_IMAGE || format('{0}/b19/ubuntu:{1}{2}', vars.SOURCE_DOCKER_REGISTRY || 'ghcr.io/damian-buho', vars.M6E_BASE_IMAGE_VARIANT_PREFIX, vars.B19_UBUNTU_SERIES || 'resolute') }}
             B19_UBUNTU_SERIES=${{ inputs.B19_UBUNTU_SERIES || vars.B19_UBUNTU_SERIES || 'resolute' }}
             B19_VERBOSITY=${{ inputs.B19_VERBOSITY || vars.B19_VERBOSITY || 'info' }}
             DESTINATION_DOCKER_REGISTRY=${{ inputs.DESTINATION_DOCKER_REGISTRY || vars.DESTINATION_DOCKER_REGISTRY }}
@@ -605,6 +611,7 @@ jobs:
     env:
       M6E_ARCH: ${{ matrix.M6E_ARCH }}
       M6E_IMAGE_ARCHIVE: image-${{ matrix.M6E_ARCH }}-${{ github.run_id }}.tar
+      CI_IGNORE_VULNERABILITIES: ${{ vars.CI_IGNORE_VULNERABILITIES }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -632,6 +639,7 @@ jobs:
           env: |-
             M6E_ARCH=${{ matrix.M6E_ARCH }}
             M6E_IMAGE_ARCHIVE=image-${{ matrix.M6E_ARCH }}-${{ github.run_id }}.tar
+            CI_IGNORE_VULNERABILITIES=${{ vars.CI_IGNORE_VULNERABILITIES }}
             M6E_SHARED_CACHE=N
           mounts: ${{ runner.temp }}/ci-cache/grype-db:/app/.cache/grype:rw
       - name: save grype-db
@@ -658,6 +666,7 @@ jobs:
           env: |-
             M6E_ARCH=${{ matrix.M6E_ARCH }}
             M6E_IMAGE_ARCHIVE=image-${{ matrix.M6E_ARCH }}-${{ github.run_id }}.tar
+            CI_IGNORE_VULNERABILITIES=${{ vars.CI_IGNORE_VULNERABILITIES }}
             M6E_SHARED_CACHE=N
             TRIVY_CACHE_BACKEND
           mounts: ${{ runner.temp }}/ci-cache/trivy-db:/app/.cache/trivy:rw
@@ -809,6 +818,7 @@ jobs:
     runs-on: ubuntu-26.04
     env:
       OSV_SCANNER_LOCAL_DB_CACHE_DIRECTORY: /app/.cache/osv
+      CI_IGNORE_VULNERABILITIES: ${{ vars.CI_IGNORE_VULNERABILITIES }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -830,6 +840,7 @@ jobs:
           version: ${{ env.M6E_TAG }}
           run: auto-grype
           env: |-
+            CI_IGNORE_VULNERABILITIES=${{ vars.CI_IGNORE_VULNERABILITIES }}
             M6E_SHARED_CACHE=N
           mounts: ${{ runner.temp }}/ci-cache/grype-db:/app/.cache/grype:rw
       - name: save grype-db
@@ -855,6 +866,7 @@ jobs:
           run: auto-osv-scanner --offline-vulnerabilities
           env: |-
             OSV_SCANNER_LOCAL_DB_CACHE_DIRECTORY=/app/.cache/osv
+            CI_IGNORE_VULNERABILITIES=${{ vars.CI_IGNORE_VULNERABILITIES }}
             M6E_SHARED_CACHE=N
           mounts: ${{ runner.temp }}/ci-cache/osv-db:/app/.cache/osv:rw
       - name: save osv-db
@@ -879,6 +891,7 @@ jobs:
           version: ${{ env.M6E_TAG }}
           run: auto-trivy fs
           env: |-
+            CI_IGNORE_VULNERABILITIES=${{ vars.CI_IGNORE_VULNERABILITIES }}
             M6E_SHARED_CACHE=N
             TRIVY_CACHE_BACKEND
           mounts: ${{ runner.temp }}/ci-cache/trivy-db:/app/.cache/trivy:rw
