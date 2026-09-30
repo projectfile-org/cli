@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/bubbles/v2/textinput"
+	tea "charm.land/bubbletea/v2"
+	"charm.land/lipgloss/v2"
 
 	"kiota.ch/projectfile/core/v2/pkg/selector"
 )
@@ -59,9 +59,11 @@ func newSectionModel(title string, fields []field, footer string) sectionModel {
 	inputs := make([]textinput.Model, len(fields))
 	for i, f := range fields {
 		ti := textinput.New()
-		ti.Width = 50
+		ti.SetWidth(50)
 		ti.Placeholder = f.Description
-		ti.PromptStyle = highlight
+		st := textinput.DefaultStyles(true)
+		st.Focused.Prompt, st.Blurred.Prompt = highlight, highlight
+		ti.SetStyles(st)
 		// Pre-fill with the current value so the user sees "what's there"
 		// and edits selectively. SetValue does not move the cursor; the
 		// CursorEnd call positions it at end-of-text for natural editing.
@@ -82,17 +84,17 @@ func newSectionModel(title string, fields []field, footer string) sectionModel {
 func (m sectionModel) Init() tea.Cmd { return textinput.Blink }
 
 func (m sectionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	if km, ok := msg.(tea.KeyMsg); ok {
-		switch km.Type {
-		case tea.KeyCtrlC, tea.KeyEsc:
+	if km, ok := msg.(tea.KeyPressMsg); ok {
+		switch km.String() {
+		case "ctrl+c", "esc":
 			return m, tea.Quit
-		case tea.KeyEnter:
+		case "enter":
 			m.submitted = true
 			return m, tea.Quit
-		case tea.KeyTab, tea.KeyDown:
+		case "tab", "down":
 			m.multi.Next()
 			return m, nil
-		case tea.KeyShiftTab, tea.KeyUp:
+		case "shift+tab", "up":
 			m.multi.Prev()
 			return m, nil
 		}
@@ -101,7 +103,7 @@ func (m sectionModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-func (m sectionModel) View() string {
+func (m sectionModel) View() tea.View {
 	var b strings.Builder
 	fmt.Fprintf(&b, "\n  %s\n", heading.Render(m.title))
 	fmt.Fprintf(&b, "  %s\n\n", dimmed.Render("(enter to confirm, tab/↑↓ to navigate, esc to cancel)"))
@@ -121,7 +123,7 @@ func (m sectionModel) View() string {
 	if m.footer != "" {
 		fmt.Fprintf(&b, "  %s\n\n", dimmed.Render(m.footer))
 	}
-	return b.String()
+	return tea.NewView(b.String())
 }
 
 // runSection drives the bubbletea program and applies field setters on

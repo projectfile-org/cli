@@ -12,11 +12,12 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/charmbracelet/lipgloss"
+	"charm.land/lipgloss/v2"
 	"github.com/spf13/cobra"
 	"go.yaml.in/yaml/v3"
 
 	"kiota.ch/projectfile/core/v2/pkg/genlog"
+	"kiota.ch/projectfile/core/v2/pkg/netfetch"
 	"kiota.ch/projectfile/core/v2/pkg/projectfile"
 	"kiota.ch/projectfile/core/v2/pkg/userconfig"
 )
@@ -130,7 +131,12 @@ var rootCmd = &cobra.Command{
 	Version:       version,
 	SilenceUsage:  true,
 	SilenceErrors: true,
-	PersistentPreRun: func(_ *cobra.Command, _ []string) {
+	PersistentPreRunE: func(c *cobra.Command, _ []string) error {
+		if err := applyColors(c); err != nil {
+			return err
+		}
+		genlog.SetResultOutput(c.OutOrStdout())
+		netfetch.SetTimeout(timeoutFlag)
 		genlog.SetQuiet(quietFlag)
 		if !verboseFlag {
 			if v, _ := strconv.ParseBool(os.Getenv("PF_CLI_VERBOSE")); v {
@@ -143,8 +149,24 @@ var rootCmd = &cobra.Command{
 		if offlineFlag {
 			genlog.Debug("offline mode", "message", "network fetches disabled")
 		}
+		genlog.Debug("output", "colors", colorsFlag, "timeout", netfetch.Timeout())
+		return nil
 	},
 }
+
+// colorsFlag is --colors: auto, always or never; PF_CLI_NO_COLOR=1 means never.
+var colorsFlag = genlog.ColorAuto
+
+// applyColors hands --colors, or PF_CLI_NO_COLOR=1 when the flag is unset, to core's one colour decision.
+func applyColors(c *cobra.Command) error {
+	if v, _ := strconv.ParseBool(os.Getenv("PF_CLI_NO_COLOR")); v && !c.Flags().Changed("colors") {
+		colorsFlag = genlog.ColorNever
+	}
+	return genlog.SetColor(colorsFlag)
+}
+
+// timeoutFlag bounds each network attempt; retries and backoff come from core.
+var timeoutFlag = netfetch.DefaultTimeout
 
 // quietFlag wires the root-level --quiet to genlog.Quiet. Persistent so it
 // applies to every subcommand without each one redeclaring it.
@@ -226,6 +248,19 @@ func init() {
 		"write YAML keys in sorted order")
 	rootCmd.PersistentFlags().Var(&failOnFlag, "fail-on",
 		"abort includes at error|warning")
+	rootCmd.PersistentFlags().StringVar(&colorsFlag, "colors", genlog.ColorAuto,
+		"colour output: auto|always|never; also PF_CLI_NO_COLOR=1")
+	rootCmd.PersistentFlags().DurationVar(&timeoutFlag, "timeout", netfetch.DefaultTimeout,
+		"per-attempt network timeout")
+	rootCmd.SetOut(genlog.Styled(os.Stdout))
+	rootCmd.SetErr(genlog.Styled(os.Stderr))
+	defaultHelp := rootCmd.HelpFunc()
+	rootCmd.SetHelpFunc(func(c *cobra.Command, args []string) {
+		if err := applyColors(c); err != nil {
+			genlog.Warn("colors", "err", err.Error())
+		}
+		defaultHelp(c, args)
+	})
 	rootCmd.Flags().BoolP("version", "V", false, "print the version")
 }
 
