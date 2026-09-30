@@ -22,7 +22,7 @@ pf-cli is the command-line frontend for the projectfile: it reads, writes and va
 
 - Document read, write and query
 
-See [FEATURES.md](FEATURES.md) for the full list.
+See [Features](docs/FEATURES.md) for the full list.
 
 ## What this provides
 
@@ -163,7 +163,7 @@ Examples:
 Use "pf-cli [command] --help" for more information about a command.
 ```
 
-Examples and every command’s help are in [USAGE.md](USAGE.md).
+Examples and every command’s help are in [Usage](docs/USAGE.md).
 
 ## Building
 

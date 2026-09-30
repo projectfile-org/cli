@@ -24,7 +24,7 @@ pf-cli es la interfaz de línea de órdenes del projectfile: lee, escribe y vali
 
 - Lectura, escritura y consulta de documentos
 
-Consulta [FEATURES.md](FEATURES.md) para ver la lista completa.
+Consulta [Características](FEATURES.md) para ver la lista completa.
 
 ## Qué entrega este proyecto
 
@@ -165,7 +165,7 @@ Examples:
 Use "pf-cli [command] --help" for more information about a command.
 ```
 
-Los ejemplos y la ayuda de cada comando están en [USAGE.md](USAGE.md).
+Los ejemplos y la ayuda de cada comando están en [Uso](USAGE.md).
 
 ## Compilación
 
