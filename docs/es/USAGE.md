@@ -104,14 +104,7 @@ Flags:
       --value-json string   the whole item as JSON
 
 Global Flags:
-      --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
-      --fail-on string       abort includes at error|warning (default "error")
-      --ignore-user-config   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
-      --offline              refuse network; use cache and embedded data
-  -q, --quiet                mute info; warnings and errors still print
-      --sorted               write YAML keys in sorted order
-      --timeout duration     per-attempt network timeout (default 10s)
-  -v, --verbose              show each step; also PF_CLI_VERBOSE=1
+  …
 
 Examples:
   pf-cli add keywords rust wasm
@@ -139,14 +132,7 @@ Flags:
   -h, --help   help for cache
 
 Global Flags:
-      --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
-      --fail-on string       abort includes at error|warning (default "error")
-      --ignore-user-config   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
-      --offline              refuse network; use cache and embedded data
-  -q, --quiet                mute info; warnings and errors still print
-      --sorted               write YAML keys in sorted order
-      --timeout duration     per-attempt network timeout (default 10s)
-  -v, --verbose              show each step; also PF_CLI_VERBOSE=1
+  …
 
 Use "pf-cli cache [command] --help" for more information about a command.
 ```
@@ -164,14 +150,7 @@ Flags:
   -h, --help   help for purge
 
 Global Flags:
-      --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
-      --fail-on string       abort includes at error|warning (default "error")
-      --ignore-user-config   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
-      --offline              refuse network; use cache and embedded data
-  -q, --quiet                mute info; warnings and errors still print
-      --sorted               write YAML keys in sorted order
-      --timeout duration     per-attempt network timeout (default 10s)
-  -v, --verbose              show each step; also PF_CLI_VERBOSE=1
+  …
 
 Examples:
   pf-cli cache purge
@@ -191,14 +170,7 @@ Flags:
   -h, --help   help for refresh
 
 Global Flags:
-      --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
-      --fail-on string       abort includes at error|warning (default "error")
-      --ignore-user-config   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
-      --offline              refuse network; use cache and embedded data
-  -q, --quiet                mute info; warnings and errors still print
-      --sorted               write YAML keys in sorted order
-      --timeout duration     per-attempt network timeout (default 10s)
-  -v, --verbose              show each step; also PF_CLI_VERBOSE=1
+  …
 
 Examples:
   pf-cli cache refresh
@@ -217,14 +189,7 @@ Flags:
   -h, --help   help for status
 
 Global Flags:
-      --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
-      --fail-on string       abort includes at error|warning (default "error")
-      --ignore-user-config   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
-      --offline              refuse network; use cache and embedded data
-  -q, --quiet                mute info; warnings and errors still print
-      --sorted               write YAML keys in sorted order
-      --timeout duration     per-attempt network timeout (default 10s)
-  -v, --verbose              show each step; also PF_CLI_VERBOSE=1
+  …
 
 Examples:
   pf-cli cache status
@@ -244,14 +209,7 @@ Flags:
   -h, --help    help for warm
 
 Global Flags:
-      --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
-      --fail-on string       abort includes at error|warning (default "error")
-      --ignore-user-config   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
-      --offline              refuse network; use cache and embedded data
-  -q, --quiet                mute info; warnings and errors still print
-      --sorted               write YAML keys in sorted order
-      --timeout duration     per-attempt network timeout (default 10s)
-  -v, --verbose              show each step; also PF_CLI_VERBOSE=1
+  …
 
 Examples:
   pf-cli cache warm
@@ -278,14 +236,7 @@ Flags:
   -h, --help   help for completion
 
 Global Flags:
-      --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
-      --fail-on string       abort includes at error|warning (default "error")
-      --ignore-user-config   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
-      --offline              refuse network; use cache and embedded data
-  -q, --quiet                mute info; warnings and errors still print
-      --sorted               write YAML keys in sorted order
-      --timeout duration     per-attempt network timeout (default 10s)
-  -v, --verbose              show each step; also PF_CLI_VERBOSE=1
+  …
 
 Use "pf-cli completion [command] --help" for more information about a command.
 ```
@@ -309,14 +260,7 @@ Flags:
   -h, --help            help for convert
 
 Global Flags:
-      --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
-      --fail-on string       abort includes at error|warning (default "error")
-      --ignore-user-config   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
-      --offline              refuse network; use cache and embedded data
-  -q, --quiet                mute info; warnings and errors still print
-      --sorted               write YAML keys in sorted order
-      --timeout duration     per-attempt network timeout (default 10s)
-  -v, --verbose              show each step; also PF_CLI_VERBOSE=1
+  …
 
 Examples:
   pf-cli convert yaml toml
@@ -344,14 +288,7 @@ Flags:
       --strict             exit 1 when the path is already absent
 
 Global Flags:
-      --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
-      --fail-on string       abort includes at error|warning (default "error")
-      --ignore-user-config   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
-      --offline              refuse network; use cache and embedded data
-  -q, --quiet                mute info; warnings and errors still print
-      --sorted               write YAML keys in sorted order
-      --timeout duration     per-attempt network timeout (default 10s)
-  -v, --verbose              show each step; also PF_CLI_VERBOSE=1
+  …
 
 Examples:
   pf-cli del keywords[0]
@@ -385,14 +322,7 @@ Flags:
       --scope stringArray   fill ${…} from this address (repeatable)
 
 Global Flags:
-      --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
-      --fail-on string       abort includes at error|warning (default "error")
-      --ignore-user-config   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
-      --offline              refuse network; use cache and embedded data
-  -q, --quiet                mute info; warnings and errors still print
-      --sorted               write YAML keys in sorted order
-      --timeout duration     per-attempt network timeout (default 10s)
-  -v, --verbose              show each step; also PF_CLI_VERBOSE=1
+  …
 
 Examples:
   pf-cli get identity.name
@@ -428,14 +358,7 @@ Flags:
       --non-interactive    fail if required fields are missing instead of prompting
 
 Global Flags:
-      --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
-      --fail-on string       abort includes at error|warning (default "error")
-      --ignore-user-config   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
-      --offline              refuse network; use cache and embedded data
-  -q, --quiet                mute info; warnings and errors still print
-      --sorted               write YAML keys in sorted order
-      --timeout duration     per-attempt network timeout (default 10s)
-  -v, --verbose              show each step; also PF_CLI_VERBOSE=1
+  …
 
 Examples:
   pf-cli init
@@ -461,14 +384,7 @@ Flags:
   -f, --path-file string   explicit projectfile path (skips detection)
 
 Global Flags:
-      --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
-      --fail-on string       abort includes at error|warning (default "error")
-      --ignore-user-config   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
-      --offline              refuse network; use cache and embedded data
-  -q, --quiet                mute info; warnings and errors still print
-      --sorted               write YAML keys in sorted order
-      --timeout duration     per-attempt network timeout (default 10s)
-  -v, --verbose              show each step; also PF_CLI_VERBOSE=1
+  …
 
 Examples:
   pf-cli optimize
@@ -494,14 +410,7 @@ Flags:
       --value-json string   value as JSON (needed for objects and arrays)
 
 Global Flags:
-      --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
-      --fail-on string       abort includes at error|warning (default "error")
-      --ignore-user-config   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
-      --offline              refuse network; use cache and embedded data
-  -q, --quiet                mute info; warnings and errors still print
-      --sorted               write YAML keys in sorted order
-      --timeout duration     per-attempt network timeout (default 10s)
-  -v, --verbose              show each step; also PF_CLI_VERBOSE=1
+  …
 
 Examples:
   pf-cli set license.spdx MIT
@@ -524,14 +433,7 @@ Flags:
   -h, --help            help for setup
 
 Global Flags:
-      --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
-      --fail-on string       abort includes at error|warning (default "error")
-      --ignore-user-config   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
-      --offline              refuse network; use cache and embedded data
-  -q, --quiet                mute info; warnings and errors still print
-      --sorted               write YAML keys in sorted order
-      --timeout duration     per-attempt network timeout (default 10s)
-  -v, --verbose              show each step; also PF_CLI_VERBOSE=1
+  …
 
 Examples:
   pf-cli setup
@@ -556,14 +458,7 @@ Flags:
       --strict-includes   fail on repeated includes (default: warn)
 
 Global Flags:
-      --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
-      --fail-on string       abort includes at error|warning (default "error")
-      --ignore-user-config   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
-      --offline              refuse network; use cache and embedded data
-  -q, --quiet                mute info; warnings and errors still print
-      --sorted               write YAML keys in sorted order
-      --timeout duration     per-attempt network timeout (default 10s)
-  -v, --verbose              show each step; also PF_CLI_VERBOSE=1
+  …
 
 Examples:
   pf-cli validate
