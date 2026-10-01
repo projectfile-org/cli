@@ -1355,11 +1355,31 @@ Generate an SBOM of the live built image (syft)
 
 ## Release
 
+### `pre-release`
+
+Release the next candidate of the version the commits imply, X.Y.Z-rc.N
+
+### `release`
+
+Stamp the version the commits imply into every derived file, commit and tag it signed — `make --dry-run release` prints the plan
+
+### `release-major`
+
+Release the next major — the only way past 0.x
+
+### `release-minor`
+
+Release the next minor, whatever the commits imply
+
+### `release-patch`
+
+Release the next patch, whatever the commits imply
+
 ### `svu-current`
 
 Show the version the latest Git tag carries
 
-`svu current --tag.prefix=${org.projectfile.release.tag-prefix}`
+`svu current --tag.mode=current --tag.prefix=${org.projectfile.release.tag-prefix}`
 
 > Image: D9T_GO_TOOLS_IMAGE
 
@@ -1367,7 +1387,7 @@ Show the version the latest Git tag carries
 
 Show the next major version
 
-`svu major --tag.prefix=${org.projectfile.release.tag-prefix}`
+`svu major --tag.mode=current --tag.prefix=${org.projectfile.release.tag-prefix}`
 
 > Image: D9T_GO_TOOLS_IMAGE
 
@@ -1375,7 +1395,7 @@ Show the next major version
 
 Show the next minor version
 
-`svu minor --tag.prefix=${org.projectfile.release.tag-prefix}`
+`svu minor --tag.mode=current --tag.prefix=${org.projectfile.release.tag-prefix}`
 
 > Image: D9T_GO_TOOLS_IMAGE
 
@@ -1383,7 +1403,7 @@ Show the next minor version
 
 Show the next version the commits since the last tag imply
 
-`svu next --v0 --tag.prefix=${org.projectfile.release.tag-prefix}`
+`svu next --v0 --tag.mode=current --tag.prefix=${org.projectfile.release.tag-prefix}`
 
 > Image: D9T_GO_TOOLS_IMAGE
 
@@ -1391,41 +1411,9 @@ Show the next version the commits since the last tag imply
 
 Show the next patch version
 
-`svu patch --tag.prefix=${org.projectfile.release.tag-prefix}`
+`svu patch --tag.mode=current --tag.prefix=${org.projectfile.release.tag-prefix}`
 
 > Image: D9T_GO_TOOLS_IMAGE
-
-### `svu-tag-major`
-
-Tag HEAD with the next major version
-
-`.makefile/core/scripts/svu-tag.sh major --prefix=${org.projectfile.release.tag-prefix}`
-
-> Image: host runner
-
-### `svu-tag-minor`
-
-Tag HEAD with the next minor version
-
-`.makefile/core/scripts/svu-tag.sh minor --prefix=${org.projectfile.release.tag-prefix}`
-
-> Image: host runner
-
-### `svu-tag-next`
-
-Tag HEAD with the next version the commit history implies
-
-`.makefile/core/scripts/svu-tag.sh next --prefix=${org.projectfile.release.tag-prefix}`
-
-> Image: host runner
-
-### `svu-tag-patch`
-
-Tag HEAD with the next patch version
-
-`.makefile/core/scripts/svu-tag.sh patch --prefix=${org.projectfile.release.tag-prefix}`
-
-> Image: host runner
 
 ## Secrets
 
