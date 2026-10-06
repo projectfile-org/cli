@@ -70,12 +70,17 @@ func runOptimizeInner(pfPath string) error {
 		projectfile.SortIncludes(rawBase)
 	}
 
+	// Prune include entries a sibling already provides. validate only warns
+	// about them; optimize drops them so the next validate runs quiet.
+	redundant := projectfile.RedundantIncludes(rawBase, baseDir, pfPath, readOpts())
+	pruned := dropRedundantIncludes(rawBase, redundant)
+
 	mergedIncludes, err := projectfile.ResolveIncludesOnly(rawBase, baseDir, readOpts())
 	if err != nil {
 		return fmt.Errorf("resolve includes: %w", err)
 	}
 
-	if len(mergedIncludes) == 0 {
+	if len(mergedIncludes) == 0 && len(pruned) == 0 {
 		genlog.Plain("no includes declared — nothing to optimize")
 		if projectfile.YAMLOutputSortedEnabled() && !optimizeDryRun {
 			doc := projectfile.FromMap(rawBase)
@@ -86,7 +91,7 @@ func runOptimizeInner(pfPath string) error {
 
 	removed := projectfile.StripRedundant(rawBase, mergedIncludes)
 
-	if len(removed) == 0 {
+	if len(removed) == 0 && len(pruned) == 0 {
 		genlog.Plain("already optimized — no redundant fields found")
 		if projectfile.YAMLOutputSortedEnabled() && !optimizeDryRun {
 			doc := projectfile.FromMap(rawBase)
@@ -98,9 +103,12 @@ func runOptimizeInner(pfPath string) error {
 	for _, p := range removed {
 		genlog.Debug(fmt.Sprintf("  removed %s", p))
 	}
+	for _, r := range pruned {
+		genlog.Debug(fmt.Sprintf("  pruned include %s (already provided by %s)", r.Ref, r.Via))
+	}
 
 	if optimizeDryRun {
-		genlog.Success(fmt.Sprintf("(%d field(s) would be removed — dry-run, not written)", len(removed)))
+		genlog.Success(fmt.Sprintf("(%d field(s) and %d include(s) would be removed — dry-run, not written)", len(removed), len(pruned)))
 		return nil
 	}
 
@@ -109,8 +117,36 @@ func runOptimizeInner(pfPath string) error {
 		return fmt.Errorf("write projectfile: %w", err)
 	}
 
-	genlog.Success(fmt.Sprintf("optimized: %d redundant field(s) removed", len(removed)))
+	genlog.Success(fmt.Sprintf("optimized: %d redundant field(s) removed, %d redundant include(s) pruned", len(removed), len(pruned)))
 	return nil
+}
+
+// dropRedundantIncludes removes one list occurrence per RedundantIncludes
+// entry from the top-level includes list. A verbatim duplicate keeps its
+// first listing, a transitively provided entry goes. Entries living outside
+// the top-level list are left untouched. Returns the entries dropped.
+func dropRedundantIncludes(raw map[string]any, redundant []projectfile.RedundantInclude) []projectfile.RedundantInclude {
+	if len(redundant) == 0 {
+		return nil
+	}
+	list, ok := raw["includes"].([]any)
+	if !ok {
+		return nil
+	}
+	pending := make(map[string]int, len(redundant))
+	for _, r := range redundant {
+		pending[r.Ref]++
+	}
+	kept := make([]any, 0, len(list))
+	for _, item := range list {
+		if s, ok := item.(string); ok && pending[s] > 0 {
+			pending[s]--
+			continue
+		}
+		kept = append(kept, item)
+	}
+	raw["includes"] = kept
+	return redundant
 }
 
 func init() {

@@ -23,7 +23,7 @@ consumers alongside `pf-bridge` (`projectfile/bridge`) and `pf-ci`
 ## Commands
 
 `get`/`set`/`add`/`del` (dotted-path query + mutate), `convert` (encoding),
-`validate` (v1 JSON Schema), `optimize` (strip include-redundant fields),
+`validate` (v1 JSON Schema), `optimize` (strip include-redundant fields AND redundant includes),
 `cache` (warm/purge HTTP **includes** only — SPDX moved to pf-bridge),
 `setup` (per-user config), `init` (scaffold a new document — delegates to
 `pf-bridge-init` when installed, else a basic local scaffold). Projections
