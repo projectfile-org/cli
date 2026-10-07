@@ -74,7 +74,9 @@ pf-cli --help
 Завантажте готовий бінарний файл для своєї платформи з випусків на GitHub:
 
 ```sh
-mkdir -p ~/.local/bin && curl --fail --location --output ~/.local/bin/pf-cli https://github.com/projectfile-org/cli/releases/latest/download/pf-cli-$(uname -s | tr A-Z a-z)-$(uname -m) && chmod +x ~/.local/bin/pf-cli
+mkdir -p ~/.local/bin
+curl --fail --location --output ~/.local/bin/pf-cli https://github.com/projectfile-org/cli/releases/latest/download/pf-cli-$(uname -s | tr A-Z a-z)-$(uname -m)
+chmod +x ~/.local/bin/pf-cli
 ~/.local/bin/pf-cli --help
 ```
 
