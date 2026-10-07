@@ -121,6 +121,9 @@ func runOptimizeInner(pfPath string) error {
 	return nil
 }
 
+// includesKey is the top-level document key holding the include list.
+const includesKey = "includes"
+
 // dropRedundantIncludes removes one list occurrence per RedundantIncludes
 // entry from the top-level includes list. A verbatim duplicate keeps its
 // first listing, a transitively provided entry goes. Entries living outside
@@ -129,7 +132,7 @@ func dropRedundantIncludes(raw map[string]any, redundant []projectfile.Redundant
 	if len(redundant) == 0 {
 		return nil
 	}
-	list, ok := raw["includes"].([]any)
+	list, ok := raw[includesKey].([]any)
 	if !ok {
 		return nil
 	}
@@ -145,7 +148,7 @@ func dropRedundantIncludes(raw map[string]any, redundant []projectfile.Redundant
 		}
 		kept = append(kept, item)
 	}
-	raw["includes"] = kept
+	raw[includesKey] = kept
 	return redundant
 }
 

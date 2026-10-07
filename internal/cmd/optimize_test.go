@@ -12,25 +12,27 @@ import (
 	"kiota.ch/projectfile/core/v2/pkg/projectfile"
 )
 
+const includeA = "a.yaml"
+
 func TestDropRedundantIncludes_RemovesTransitiveEntry(t *testing.T) {
-	raw := map[string]any{"includes": []any{"a.yaml", "b.yaml"}}
-	redundant := []projectfile.RedundantInclude{{Ref: "b.yaml", Via: "a.yaml", Reason: "transitive"}}
+	raw := map[string]any{includesKey: []any{includeA, "b.yaml"}}
+	redundant := []projectfile.RedundantInclude{{Ref: "b.yaml", Via: includeA, Reason: "transitive"}}
 	pruned := dropRedundantIncludes(raw, redundant)
 	assert.Len(t, pruned, 1)
-	assert.Equal(t, []any{"a.yaml"}, raw["includes"])
+	assert.Equal(t, []any{includeA}, raw[includesKey])
 }
 
 func TestDropRedundantIncludes_DuplicateKeepsFirst(t *testing.T) {
-	raw := map[string]any{"includes": []any{"a.yaml", "a.yaml"}}
-	redundant := []projectfile.RedundantInclude{{Ref: "a.yaml", Via: "a.yaml", Reason: "duplicate"}}
+	raw := map[string]any{includesKey: []any{includeA, includeA}}
+	redundant := []projectfile.RedundantInclude{{Ref: includeA, Via: includeA, Reason: "duplicate"}}
 	pruned := dropRedundantIncludes(raw, redundant)
 	assert.Len(t, pruned, 1)
-	assert.Equal(t, []any{"a.yaml"}, raw["includes"])
+	assert.Equal(t, []any{includeA}, raw[includesKey])
 }
 
 func TestDropRedundantIncludes_NothingToDo(t *testing.T) {
-	raw := map[string]any{"includes": []any{"a.yaml"}}
+	raw := map[string]any{includesKey: []any{includeA}}
 	assert.Empty(t, dropRedundantIncludes(raw, nil))
-	assert.Equal(t, []any{"a.yaml"}, raw["includes"])
-	assert.Empty(t, dropRedundantIncludes(map[string]any{}, []projectfile.RedundantInclude{{Ref: "a.yaml"}}))
+	assert.Equal(t, []any{includeA}, raw[includesKey])
+	assert.Empty(t, dropRedundantIncludes(map[string]any{}, []projectfile.RedundantInclude{{Ref: includeA}}))
 }
