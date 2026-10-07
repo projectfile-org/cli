@@ -6,7 +6,7 @@
 
 set -eu
 
-# build-binaries.sh — cross-compile pf-cli for one GOOS/GOARCH, writing dist/pf-cli-<goos>-<goarch>.
+# build-binaries.sh — cross-compile pf-cli for one GOOS/GOARCH, writing dist/pf-cli-<os>-<uname -m>.
 
 sh .scripts/fetch-schema.sh # //go:embed input; fetched here since a matrixed cell can't take it from another job's artifact
 
@@ -19,7 +19,7 @@ hostos="$(go env GOHOSTOS)"   # the real host even under a cross-compile
 hostarch="$(go env GOHOSTARCH)"
 goos="${GOOS:-${hostos}}"     # the matrix sets these per cell; unset means a host-native build
 goarch="${GOARCH:-${hostarch}}"
-out="dist/pf-cli-${goos}-${goarch}"
+out="$(GOOS="${goos}" GOARCH="${goarch}" .makefile/core/scripts/asset-name.sh dist/pf-cli)"
 
 log() { printf '[build-binaries] %s\n' "$*" >&2; }
 log "building pf-cli ${version} for ${goos}/${goarch}"
