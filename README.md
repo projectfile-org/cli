@@ -69,11 +69,11 @@ pf-cli --help
 
 ### Prebuilt binary
 
-Download the prebuilt binary for your platform from the latest GitHub release:
+Download the prebuilt binary for your platform from GitHub Releases:
 
 ```sh
-curl --fail --location --output pf-cli https://github.com/projectfile-org/cli/releases/latest/download/pf-cli-$(uname -s | tr A-Z a-z)-$(uname -m | sed -e s/x86_64/amd64/ -e s/aarch64/arm64/) && chmod +x pf-cli
-./pf-cli --help
+mkdir -p ~/.local/bin && curl --fail --location --output ~/.local/bin/pf-cli https://github.com/projectfile-org/cli/releases/latest/download/pf-cli-$(uname -s | tr A-Z a-z)-$(uname -m) && chmod +x ~/.local/bin/pf-cli
+~/.local/bin/pf-cli --help
 ```
 
 Published for: `linux/amd64`, `linux/arm64`, `linux/riscv64`, `darwin/amd64`, `darwin/arm64`
