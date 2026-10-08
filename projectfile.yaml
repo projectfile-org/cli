@@ -165,22 +165,6 @@ org:
           needs:
             binaries-are-signed: true
             binaries-are-ok: false
-        # Release restores dist/ from the torrent node alone — the only one holding both the .asc and the .torrent.
-        binaries-are-released:
-          needs:
-            binaries-are-signed: false
-          matrix:
-            axes:
-              GOARCH:
-                - amd64
-                - arm64
-                - riscv64
-              GOOS:
-                - linux
-                - darwin
-            exclude:
-              - GOARCH: riscv64
-                GOOS: darwin
         image-is-built:
           needs:
             schema-fetched: true
@@ -193,6 +177,10 @@ org:
         source-passes-lint:
           needs:
             schema-fetched: true
+        # Release restores dist/ from the torrent node alone — the only one holding both the .asc and the .torrent.
+        release-is-published:
+          needs:
+            binaries-are-signed: false
       tools:
         fetch-schema:
           artifact: internal/validate/embedded
