@@ -29,7 +29,7 @@ var delCmd = &cobra.Command{
 		"Missing paths are not an error.",
 	Example: "  pf-cli del keywords[0]\n" +
 		"  pf-cli del keywords[99] --strict",
-	Args: cobra.ExactArgs(1),
+	Args: usageArgs(cobra.ExactArgs(1)),
 	RunE: runDel,
 }
 

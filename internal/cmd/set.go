@@ -34,7 +34,7 @@ var setCmd = &cobra.Command{
 	Example: "  pf-cli set license.spdx MIT\n" +
 		"  pf-cli set keywords --csv rust,wasm\n" +
 		"  pf-cli set contacts --value-json '{\"email\":\"a@example.com\"}'",
-	Args: cobra.RangeArgs(1, 2),
+	Args: usageArgs(cobra.RangeArgs(1, 2)),
 	RunE: runSet,
 }
 

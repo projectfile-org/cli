@@ -33,7 +33,7 @@ var addCmd = &cobra.Command{
 	Example: "  pf-cli add keywords rust wasm\n" +
 		"  pf-cli add repositories --field url=https://example.com/r\n" +
 		"  pf-cli add keywords rust -n",
-	Args: cobra.MinimumNArgs(1),
+	Args: usageArgs(cobra.MinimumNArgs(1)),
 	RunE: runAdd,
 }
 

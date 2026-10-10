@@ -61,7 +61,7 @@ var convertCmd = &cobra.Command{
 		"  pf-cli convert yaml json --delete-source\n" +
 		"  pf-cli convert toml yaml --force",
 	Aliases: []string{"conv"},
-	Args:    cobra.RangeArgs(2, 3),
+	Args:    usageArgs(cobra.RangeArgs(2, 3), "Supported: "+supportedFormats()),
 	RunE:    runConvert,
 }
 

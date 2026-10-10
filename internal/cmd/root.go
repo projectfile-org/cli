@@ -68,6 +68,36 @@ func orderHelp(c *cobra.Command) {
 	c.SetUsageTemplate(helpTemplate)
 }
 
+// usageArgs wraps a cobra arity validator so a rejection reads in the tool's
+// own voice: the command, the shape it expects (its own Use line) and the fix,
+// routed through errUsage so it exits 2 like every other usage mistake. The
+// optional detail names values the validator cannot know (convert's format list).
+func usageArgs(fn cobra.PositionalArgs, detail ...string) cobra.PositionalArgs {
+	return func(cmd *cobra.Command, args []string) error {
+		if err := fn(cmd, args); err != nil {
+			shape := strings.TrimSpace(strings.TrimPrefix(cmd.Use, cmd.Name()))
+			parts := []string{}
+			if shape == "" {
+				parts = append(parts, fmt.Sprintf("%s takes no arguments (got %d)", cmd.CommandPath(), len(args)))
+			} else {
+				parts = append(parts, fmt.Sprintf("%s needs %s (got %d)", cmd.CommandPath(), shape, len(args)))
+			}
+			if len(detail) > 0 && detail[0] != "" {
+				parts = append(parts, detail[0])
+			}
+			return errUsage(strings.Join(parts, ". ") + fmt.Sprintf(". Run %s --help.", cmd.CommandPath()))
+		}
+		return nil
+	}
+}
+
+// flagError rewrites pflag's parse failures in the tool's own voice — the
+// command, the library's reason, the fix — and routes them through errUsage so
+// they join the usage exit class (Execute's exit 2).
+func flagError(cmd *cobra.Command, err error) error {
+	return errUsage(fmt.Sprintf("%s: %s. Run %s --help.", cmd.CommandPath(), err, cmd.CommandPath()))
+}
+
 // registerHelpPalette exposes the lipgloss styles to the help template.
 func registerHelpPalette() {
 	cobra.AddTemplateFunc("hdr", helpHeading.Render)
@@ -236,6 +266,7 @@ func readOpts() projectfile.ReadOptions {
 func init() {
 	registerHelpPalette()
 	orderHelp(rootCmd)
+	rootCmd.SetFlagErrorFunc(flagError)
 	rootCmd.PersistentFlags().BoolVarP(&quietFlag, "quiet", "q", false,
 		"mute info; warnings and errors still print")
 	rootCmd.PersistentFlags().BoolVarP(&verboseFlag, "verbose", "v", false,

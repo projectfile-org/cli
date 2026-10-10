@@ -28,7 +28,7 @@ var optimizeCmd = &cobra.Command{
 	Example: "  pf-cli optimize\n" +
 		"  pf-cli optimize --dry-run",
 	Aliases: []string{"opt"},
-	Args:    cobra.MaximumNArgs(1),
+	Args:    usageArgs(cobra.MaximumNArgs(1)),
 	RunE:    runOptimize,
 }
 

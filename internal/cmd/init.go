@@ -46,7 +46,7 @@ var initCmd = &cobra.Command{
 		"scaffold prompts for namespace, name and title only — no scanners.",
 	Example: "  pf-cli init\n" +
 		"  pf-cli init /tmp/demo --namespace org.example --name demo --non-interactive",
-	Args: cobra.MaximumNArgs(1),
+	Args: usageArgs(cobra.MaximumNArgs(1)),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir := "."
 		if len(args) > 0 {

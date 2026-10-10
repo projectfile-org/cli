@@ -31,7 +31,7 @@ var validateCmd = &cobra.Command{
 		"  pf-cli validate /tmp/demo\n" +
 		"  pf-cli validate --strict-includes",
 	Aliases: []string{"lint"},
-	Args:    cobra.MaximumNArgs(1),
+	Args:    usageArgs(cobra.MaximumNArgs(1)),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir := "."
 		if len(args) > 0 {

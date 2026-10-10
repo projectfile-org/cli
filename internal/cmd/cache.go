@@ -37,7 +37,7 @@ var cacheStatusCmd = &cobra.Command{
 	Use:     "status",
 	Short:   "Show what is cached and where",
 	Example: "  pf-cli cache status",
-	Args:    cobra.NoArgs,
+	Args:    usageArgs(cobra.NoArgs),
 	RunE: func(cmd *cobra.Command, _ []string) error {
 		out := cmd.OutOrStdout()
 
@@ -70,7 +70,7 @@ var cacheWarmCmd = &cobra.Command{
 	Long:  "Fetch every include for [directory] into the cache.",
 	Example: "  pf-cli cache warm\n" +
 		"  pf-cli cache warm /tmp/demo --force",
-	Args: cobra.MaximumNArgs(1),
+	Args: usageArgs(cobra.MaximumNArgs(1)),
 	RunE: func(_ *cobra.Command, args []string) error {
 		if offlineFlag {
 			return fmt.Errorf("cannot warm cache in offline mode; remove --offline to proceed")
@@ -87,7 +87,7 @@ var cacheRefreshCmd = &cobra.Command{
 	Use:     "refresh [directory]",
 	Short:   "Alias for cache warm --force",
 	Example: "  pf-cli cache refresh",
-	Args:    cobra.MaximumNArgs(1),
+	Args:    usageArgs(cobra.MaximumNArgs(1)),
 	RunE: func(_ *cobra.Command, args []string) error {
 		if offlineFlag {
 			return fmt.Errorf("cannot refresh cache in offline mode; remove --offline to proceed")
@@ -106,7 +106,7 @@ var cachePurgeCmd = &cobra.Command{
 	Long:  "Clear the cache, or one URL. The next read downloads it again.",
 	Example: "  pf-cli cache purge\n" +
 		"  pf-cli cache purge https://example.com/fleet.yaml",
-	Args: cobra.MaximumNArgs(1),
+	Args: usageArgs(cobra.MaximumNArgs(1)),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		out := cmd.OutOrStdout()
 

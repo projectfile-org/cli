@@ -22,7 +22,7 @@ var (
 var includesCmd = &cobra.Command{
 	Use:   "includes",
 	Short: "Manage the includes list",
-	Args:  cobra.NoArgs,
+	Args:  usageArgs(cobra.NoArgs),
 }
 
 var includesPinCmd = &cobra.Command{
