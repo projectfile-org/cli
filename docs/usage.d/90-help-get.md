@@ -10,6 +10,7 @@ $ pf-cli get --help
 Read values out of the projectfile by path.
 Prints plain text, one value per line.
 Exits 3 when a path is missing, 2 when the invocation is wrong.
+With --suggest a missing path prints the nearest existing address instead.
 
 Usage:
   pf-cli get <path>… [flags]
@@ -17,6 +18,7 @@ Usage:
 Examples:
   pf-cli get identity.name
   pf-cli get repositories[role=origin].url
+  pf-cli get identity.bogus --suggest
   pf-cli get repositories[].url
   pf-cli get identity --format json
   pf-cli get org.projectfile.sinks.kiota.ref --scope org.projectfile.image
@@ -42,6 +44,7 @@ Flags:
       --path-file string    explicit projectfile path (skips detection)
       --print-path          print the projectfile path and exit
       --scope stringArray   fill ${…} from this address (repeatable)
+      --suggest             on a missing path, print the nearest existing address instead of failing
 
 Global Flags:
   …

@@ -37,6 +37,7 @@ var (
 	getLang       string
 	getScopes     []string
 	getExpand     bool
+	getSuggest    bool
 )
 
 var getCmd = &cobra.Command{
@@ -44,9 +45,11 @@ var getCmd = &cobra.Command{
 	Short: "Read one or more projectfile fields",
 	Long: "Read values out of the projectfile by path.\n" +
 		"Prints plain text, one value per line.\n" +
-		"Exits 3 when a path is missing, 2 when the invocation is wrong.",
+		"Exits 3 when a path is missing, 2 when the invocation is wrong.\n" +
+		"With --suggest a missing path prints the nearest existing address instead.",
 	Example: "  pf-cli get identity.name\n" +
 		"  pf-cli get repositories[role=origin].url\n" +
+		"  pf-cli get identity.bogus --suggest\n" +
 		"  pf-cli get repositories[].url\n" +
 		"  pf-cli get identity --format json\n" +
 		"  pf-cli get org.projectfile.sinks.kiota.ref --scope org.projectfile.image",
@@ -191,6 +194,15 @@ func runGet(cmd *cobra.Command, args []string) error {
 		return errUsage(fmt.Sprintf("unknown --format %q (raw|json|yaml|toml|sh|flat)", getFormat))
 	}
 
+	if missingAny && !getExists && getSuggest {
+		// --suggest answers "what did I mean?" with the nearest existing
+		// address on stdout, so a caller can capture and re-run it. It stays
+		// off the default path: a script asking for a deliberately absent
+		// field keeps a quiet stderr and exit 3.
+		if suggested := suggestEntries(cmd, out, doc); suggested > 0 {
+			return nil
+		}
+	}
 	if missingAny && !getExists {
 		// Missing values without a fallback are a soft failure: stdout
 		// already shows what we *could* resolve, but the process exits
@@ -709,6 +721,8 @@ func init() {
 		"fill ${…} from this address (repeatable)")
 	getCmd.Flags().BoolVar(&getExpand, "expand", false,
 		"fill ${…} from the document; leave the rest as written")
+	getCmd.Flags().BoolVar(&getSuggest, "suggest", false,
+		"on a missing path, print the nearest existing address instead of failing")
 	groupCmd(getCmd, "read", "get")
 }
 
@@ -732,6 +746,88 @@ func reportMissing(cmd *cobra.Command, entries []resolvedEntry, doc *projectfile
 		}
 		fmt.Fprintf(cmd.ErrOrStderr(), "%s: no such field.%s To continue, %s.\n", r.path.String(), closest, hint)
 	}
+}
+
+// suggestEntries prints the nearest existing address for every unresolved
+// path and reports how many it produced. When nothing is close enough to
+// name, the caller falls back to the ordinary not-found message.
+func suggestEntries(cmd *cobra.Command, entries []resolvedEntry, doc *projectfile.Document) int {
+	n := 0
+	for _, r := range entries {
+		if r.present {
+			continue
+		}
+		if addr, ok := suggestAddress(doc, r.path); ok {
+			fmt.Fprintln(cmd.OutOrStdout(), addr)
+			n++
+		}
+	}
+	return n
+}
+
+// suggestAddress returns the address a mistyped path most likely meant: walk
+// the path down, and wherever a key does not exist substitute the nearest one
+// that does, so a typo in an early segment still yields the full address the
+// user was reaching for. An index or selector segment carries no key to match
+// on, and a walk that corrects nothing is not a suggestion at all.
+func suggestAddress(doc *projectfile.Document, p fieldpath.Path) (string, bool) {
+	if doc == nil {
+		return "", false
+	}
+	value, _, _, _, err := resolveEntry(doc, fieldpath.Path{})
+	if err != nil {
+		return "", false
+	}
+	prefix := []fieldpath.Segment{}
+	corrected := false
+	for _, seg := range p.Segments {
+		if seg.Kind != fieldpath.SegKey {
+			break
+		}
+		m, ok := value.(map[string]any)
+		if !ok {
+			break
+		}
+		next, exists := m[seg.Key]
+		if exists {
+			prefix = append(prefix, seg)
+			value = next
+			continue
+		}
+		best, ok := closestKey(m, seg.Key)
+		if !ok {
+			break
+		}
+		prefix = append(prefix, fieldpath.Segment{Kind: fieldpath.SegKey, Key: best})
+		value = m[best]
+		corrected = true
+	}
+	if !corrected {
+		return "", false
+	}
+	return fieldpath.Path{Segments: prefix}.String(), true
+}
+
+// closestKey picks the key in m nearest to want, or reports that nothing is
+// close enough to be the one the user meant.
+func closestKey(m map[string]any, want string) (string, bool) {
+	names := make([]string, 0, len(m))
+	for name := range m {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	best, bestDist := "", len(want)+1
+	for _, name := range names {
+		if d := editDistance(want, name); d < bestDist {
+			best, bestDist = name, d
+		}
+	}
+	// A near miss is a typo worth naming; a distant match is noise the
+	// "list what is there" hint already covers.
+	if best == "" || bestDist*2 > len(want)+2 {
+		return "", false
+	}
+	return best, true
 }
 
 // closestSibling returns the map key under the path's parent nearest to the

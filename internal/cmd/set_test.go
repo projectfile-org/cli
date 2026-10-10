@@ -100,7 +100,7 @@ func TestSetRefusesAValueTheFieldCannotHold(t *testing.T) {
 	resetSetFlags(t)
 	rootCmd.SetOut(&buf)
 	rootCmd.SetErr(&buf)
-	rootCmd.SetArgs([]string{"set", flagPathFile, path, "identity.name", "--value-json", "true"})
+	rootCmd.SetArgs([]string{"set", flagPathFile, path, addrIdentityName, "--value-json", "true"})
 	err := rootCmd.Execute()
 
 	require.Error(t, err)

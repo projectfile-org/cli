@@ -16,22 +16,23 @@ import (
 // Shared literals across the cmd tests, hoisted so goconst stays quiet: the
 // same command names recur in the arity, flag and dispatch tables.
 const (
-	cmdAdd        = "add"
-	cmdCache      = "cache"
-	cmdCompletion = "completion"
-	cmdConvert    = "convert"
-	cmdDel        = "del"
-	cmdGet        = "get"
-	cmdIncludes   = "includes"
-	cmdInit       = "init"
-	cmdOptimize   = "optimize"
-	cmdSet        = "set"
-	cmdSetup      = "setup"
-	cmdValidate   = "validate"
-	keyIdentity   = "identity"
-	keyName       = "name"
-	valDemo       = "demo"
-	flagNope      = "--nope"
+	cmdAdd           = "add"
+	cmdCache         = "cache"
+	cmdCompletion    = "completion"
+	cmdConvert       = "convert"
+	cmdDel           = "del"
+	cmdGet           = "get"
+	cmdIncludes      = "includes"
+	cmdInit          = "init"
+	cmdOptimize      = "optimize"
+	cmdSet           = "set"
+	cmdSetup         = "setup"
+	cmdValidate      = "validate"
+	addrIdentityName = keyIdentity + "." + keyName
+	keyIdentity      = "identity"
+	keyName          = "name"
+	valDemo          = "demo"
+	flagNope         = "--nope"
 )
 
 // runRootCmd drives the shared root with args, capturing both streams. Flags
@@ -124,7 +125,7 @@ func TestUsageArgsKeepsValidAritySilent(t *testing.T) {
 	fn := usageArgs(func(_ *cobra.Command, _ []string) error { called = true; return nil })
 	getCmd.Args = fn
 	t.Cleanup(func() { getCmd.Args = cobra.ArbitraryArgs })
-	_, err := runRootCmd(t, "get", "identity.name", "--print-path")
+	_, err := runRootCmd(t, "get", addrIdentityName, "--print-path")
 	if err != nil {
 		t.Fatalf("valid args failed: %v", err)
 	}

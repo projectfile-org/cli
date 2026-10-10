@@ -623,7 +623,7 @@ func TestGetDefaultIgnoredWhenPresent(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, envFixtureTOML)
 
-	out, err := runGetCmd(t, "identity.name", "--path-file", path, "--default", "fallback")
+	out, err := runGetCmd(t, addrIdentityName, "--path-file", path, "--default", "fallback")
 	if err != nil {
 		t.Fatalf("get present --default: %v", err)
 	}
@@ -642,7 +642,7 @@ func TestGetDefaultBrokenStillErrors(t *testing.T) {
 	// path lookup (and its default) is never reached.
 	path := writeFixture(t, dir, "spec_version = \"1\"\n[identity\nname = \"x\"\n")
 
-	if _, err := runGetCmd(t, "identity.name", "--path-file", path, "--default", "fallback"); err == nil {
+	if _, err := runGetCmd(t, addrIdentityName, "--path-file", path, "--default", "fallback"); err == nil {
 		t.Fatalf("broken projectfile with --default should error, got nil")
 	}
 }
@@ -668,7 +668,7 @@ func TestGetFormatYAMLSubtree(t *testing.T) {
 		}
 	}
 
-	scalar, err := runGetCmd(t, "identity.name", "--path-file", path, "--format", "yaml")
+	scalar, err := runGetCmd(t, addrIdentityName, "--path-file", path, "--format", "yaml")
 	if err != nil {
 		t.Fatalf("get scalar yaml: %v", err)
 	}
@@ -752,7 +752,7 @@ func TestGetFormatTOMLScalarErrors(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, envFixtureTOML)
 
-	_, err := runGetCmd(t, "identity.name", "--path-file", path, "--format", "toml")
+	_, err := runGetCmd(t, addrIdentityName, "--path-file", path, "--format", "toml")
 	if err == nil || !strings.Contains(err.Error(), "yaml or json") {
 		t.Fatalf("toml scalar should hint at yaml/json, got %v", err)
 	}
@@ -769,13 +769,13 @@ func TestGetUsageErrorType(t *testing.T) {
 		t.Fatalf("write broken: %v", err)
 	}
 
-	_, uErr := runGetCmd(t, "identity.name", "--path-file", good, "--format", "bogus")
+	_, uErr := runGetCmd(t, addrIdentityName, "--path-file", good, "--format", "bogus")
 	var ue *usageError
 	if !errors.As(uErr, &ue) {
 		t.Fatalf("unknown --format should be a *usageError (exit 2), got %T: %v", uErr, uErr)
 	}
 
-	_, rErr := runGetCmd(t, "identity.name", "--path-file", broken)
+	_, rErr := runGetCmd(t, addrIdentityName, "--path-file", broken)
 	if rErr == nil || errors.As(rErr, &ue) {
 		t.Fatalf("broken doc should be a non-usage runtime error (exit 1), got %v", rErr)
 	}
@@ -832,11 +832,14 @@ func TestClosestSiblingSkipsNonKeySegments(t *testing.T) {
 	if key, ok := closestSibling(doc, idx); ok {
 		t.Fatalf("index miss suggested a sibling %q", key)
 	}
-	key, ok := closestSibling(doc, mustParse(t, "identity.name"))
+	key, ok := closestSibling(doc, mustParse(t, addrIdentityName))
 	if !ok || key != keyName {
 		t.Fatalf("exact key resolved to %q (ok=%v), want the exact match", key, ok)
 	}
 }
+
+// flagSuggest is spelled once across the tests that read the flag.
+const flagSuggest = "--suggest"
 
 func mustParse(t *testing.T, addr string) fieldpath.Path {
 	t.Helper()
@@ -845,4 +848,60 @@ func mustParse(t *testing.T, addr string) fieldpath.Path {
 		t.Fatalf("parse %s: %v", addr, err)
 	}
 	return p
+}
+
+// TestSuggestAddressWalksToTheWholeAddress pins that a typo in an EARLY
+// segment still proposes the full address, so `identty.name` yields
+// identity.name rather than stopping at the corrected prefix.
+func TestSuggestAddressWalksToTheWholeAddress(t *testing.T) {
+	doc := projectfile.FromMap(map[string]any{
+		keyIdentity: map[string]any{keyName: valDemo},
+	})
+	for _, tc := range []struct{ typed, want string }{
+		{"identity.nam", addrIdentityName},
+		{"identty.name", addrIdentityName},
+		{"identty.nam", addrIdentityName},
+	} {
+		got, ok := suggestAddress(doc, mustParse(t, tc.typed))
+		if !ok || got != tc.want {
+			t.Errorf("suggestAddress(%s) = %q (ok=%v), want %q", tc.typed, got, ok, tc.want)
+		}
+	}
+}
+
+// TestSuggestAddressStaysQuietWithoutANearMatch keeps the proposal honest:
+// a path nothing is close to gets no suggestion, and a fully resolving path
+// is not a correction at all.
+func TestSuggestAddressStaysQuietWithoutANearMatch(t *testing.T) {
+	doc := projectfile.FromMap(map[string]any{
+		keyIdentity: map[string]any{keyName: valDemo},
+	})
+	for _, addr := range []string{"identity.bogus", "zzzz.qqqq", addrIdentityName, "identity.name.deeper", "keywords[7]"} {
+		if got, ok := suggestAddress(doc, mustParse(t, addr)); ok {
+			t.Errorf("suggestAddress(%s) = %q, want no suggestion", addr, got)
+		}
+	}
+}
+
+// TestGetSuggestPrintsTheAddressAndExitsZero pins the command contract: a
+// missing path prints the nearest existing address on stdout and exits 0, so
+// a script captures it; without --suggest the miss stays a quiet-stderr exit 3.
+func TestGetSuggestPrintsTheAddressAndExitsZero(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "projectfile.yaml")
+	body := []byte("identity:\n  namespace: org.example\n  name: demo\n")
+	if err := os.WriteFile(path, body, 0o600); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+
+	var buf bytes.Buffer
+	resetGetFlags(t)
+	rootCmd.SetOut(&buf)
+	rootCmd.SetErr(&buf)
+	rootCmd.SetArgs([]string{cmdGet, flagPathFile, path, "identity.nam", flagSuggest})
+	if err := rootCmd.Execute(); err != nil {
+		t.Fatalf("get --suggest: %v", err)
+	}
+	if buf.String() != "identity.name\n" {
+		t.Fatalf("get --suggest = %q, want the suggested address on stdout", buf.String())
+	}
 }
