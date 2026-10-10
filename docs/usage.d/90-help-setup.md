@@ -14,7 +14,7 @@ Usage:
   pf-cli setup [flags]
 
 Flags:
-  -f, --format string   output format: yaml, toml, json (default: prompt)
+      --format string   output format: yaml, toml, json (default: prompt)
   -h, --help            help for setup
 
 Global Flags:

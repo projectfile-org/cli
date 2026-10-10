@@ -164,7 +164,7 @@ func includeRef(item any) string {
 func init() {
 	optimizeCmd.Flags().BoolVarP(&optimizeDryRun, "dry-run", "n", false,
 		"list removals without saving")
-	optimizeCmd.Flags().StringVarP(&optimizePathFile, "path-file", "f", "",
+	optimizeCmd.Flags().StringVar(&optimizePathFile, "path-file", "",
 		"explicit projectfile path (skips detection)")
 	rootCmd.AddCommand(optimizeCmd)
 }

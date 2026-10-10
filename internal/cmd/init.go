@@ -98,7 +98,7 @@ func initTailArgs() []string {
 }
 
 func init() {
-	initCmd.Flags().StringVarP(&initFormat, "format", "f", "",
+	initCmd.Flags().StringVar(&initFormat, "format", "",
 		"output format: yaml, toml, json (default: prompt)")
 	initCmd.Flags().BoolVar(&initNonInteractive, "non-interactive", false,
 		"fail if required fields are missing instead of prompting")

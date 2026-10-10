@@ -18,7 +18,7 @@ Flags:
   -n, --dry-run             show the append without saving it
       --field stringArray   set one item field as k=v (repeatable)
   -h, --help                help for add
-  -f, --path-file string    explicit projectfile path (skips detection)
+      --path-file string    explicit projectfile path (skips detection)
       --value-json string   the whole item as JSON
 
 Global Flags:

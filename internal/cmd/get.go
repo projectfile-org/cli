@@ -702,7 +702,7 @@ func init() {
 	getCmd.Flags().BoolVar(&getPrintPath, "print-path", false, "print the projectfile path and exit")
 	getCmd.Flags().BoolVar(&getExpandEnv, "expand-env", false,
 		"fill ${VAR} from the environment first")
-	getCmd.Flags().StringVarP(&getPathFile, "path-file", "f", "", "explicit projectfile path (skips detection)")
+	getCmd.Flags().StringVar(&getPathFile, "path-file", "", "explicit projectfile path (skips detection)")
 	getCmd.Flags().StringArrayVar(&getNamedPaths, "path", nil, "label a path as KEY=ADDR (repeatable)")
 	getCmd.Flags().StringVar(&getLang, "lang", "", "choose a language for translated fields")
 	getCmd.Flags().StringArrayVar(&getScopes, "scope", nil,

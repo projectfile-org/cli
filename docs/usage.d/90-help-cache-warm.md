@@ -13,7 +13,7 @@ Usage:
   pf-cli cache warm [directory] [flags]
 
 Flags:
-      --force   download everything again, even when fresh
+  -f, --force   download everything again, even when fresh
   -h, --help    help for warm
 
 Global Flags:

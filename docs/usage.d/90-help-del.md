@@ -19,7 +19,7 @@ Aliases:
 Flags:
   -n, --dry-run            show the deletion without saving it
   -h, --help               help for del
-  -f, --path-file string   explicit projectfile path (skips detection)
+      --path-file string   explicit projectfile path (skips detection)
       --strict             exit 1 when the path is already absent
 
 Global Flags:

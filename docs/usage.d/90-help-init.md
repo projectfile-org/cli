@@ -20,7 +20,7 @@ Aliases:
   init, scaffold
 
 Flags:
-  -f, --format string      output format: yaml, toml, json (default: prompt)
+      --format string      output format: yaml, toml, json (default: prompt)
   -h, --help               help for init
       --license string     license SPDX expression (e.g. MIT)
       --name string        identity.name (project slug)

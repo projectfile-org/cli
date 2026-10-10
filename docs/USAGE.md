@@ -126,7 +126,7 @@ Flags:
   -n, --dry-run             show the append without saving it
       --field stringArray   set one item field as k=v (repeatable)
   -h, --help                help for add
-  -f, --path-file string    explicit projectfile path (skips detection)
+      --path-file string    explicit projectfile path (skips detection)
       --value-json string   the whole item as JSON
 
 Global Flags:
@@ -231,7 +231,7 @@ Usage:
   pf-cli cache warm [directory] [flags]
 
 Flags:
-      --force   download everything again, even when fresh
+  -f, --force   download everything again, even when fresh
   -h, --help    help for warm
 
 Global Flags:
@@ -310,7 +310,7 @@ Aliases:
 Flags:
   -n, --dry-run            show the deletion without saving it
   -h, --help               help for del
-  -f, --path-file string   explicit projectfile path (skips detection)
+      --path-file string   explicit projectfile path (skips detection)
       --strict             exit 1 when the path is already absent
 
 Global Flags:
@@ -343,7 +343,7 @@ Flags:
       --lang string         choose a language for translated fields
       --or-default          use the built-in default if missing
       --path stringArray    label a path as KEY=ADDR (repeatable)
-  -f, --path-file string    explicit projectfile path (skips detection)
+      --path-file string    explicit projectfile path (skips detection)
       --print-path          print the projectfile path and exit
       --scope stringArray   fill ${…} from this address (repeatable)
 
@@ -393,7 +393,7 @@ Usage:
 Flags:
   -n, --dry-run            print the digests without saving
   -h, --help               help for pin
-  -f, --path-file string   explicit projectfile path (skips detection)
+      --path-file string   explicit projectfile path (skips detection)
 
 Global Flags:
   …
@@ -420,7 +420,7 @@ Aliases:
   init, scaffold
 
 Flags:
-  -f, --format string      output format: yaml, toml, json (default: prompt)
+      --format string      output format: yaml, toml, json (default: prompt)
   -h, --help               help for init
       --license string     license SPDX expression (e.g. MIT)
       --name string        identity.name (project slug)
@@ -452,7 +452,7 @@ Aliases:
 Flags:
   -n, --dry-run            list removals without saving
   -h, --help               help for optimize
-  -f, --path-file string   explicit projectfile path (skips detection)
+      --path-file string   explicit projectfile path (skips detection)
 
 Global Flags:
   …
@@ -477,7 +477,7 @@ Flags:
       --csv string          value as a comma-separated string list
   -n, --dry-run             show the write without saving it
   -h, --help                help for set
-  -f, --path-file string    explicit projectfile path (skips detection)
+      --path-file string    explicit projectfile path (skips detection)
       --value-json string   value as JSON (needed for objects and arrays)
 
 Global Flags:
@@ -500,7 +500,7 @@ Usage:
   pf-cli setup [flags]
 
 Flags:
-  -f, --format string   output format: yaml, toml, json (default: prompt)
+      --format string   output format: yaml, toml, json (default: prompt)
   -h, --help            help for setup
 
 Global Flags:

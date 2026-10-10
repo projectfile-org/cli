@@ -72,7 +72,7 @@ func runIncludesPin(_ *cobra.Command, args []string) error {
 func init() {
 	includesPinCmd.Flags().BoolVarP(&includesPinDryRun, "dry-run", "n", false,
 		"print the digests without saving")
-	includesPinCmd.Flags().StringVarP(&includesPinPathFile, "path-file", "f", "",
+	includesPinCmd.Flags().StringVar(&includesPinPathFile, "path-file", "",
 		"explicit projectfile path (skips detection)")
 	includesCmd.AddCommand(includesPinCmd)
 	rootCmd.AddCommand(includesCmd)

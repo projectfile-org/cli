@@ -175,6 +175,6 @@ func init() {
 	addCmd.Flags().StringVar(&addValueJSON, "value-json", "", "the whole item as JSON")
 	addCmd.Flags().BoolVar(&addAllowDup, "allow-duplicate", false, "append even if already present")
 	addCmd.Flags().BoolVarP(&addDryRun, "dry-run", "n", false, "show the append without saving it")
-	addCmd.Flags().StringVarP(&addPathFile, "path-file", "f", "", "explicit projectfile path (skips detection)")
+	addCmd.Flags().StringVar(&addPathFile, "path-file", "", "explicit projectfile path (skips detection)")
 	rootCmd.AddCommand(addCmd)
 }

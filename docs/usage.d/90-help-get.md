@@ -25,7 +25,7 @@ Flags:
       --lang string         choose a language for translated fields
       --or-default          use the built-in default if missing
       --path stringArray    label a path as KEY=ADDR (repeatable)
-  -f, --path-file string    explicit projectfile path (skips detection)
+      --path-file string    explicit projectfile path (skips detection)
       --print-path          print the projectfile path and exit
       --scope stringArray   fill ${…} from this address (repeatable)
 

@@ -177,6 +177,6 @@ func init() {
 	cacheCmd.AddCommand(cacheWarmCmd)
 	cacheCmd.AddCommand(cacheRefreshCmd)
 	cacheCmd.AddCommand(cachePurgeCmd)
-	cacheWarmCmd.Flags().BoolVar(&cacheWarmForce, "force", false, "download everything again, even when fresh")
+	cacheWarmCmd.Flags().BoolVarP(&cacheWarmForce, "force", "f", false, "download everything again, even when fresh")
 	rootCmd.AddCommand(cacheCmd)
 }

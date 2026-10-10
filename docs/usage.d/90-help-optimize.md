@@ -19,7 +19,7 @@ Aliases:
 Flags:
   -n, --dry-run            list removals without saving
   -h, --help               help for optimize
-  -f, --path-file string   explicit projectfile path (skips detection)
+      --path-file string   explicit projectfile path (skips detection)
 
 Global Flags:
   …

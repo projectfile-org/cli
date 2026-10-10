@@ -17,7 +17,7 @@ Usage:
 Flags:
   -n, --dry-run            print the digests without saving
   -h, --help               help for pin
-  -f, --path-file string   explicit projectfile path (skips detection)
+      --path-file string   explicit projectfile path (skips detection)
 
 Global Flags:
   …

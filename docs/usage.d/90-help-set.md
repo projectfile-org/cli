@@ -18,7 +18,7 @@ Flags:
       --csv string          value as a comma-separated string list
   -n, --dry-run             show the write without saving it
   -h, --help                help for set
-  -f, --path-file string    explicit projectfile path (skips detection)
+      --path-file string    explicit projectfile path (skips detection)
       --value-json string   value as JSON (needed for objects and arrays)
 
 Global Flags:
