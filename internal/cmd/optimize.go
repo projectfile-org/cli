@@ -142,14 +142,23 @@ func dropRedundantIncludes(raw map[string]any, redundant []projectfile.Redundant
 	}
 	kept := make([]any, 0, len(list))
 	for _, item := range list {
-		if s, ok := item.(string); ok && pending[s] > 0 {
-			pending[s]--
+		if ref := includeRef(item); ref != "" && pending[ref] > 0 {
+			pending[ref]--
 			continue
 		}
 		kept = append(kept, item)
 	}
 	raw[includesKey] = kept
 	return redundant
+}
+
+// includeRef is the path or URL of an includes item in string or {url, sha256} form.
+func includeRef(item any) string {
+	if m, ok := item.(map[string]any); ok {
+		item = m["url"]
+	}
+	s, _ := item.(string)
+	return s
 }
 
 func init() {

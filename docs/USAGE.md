@@ -29,6 +29,7 @@ Commands:
   del         Remove a field, list item, or map entry from projectfile
   get         Read one or more projectfile fields
   help        Help about any command
+  includes    Manage the includes list
   init        Scaffold a new projectfile document
   optimize    Remove local fields that duplicate include values
   set         Write a value into a projectfile field
@@ -328,6 +329,51 @@ Examples:
   pf-cli get repositories[].url
   pf-cli get identity --format json
   pf-cli get org.projectfile.sinks.kiota.ref --scope org.projectfile.image
+```
+
+## pf-cli includes
+
+```console
+$ pf-cli includes --help
+Manage the includes list
+
+Usage:
+  pf-cli includes [command]
+
+Commands:
+  pin         Pin remote includes to the SHA-256 of their current bytes
+
+Flags:
+  -h, --help   help for includes
+
+Global Flags:
+  …
+
+Use "pf-cli includes [command] --help" for more information about a command.
+```
+
+## pf-cli includes pin
+
+```console
+$ pf-cli includes pin --help
+Rewrite each HTTP(S) include as {url, sha256}, fetching it fresh.
+Readers then reject the include once its bytes change.
+With no URL every remote include is pinned; a pinned one is re-pinned.
+
+Usage:
+  pf-cli includes pin [url…] [flags]
+
+Flags:
+  -n, --dry-run            print the digests without saving
+  -h, --help               help for pin
+  -f, --path-file string   explicit projectfile path (skips detection)
+
+Global Flags:
+  …
+
+Examples:
+  pf-cli includes pin
+  pf-cli includes pin https://example.org/base.yaml --dry-run
 ```
 
 ## pf-cli init

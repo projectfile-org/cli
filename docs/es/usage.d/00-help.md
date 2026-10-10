@@ -25,6 +25,7 @@ Commands:
   del         Remove a field, list item, or map entry from projectfile
   get         Read one or more projectfile fields
   help        Help about any command
+  includes    Manage the includes list
   init        Scaffold a new projectfile document
   optimize    Remove local fields that duplicate include values
   set         Write a value into a projectfile field
