@@ -176,5 +176,5 @@ func init() {
 	addCmd.Flags().BoolVar(&addAllowDup, "allow-duplicate", false, "append even if already present")
 	addCmd.Flags().BoolVarP(&addDryRun, "dry-run", "n", false, "show the append without saving it")
 	addCmd.Flags().StringVar(&addPathFile, "path-file", "", "explicit projectfile path (skips detection)")
-	rootCmd.AddCommand(addCmd)
+	groupCmd(addCmd, "write", "add")
 }

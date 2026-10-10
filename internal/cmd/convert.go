@@ -167,5 +167,5 @@ func init() {
 		"overwrite the output file if it already exists")
 	convertCmd.Flags().BoolVar(&convertDeleteSource, "delete-source", false,
 		"remove the source file after converting")
-	rootCmd.AddCommand(convertCmd)
+	groupCmd(convertCmd, "maintain", "convert")
 }

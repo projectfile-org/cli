@@ -110,7 +110,7 @@ func init() {
 		"license SPDX expression (e.g. MIT)")
 	initCmd.Flags().BoolVar(&initNoScan, "no-scan", false,
 		"skip init-time scanners (accepted for pf-bridge-init parity; the basic scaffold never scans)")
-	rootCmd.AddCommand(initCmd)
+	groupCmd(initCmd, "maintain", "init")
 }
 
 // basicOptions carries the init flag values into the fallback scaffold.

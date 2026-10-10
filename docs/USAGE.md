@@ -93,7 +93,7 @@ finish.
 
 | Code | Meaning | Examples |
 | --- | --- | --- |
-| `1` | Runtime failure — the document could not be read, an include could not be resolved, or a write was refused | `pf-cli -f /nope.yaml get identity.name`, an unreachable include, a failed write |
+| `1` | Runtime failure — the document could not be read, an include could not be resolved, or a write was refused | `pf-cli get --path-file /nope.yaml identity.name`, an unreachable include, a failed write |
 | `2` | Usage error — the invocation itself is wrong, and nothing ran | `pf-cli --nope`, `pf-cli bogus`, `pf-cli set` with no path |
 | `3` | The requested field is absent | `pf-cli get identity.bogus`, `pf-cli get identity.name --exists` on a missing field |
 | `4` | Validation failed — the document was read and violates the v1 schema | `pf-cli validate` on a document missing required fields |
@@ -111,6 +111,28 @@ Codes `2`, `3` and `4` were all `1` before this map existed. A caller that
 branches on “non-zero versus zero” is unaffected; one that branched on `1`
 alone now sees `3` for a missing field and `4` for a schema failure.
 
+## Tab completion
+
+`pf-cli completion` prints the shell-completion script for the shell named as
+its argument — `bash`, `zsh`, `fish` or `powershell`. Load it once per shell
+session, or from your shell’s startup file:
+
+```sh
+source <(pf-cli completion bash)
+source <(pf-cli completion zsh)
+source <(pf-cli completion fish)
+```
+
+Every command, subcommand, flag and flag value is completed, including the
+`--format` list on `get`. Print the script to inspect it, or install it under
+your shell’s completion directory:
+
+```console
+$ pf-cli completion zsh --help
+Generate the autocompletion script for the zsh shell.
+...
+```
+
 ## pf-cli add
 
 ```console
@@ -120,6 +142,18 @@ Skips items that are already there.
 
 Usage:
   pf-cli add <path> [value…] [flags]
+
+Examples:
+  pf-cli add keywords rust wasm
+  pf-cli add repositories --field url=https://example.com/r
+  pf-cli add keywords rust -n
+
+Common flags:
+    -q, --quiet          mute info; warnings and errors still print
+  -v, --verbose        show each step; also PF_CLI_VERBOSE=1
+  --offline            refuse network; use cache and embedded data
+  -n, --dry-run        show the append without saving it
+  --path-file          explicit projectfile path (skips detection)
 
 Flags:
       --allow-duplicate     append even if already present
@@ -132,10 +166,11 @@ Flags:
 Global Flags:
   …
 
-Examples:
-  pf-cli add keywords rust wasm
-  pf-cli add repositories --field url=https://example.com/r
-  pf-cli add keywords rust -n
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-add
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```
 
 ## pf-cli cache
@@ -148,17 +183,26 @@ Shared with pf-bridge and pf-ci.
 Usage:
   pf-cli cache [command]
 
-Commands:
+Other:
   purge       Delete cached includes (all, or one URL)
   refresh     Alias for cache warm --force
   status      Show what is cached and where
   warm        Download includes now so later reads work offline
+
+Common flags:
+  …
 
 Flags:
   -h, --help   help for cache
 
 Global Flags:
   …
+
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-cache
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 
 Use "pf-cli cache [command] --help" for more information about a command.
 ```
@@ -172,15 +216,24 @@ Clear the cache, or one URL. The next read downloads it again.
 Usage:
   pf-cli cache purge [url] [flags]
 
+Examples:
+  pf-cli cache purge
+  pf-cli cache purge https://example.com/fleet.yaml
+
+Common flags:
+  …
+
 Flags:
   -h, --help   help for purge
 
 Global Flags:
   …
 
-Examples:
-  pf-cli cache purge
-  pf-cli cache purge https://example.com/fleet.yaml
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-purge
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```
 
 ## pf-cli cache refresh
@@ -192,14 +245,23 @@ Alias for cache warm --force
 Usage:
   pf-cli cache refresh [directory] [flags]
 
+Examples:
+  pf-cli cache refresh
+
+Common flags:
+  …
+
 Flags:
   -h, --help   help for refresh
 
 Global Flags:
   …
 
-Examples:
-  pf-cli cache refresh
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-refresh
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```
 
 ## pf-cli cache status
@@ -211,14 +273,23 @@ Show what is cached and where
 Usage:
   pf-cli cache status [flags]
 
+Examples:
+  pf-cli cache status
+
+Common flags:
+  …
+
 Flags:
   -h, --help   help for status
 
 Global Flags:
   …
 
-Examples:
-  pf-cli cache status
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-status
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```
 
 ## pf-cli cache warm
@@ -230,6 +301,16 @@ Fetch every include for [directory] into the cache.
 Usage:
   pf-cli cache warm [directory] [flags]
 
+Examples:
+  pf-cli cache warm
+  pf-cli cache warm /tmp/demo --force
+
+Common flags:
+    -q, --quiet          mute info; warnings and errors still print
+  -v, --verbose        show each step; also PF_CLI_VERBOSE=1
+  --offline            refuse network; use cache and embedded data
+  -f, --force          download everything again, even when fresh
+
 Flags:
   -f, --force   download everything again, even when fresh
   -h, --help    help for warm
@@ -237,9 +318,11 @@ Flags:
 Global Flags:
   …
 
-Examples:
-  pf-cli cache warm
-  pf-cli cache warm /tmp/demo --force
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-warm
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```
 
 ## pf-cli completion
@@ -252,17 +335,26 @@ See each sub-command's help for details on how to use the generated script.
 Usage:
   pf-cli completion [command]
 
-Commands:
+Other:
   bash        Generate the autocompletion script for bash
   fish        Generate the autocompletion script for fish
   powershell  Generate the autocompletion script for powershell
   zsh         Generate the autocompletion script for zsh
+
+Common flags:
+  …
 
 Flags:
   -h, --help   help for completion
 
 Global Flags:
   …
+
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-completion
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 
 Use "pf-cli completion [command] --help" for more information about a command.
 ```
@@ -280,6 +372,17 @@ Usage:
 Aliases:
   convert, conv
 
+Examples:
+  pf-cli convert yaml toml
+  pf-cli convert yaml json --delete-source
+  pf-cli convert toml yaml --force
+
+Common flags:
+    -q, --quiet          mute info; warnings and errors still print
+  -v, --verbose        show each step; also PF_CLI_VERBOSE=1
+  --offline            refuse network; use cache and embedded data
+  -f, --force          overwrite the output file if it already exists
+
 Flags:
       --delete-source   remove the source file after converting
   -f, --force           overwrite the output file if it already exists
@@ -288,10 +391,11 @@ Flags:
 Global Flags:
   …
 
-Examples:
-  pf-cli convert yaml toml
-  pf-cli convert yaml json --delete-source
-  pf-cli convert toml yaml --force
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-convert
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```
 
 ## pf-cli del
@@ -307,6 +411,17 @@ Usage:
 Aliases:
   del, delete
 
+Examples:
+  pf-cli del keywords[0]
+  pf-cli del keywords[99] --strict
+
+Common flags:
+    -q, --quiet          mute info; warnings and errors still print
+  -v, --verbose        show each step; also PF_CLI_VERBOSE=1
+  --offline            refuse network; use cache and embedded data
+  -n, --dry-run        show the deletion without saving it
+  --path-file          explicit projectfile path (skips detection)
+
 Flags:
   -n, --dry-run            show the deletion without saving it
   -h, --help               help for del
@@ -316,9 +431,11 @@ Flags:
 Global Flags:
   …
 
-Examples:
-  pf-cli del keywords[0]
-  pf-cli del keywords[99] --strict
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-del
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```
 
 ## pf-cli get
@@ -331,6 +448,20 @@ Exits 3 when a path is missing, 2 when the invocation is wrong.
 
 Usage:
   pf-cli get <path>… [flags]
+
+Examples:
+  pf-cli get identity.name
+  pf-cli get repositories[role=origin].url
+  pf-cli get repositories[].url
+  pf-cli get identity --format json
+  pf-cli get org.projectfile.sinks.kiota.ref --scope org.projectfile.image
+
+Common flags:
+    -q, --quiet          mute info; warnings and errors still print
+  -v, --verbose        show each step; also PF_CLI_VERBOSE=1
+  --offline            refuse network; use cache and embedded data
+  --path-file          explicit projectfile path (skips detection)
+  --format             raw, json, yaml, toml, sh, flat
 
 Flags:
       --batch               read several paths in one run
@@ -350,12 +481,11 @@ Flags:
 Global Flags:
   …
 
-Examples:
-  pf-cli get identity.name
-  pf-cli get repositories[role=origin].url
-  pf-cli get repositories[].url
-  pf-cli get identity --format json
-  pf-cli get org.projectfile.sinks.kiota.ref --scope org.projectfile.image
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-get
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```
 
 ## pf-cli includes
@@ -367,14 +497,23 @@ Manage the includes list
 Usage:
   pf-cli includes [command]
 
-Commands:
+Other:
   pin         Pin remote includes to the SHA-256 of their current bytes
+
+Common flags:
+  …
 
 Flags:
   -h, --help   help for includes
 
 Global Flags:
   …
+
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-includes
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 
 Use "pf-cli includes [command] --help" for more information about a command.
 ```
@@ -390,6 +529,17 @@ With no URL every remote include is pinned; a pinned one is re-pinned.
 Usage:
   pf-cli includes pin [url…] [flags]
 
+Examples:
+  pf-cli includes pin
+  pf-cli includes pin https://example.org/base.yaml --dry-run
+
+Common flags:
+    -q, --quiet          mute info; warnings and errors still print
+  -v, --verbose        show each step; also PF_CLI_VERBOSE=1
+  --offline            refuse network; use cache and embedded data
+  -n, --dry-run        print the digests without saving
+  --path-file          explicit projectfile path (skips detection)
+
 Flags:
   -n, --dry-run            print the digests without saving
   -h, --help               help for pin
@@ -398,9 +548,11 @@ Flags:
 Global Flags:
   …
 
-Examples:
-  pf-cli includes pin
-  pf-cli includes pin https://example.org/base.yaml --dry-run
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-pin
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```
 
 ## pf-cli init
@@ -419,6 +571,16 @@ Usage:
 Aliases:
   init, scaffold
 
+Examples:
+  pf-cli init
+  pf-cli init /tmp/demo --namespace org.example --name demo --non-interactive
+
+Common flags:
+    -q, --quiet          mute info; warnings and errors still print
+  -v, --verbose        show each step; also PF_CLI_VERBOSE=1
+  --offline            refuse network; use cache and embedded data
+  --format             output format: yaml, toml, json (default: prompt)
+
 Flags:
       --format string      output format: yaml, toml, json (default: prompt)
   -h, --help               help for init
@@ -431,9 +593,11 @@ Flags:
 Global Flags:
   …
 
-Examples:
-  pf-cli init
-  pf-cli init /tmp/demo --namespace org.example --name demo --non-interactive
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-init
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```
 
 ## pf-cli optimize
@@ -449,6 +613,17 @@ Usage:
 Aliases:
   optimize, opt
 
+Examples:
+  pf-cli optimize
+  pf-cli optimize --dry-run
+
+Common flags:
+    -q, --quiet          mute info; warnings and errors still print
+  -v, --verbose        show each step; also PF_CLI_VERBOSE=1
+  --offline            refuse network; use cache and embedded data
+  -n, --dry-run        list removals without saving
+  --path-file          explicit projectfile path (skips detection)
+
 Flags:
   -n, --dry-run            list removals without saving
   -h, --help               help for optimize
@@ -457,9 +632,11 @@ Flags:
 Global Flags:
   …
 
-Examples:
-  pf-cli optimize
-  pf-cli optimize --dry-run
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-optimize
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```
 
 ## pf-cli set
@@ -472,6 +649,18 @@ Missing sections are created.
 Usage:
   pf-cli set <path> [value] [flags]
 
+Examples:
+  pf-cli set license.spdx MIT
+  pf-cli set keywords --csv rust,wasm
+  pf-cli set contacts --value-json '{"email":"a@example.com"}'
+
+Common flags:
+    -q, --quiet          mute info; warnings and errors still print
+  -v, --verbose        show each step; also PF_CLI_VERBOSE=1
+  --offline            refuse network; use cache and embedded data
+  -n, --dry-run        show the write without saving it
+  --path-file          explicit projectfile path (skips detection)
+
 Flags:
       --create-only         fail if the path already has a value
       --csv string          value as a comma-separated string list
@@ -483,10 +672,11 @@ Flags:
 Global Flags:
   …
 
-Examples:
-  pf-cli set license.spdx MIT
-  pf-cli set keywords --csv rust,wasm
-  pf-cli set contacts --value-json '{"email":"a@example.com"}'
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-set
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```
 
 ## pf-cli setup
@@ -499,6 +689,16 @@ Enter accepts, Esc skips a section.
 Usage:
   pf-cli setup [flags]
 
+Examples:
+  pf-cli setup
+  pf-cli setup --format yaml
+
+Common flags:
+    -q, --quiet          mute info; warnings and errors still print
+  -v, --verbose        show each step; also PF_CLI_VERBOSE=1
+  --offline            refuse network; use cache and embedded data
+  --format             output format: yaml, toml, json (default: prompt)
+
 Flags:
       --format string   output format: yaml, toml, json (default: prompt)
   -h, --help            help for setup
@@ -506,9 +706,11 @@ Flags:
 Global Flags:
   …
 
-Examples:
-  pf-cli setup
-  pf-cli setup --format yaml
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-setup
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```
 
 ## pf-cli validate
@@ -524,6 +726,14 @@ Usage:
 Aliases:
   validate, lint
 
+Examples:
+  pf-cli validate
+  pf-cli validate /tmp/demo
+  pf-cli validate --strict-includes
+
+Common flags:
+  …
+
 Flags:
   -h, --help              help for validate
       --strict-includes   fail on repeated includes (default: warn)
@@ -531,8 +741,9 @@ Flags:
 Global Flags:
   …
 
-Examples:
-  pf-cli validate
-  pf-cli validate /tmp/demo
-  pf-cli validate --strict-includes
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-validate
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```

@@ -709,7 +709,7 @@ func init() {
 		"fill ${…} from this address (repeatable)")
 	getCmd.Flags().BoolVar(&getExpand, "expand", false,
 		"fill ${…} from the document; leave the rest as written")
-	rootCmd.AddCommand(getCmd)
+	groupCmd(getCmd, "read", "get")
 }
 
 // reportMissing names each unresolved path on stderr with the next command to run, unless --quiet.

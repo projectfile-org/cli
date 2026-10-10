@@ -7,6 +7,7 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"runtime/debug"
 	"strconv"
@@ -40,25 +41,47 @@ var (
 	helpCommand = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("86"))
 )
 
-// helpTemplate orders every help screen as Description, Commands, Flags, Examples.
-const helpTemplate = `{{hdr "Usage:"}}{{if .Runnable}}
-  {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
-  {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
+// helpGroups is the order the root help lists commands in: read, write,
+// validate, maintain. A command outside every group lands under "Other:".
+var helpGroups = []*cobra.Group{
+	{ID: "read", Title: "Read:"},
+	{ID: "write", Title: "Write:"},
+	{ID: "validate", Title: "Validate:"},
+	{ID: "maintain", Title: "Maintain:"},
+}
+
+// helpTemplate orders every help screen as Description, Examples, Commands
+// (grouped), the common flags, then the full flag lists and the doc links.
+const helpTemplate = `{{hdr "Usage:"}}{{if .HasAvailableSubCommands}}
+  {{.CommandPath}} [command]{{else}}
+  {{.UseLine}}{{end}}{{if gt (len .Aliases) 0}}
 
 {{hdr "Aliases:"}}
-  {{.NameAndAliases}}{{end}}{{if .HasAvailableSubCommands}}
+  {{.NameAndAliases}}{{end}}{{if .HasExample}}
 
-{{hdr "Commands:"}}{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+{{hdr "Examples:"}}
+{{.Example}}{{end}}{{if .HasAvailableSubCommands}}{{$cmds := .Commands}}{{range $group := .Groups}}
+
+{{hdr $group.Title}}{{range $cmds}}{{if and (eq .GroupID $group.ID) (or .IsAvailableCommand (eq .Name "help"))}}
+  {{cmd (rpad .Name .NamePadding)}} {{.Short}}{{end}}{{end}}{{end}}
+
+{{hdr "Other:"}}{{range $cmds}}{{if and (eq .GroupID "") (or .IsAvailableCommand (eq .Name "help"))}}
   {{cmd (rpad .Name .NamePadding)}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+
+{{hdr "Common flags:"}}
+  {{commonFlags .}}{{end}}{{if .HasAvailableLocalFlags}}
 
 {{hdr "Flags:"}}
 {{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
 
 {{hdr "Global Flags:"}}
-{{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasExample}}
+{{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if hasDocLinks .}}
 
-{{hdr "Examples:"}}
-{{.Example}}{{end}}{{if .HasAvailableSubCommands}}
+{{hdr "Documentation:"}}
+  {{docDocs .}}
+
+{{hdr "Report a bug:"}}
+  {{docIssues .}}{{end}}{{if .HasAvailableSubCommands}}
 
 Use "{{.CommandPath}} [command] --help" for more information about a command.{{end}}
 `
@@ -113,6 +136,160 @@ func commandError(_ *cobra.Command, err error) error {
 func registerHelpPalette() {
 	cobra.AddTemplateFunc("hdr", helpHeading.Render)
 	cobra.AddTemplateFunc("cmd", helpCommand.Render)
+	// commonFlags renders the short "flags worth knowing" block the checklist
+	// requires ahead of the full flag list; the exhaustive set follows.
+	cobra.AddTemplateFunc("commonFlags", func(c *cobra.Command) string {
+		names := []string{"quiet", "verbose", "offline", "force", "dry-run", "path-file", "format"}
+		var b strings.Builder
+		for _, n := range names {
+			f := c.Flags().Lookup(n)
+			if f == nil {
+				continue
+			}
+			label := "--" + f.Name
+			if f.Shorthand != "" {
+				label = "-" + f.Shorthand + ", --" + f.Name
+			}
+			fmt.Fprintf(&b, "  %-20s %s\n", label, f.Usage)
+		}
+		return strings.TrimRight(b.String(), "\n")
+	})
+	// The three doc-link funcs resolve at render time: SetProjectfileYAML runs
+	// after package init, so an annotation stamped there would read empty.
+	cobra.AddTemplateFunc("hasDocLinks", func(_ *cobra.Command) bool {
+		docs, _ := docLinks()
+		return docs != ""
+	})
+	cobra.AddTemplateFunc("docDocs", func(c *cobra.Command) string {
+		// Cobra's own commands (completion) are added lazily and never pass
+		// through groupCmd, so the name is the fallback page; the root links
+		// the docs index and cobra's `help` has no page to link.
+		page := c.Annotations["doc-page"]
+		if page == "" && c.Parent() != nil && c.Name() != "help" {
+			page = c.Name()
+		}
+		return docsForPage(page)
+	})
+	cobra.AddTemplateFunc("docIssues", func(_ *cobra.Command) string {
+		_, issues := docLinks()
+		return issues
+	})
+}
+
+// linkTypeSourceCode and linkTypeBugs are the projectfile link types the docs
+// renderer reads; the projectfile schema names them.
+const (
+	linkTypeSourceCode = "source-code"
+	linkTypeBugs       = "bugs"
+)
+
+// docLinks derives the documentation and issue-tracker URLs from the embedded
+// projectfile, so help points at the project's own declared addresses rather
+// than a hardcoded host. A public source repository is preferred for the docs
+// URL, since that is the page every reader can reach.
+func docLinks() (docs, issues string) {
+	var doc struct {
+		Links []struct {
+			Type      string   `yaml:"type"`
+			Tags      []string `yaml:"tags"`
+			Preferred bool     `yaml:"preferred"`
+			URL       string   `yaml:"url"`
+		} `yaml:"links"`
+	}
+	if err := yaml.Unmarshal(projectfileYAML, &doc); err != nil {
+		return "", ""
+	}
+	for _, l := range doc.Links {
+		if l.Type == linkTypeBugs && issues == "" {
+			issues = l.URL
+		}
+		if l.Type != linkTypeSourceCode || docs != "" {
+			continue
+		}
+		for _, t := range l.Tags {
+			if t == "public" {
+				docs = l.URL
+				break
+			}
+		}
+	}
+	if docs == "" {
+		for _, l := range doc.Links {
+			if l.Type == linkTypeSourceCode && l.Preferred {
+				docs = l.URL
+				break
+			}
+		}
+	}
+	if docs == "" {
+		for _, l := range doc.Links {
+			if l.Type == linkTypeSourceCode {
+				docs = l.URL
+				break
+			}
+		}
+	}
+	if docs != "" {
+		docs += "/tree/main/docs"
+	}
+	return docs, issues
+}
+
+// docsForPage turns the docs index into the exact page or anchor a command's
+// own help links: the root keeps the index, a subcommand gets its USAGE.md
+// heading anchor.
+func docsForPage(page string) string {
+	docs, _ := docLinks()
+	if page == "" {
+		return docs
+	}
+	base := strings.TrimSuffix(docs, "/tree/main/docs")
+	return base + "/blob/main/docs/USAGE.md#pf-cli-" + strings.ReplaceAll(page, " ", "-")
+}
+
+// groupCmd registers one subcommand under its help group and stamps its docs
+// page, so the root help lists it in a named group and its own --help carries
+// the exact page link.
+func groupCmd(c *cobra.Command, groupID, page string) {
+	c.GroupID = groupID
+	stampDocLinks(c, page)
+	rootCmd.AddCommand(c)
+}
+
+// stampDocLinks records which docs page a command's help links. The URLs are
+// resolved lazily at render time — SetProjectfileYAML lands after package
+// init, so an eagerly computed value would read empty.
+func stampDocLinks(c *cobra.Command, page string) {
+	if c.Annotations == nil {
+		c.Annotations = map[string]string{}
+	}
+	c.Annotations["doc-page"] = page
+}
+
+// conciseHelp is the bare-invocation screen: one line on what the tool does,
+// two worked examples, the flags worth knowing, and the pointer to --help.
+func conciseHelp(out io.Writer, docs, issues string) {
+	fmt.Fprintln(out, rootShort+" — read, write and validate projectfile documents.")
+	fmt.Fprintln(out)
+	fmt.Fprintln(out, "Try one:")
+	fmt.Fprintln(out, "  pf-cli get identity.name      read a field")
+	fmt.Fprintln(out, "  pf-cli set license.spdx MIT   write a field")
+	fmt.Fprintln(out, "  pf-cli validate               check the document against the v1 schema")
+	fmt.Fprintln(out)
+	fmt.Fprintln(out, "Common flags:")
+	fmt.Fprintln(out, "  -q, --quiet       mute info lines")
+	fmt.Fprintln(out, "  -v, --verbose     show each step")
+	fmt.Fprintln(out, "      --offline     refuse network; use cache and embedded data")
+	fmt.Fprintln(out, "  -f, --force       overwrite the output (convert, cache warm)")
+	if docs != "" {
+		fmt.Fprintln(out)
+		fmt.Fprintf(out, "Docs:   %s\n", docs)
+	}
+	if issues != "" {
+		fmt.Fprintf(out, "Issues: %s\n", issues)
+	}
+	fmt.Fprintln(out)
+	fmt.Fprintln(out, "Run pf-cli --help for every command and flag.")
 }
 
 // rootLong builds the Description from the projectfile identity text baked in at build time.
@@ -220,6 +397,16 @@ var rootCmd = &cobra.Command{
 	Version:       version,
 	SilenceUsage:  true,
 	SilenceErrors: true,
+	// A bare invocation prints the concise summary; --help still renders the
+	// full screen, and any subcommand dispatches past this RunE untouched.
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if len(args) > 0 {
+			return commandError(cmd, fmt.Errorf("unknown command %q for %q", args[0], cmd.CommandPath()))
+		}
+		docs, issues := docLinks()
+		conciseHelp(cmd.OutOrStdout(), docs, issues)
+		return nil
+	},
 	PersistentPreRunE: func(c *cobra.Command, _ []string) error {
 		if err := applyColors(c); err != nil {
 			return err
@@ -353,6 +540,8 @@ func init() {
 		defaultHelp(c, args)
 	})
 	rootCmd.Flags().BoolP("version", "V", false, "print the version")
+	rootCmd.AddGroup(helpGroups...)
+	stampDocLinks(rootCmd, "")
 }
 
 // classifyDispatchError re-classes cobra's own dispatch failures — unknown

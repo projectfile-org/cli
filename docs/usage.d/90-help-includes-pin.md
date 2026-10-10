@@ -14,6 +14,17 @@ With no URL every remote include is pinned; a pinned one is re-pinned.
 Usage:
   pf-cli includes pin [url…] [flags]
 
+Examples:
+  pf-cli includes pin
+  pf-cli includes pin https://example.org/base.yaml --dry-run
+
+Common flags:
+    -q, --quiet          mute info; warnings and errors still print
+  -v, --verbose        show each step; also PF_CLI_VERBOSE=1
+  --offline            refuse network; use cache and embedded data
+  -n, --dry-run        print the digests without saving
+  --path-file          explicit projectfile path (skips detection)
+
 Flags:
   -n, --dry-run            print the digests without saving
   -h, --help               help for pin
@@ -22,7 +33,9 @@ Flags:
 Global Flags:
   …
 
-Examples:
-  pf-cli includes pin
-  pf-cli includes pin https://example.org/base.yaml --dry-run
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-pin
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```

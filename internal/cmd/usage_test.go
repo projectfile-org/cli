@@ -10,20 +10,33 @@ import (
 	"testing"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 )
 
 // Shared literals across the cmd tests, hoisted so goconst stays quiet: the
 // same command names recur in the arity, flag and dispatch tables.
 const (
-	cmdConvert  = "convert"
-	cmdValidate = "validate"
-	keyIdentity = "identity"
-	keyName     = "name"
-	valDemo     = "demo"
-	flagNope    = "--nope"
+	cmdAdd        = "add"
+	cmdCache      = "cache"
+	cmdCompletion = "completion"
+	cmdConvert    = "convert"
+	cmdDel        = "del"
+	cmdGet        = "get"
+	cmdIncludes   = "includes"
+	cmdInit       = "init"
+	cmdOptimize   = "optimize"
+	cmdSet        = "set"
+	cmdSetup      = "setup"
+	cmdValidate   = "validate"
+	keyIdentity   = "identity"
+	keyName       = "name"
+	valDemo       = "demo"
+	flagNope      = "--nope"
 )
 
-// runRootCmd drives the shared root with args, capturing both streams.
+// runRootCmd drives the shared root with args, capturing both streams. Flags
+// are reset afterwards: pflag keeps a --help value across runs, so one help
+// execution would silently turn every later one into a help print.
 func runRootCmd(t *testing.T, args ...string) (string, error) {
 	t.Helper()
 	var buf bytes.Buffer
@@ -31,7 +44,16 @@ func runRootCmd(t *testing.T, args ...string) (string, error) {
 	rootCmd.SetErr(&buf)
 	rootCmd.SetArgs(args)
 	err := rootCmd.Execute()
-	t.Cleanup(func() { rootCmd.SetArgs(nil) })
+	resetChanged := func(c *cobra.Command) {
+		c.Flags().Visit(func(f *pflag.Flag) { _ = f.Value.Set(f.DefValue) })
+	}
+	t.Cleanup(func() {
+		rootCmd.SetArgs(nil)
+		resetChanged(rootCmd)
+		for _, c := range rootCmd.Commands() {
+			resetChanged(c)
+		}
+	})
 	return buf.String(), err
 }
 

@@ -16,6 +16,17 @@ Usage:
 Aliases:
   del, delete
 
+Examples:
+  pf-cli del keywords[0]
+  pf-cli del keywords[99] --strict
+
+Common flags:
+    -q, --quiet          mute info; warnings and errors still print
+  -v, --verbose        show each step; also PF_CLI_VERBOSE=1
+  --offline            refuse network; use cache and embedded data
+  -n, --dry-run        show the deletion without saving it
+  --path-file          explicit projectfile path (skips detection)
+
 Flags:
   -n, --dry-run            show the deletion without saving it
   -h, --help               help for del
@@ -25,7 +36,9 @@ Flags:
 Global Flags:
   …
 
-Examples:
-  pf-cli del keywords[0]
-  pf-cli del keywords[99] --strict
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-del
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```

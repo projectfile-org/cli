@@ -16,6 +16,14 @@ Usage:
 Aliases:
   validate, lint
 
+Examples:
+  pf-cli validate
+  pf-cli validate /tmp/demo
+  pf-cli validate --strict-includes
+
+Common flags:
+  …
+
 Flags:
   -h, --help              help for validate
       --strict-includes   fail on repeated includes (default: warn)
@@ -23,8 +31,9 @@ Flags:
 Global Flags:
   …
 
-Examples:
-  pf-cli validate
-  pf-cli validate /tmp/demo
-  pf-cli validate --strict-includes
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-validate
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```

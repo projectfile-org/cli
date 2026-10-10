@@ -75,5 +75,5 @@ func init() {
 	includesPinCmd.Flags().StringVar(&includesPinPathFile, "path-file", "",
 		"explicit projectfile path (skips detection)")
 	includesCmd.AddCommand(includesPinCmd)
-	rootCmd.AddCommand(includesCmd)
+	groupCmd(includesCmd, "maintain", "includes")
 }

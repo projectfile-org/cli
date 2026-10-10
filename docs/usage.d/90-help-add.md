@@ -13,6 +13,18 @@ Skips items that are already there.
 Usage:
   pf-cli add <path> [value…] [flags]
 
+Examples:
+  pf-cli add keywords rust wasm
+  pf-cli add repositories --field url=https://example.com/r
+  pf-cli add keywords rust -n
+
+Common flags:
+    -q, --quiet          mute info; warnings and errors still print
+  -v, --verbose        show each step; also PF_CLI_VERBOSE=1
+  --offline            refuse network; use cache and embedded data
+  -n, --dry-run        show the append without saving it
+  --path-file          explicit projectfile path (skips detection)
+
 Flags:
       --allow-duplicate     append even if already present
   -n, --dry-run             show the append without saving it
@@ -24,8 +36,9 @@ Flags:
 Global Flags:
   …
 
-Examples:
-  pf-cli add keywords rust wasm
-  pf-cli add repositories --field url=https://example.com/r
-  pf-cli add keywords rust -n
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-add
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```

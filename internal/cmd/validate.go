@@ -212,5 +212,5 @@ func flattenViolations(ve *jsonschema.ValidationError) []string {
 func init() {
 	validateCmd.Flags().BoolVar(&strictIncludesFlag, "strict-includes", false,
 		"fail on repeated includes (default: warn)")
-	rootCmd.AddCommand(validateCmd)
+	groupCmd(validateCmd, "validate", "validate")
 }

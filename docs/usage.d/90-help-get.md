@@ -14,6 +14,20 @@ Exits 3 when a path is missing, 2 when the invocation is wrong.
 Usage:
   pf-cli get <path>… [flags]
 
+Examples:
+  pf-cli get identity.name
+  pf-cli get repositories[role=origin].url
+  pf-cli get repositories[].url
+  pf-cli get identity --format json
+  pf-cli get org.projectfile.sinks.kiota.ref --scope org.projectfile.image
+
+Common flags:
+    -q, --quiet          mute info; warnings and errors still print
+  -v, --verbose        show each step; also PF_CLI_VERBOSE=1
+  --offline            refuse network; use cache and embedded data
+  --path-file          explicit projectfile path (skips detection)
+  --format             raw, json, yaml, toml, sh, flat
+
 Flags:
       --batch               read several paths in one run
       --default string      value to print when the path is missing
@@ -32,10 +46,9 @@ Flags:
 Global Flags:
   …
 
-Examples:
-  pf-cli get identity.name
-  pf-cli get repositories[role=origin].url
-  pf-cli get repositories[].url
-  pf-cli get identity --format json
-  pf-cli get org.projectfile.sinks.kiota.ref --scope org.projectfile.image
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-get
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```

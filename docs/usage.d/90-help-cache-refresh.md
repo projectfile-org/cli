@@ -12,12 +12,21 @@ Alias for cache warm --force
 Usage:
   pf-cli cache refresh [directory] [flags]
 
+Examples:
+  pf-cli cache refresh
+
+Common flags:
+  …
+
 Flags:
   -h, --help   help for refresh
 
 Global Flags:
   …
 
-Examples:
-  pf-cli cache refresh
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-refresh
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```

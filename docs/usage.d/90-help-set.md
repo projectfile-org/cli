@@ -13,6 +13,18 @@ Missing sections are created.
 Usage:
   pf-cli set <path> [value] [flags]
 
+Examples:
+  pf-cli set license.spdx MIT
+  pf-cli set keywords --csv rust,wasm
+  pf-cli set contacts --value-json '{"email":"a@example.com"}'
+
+Common flags:
+    -q, --quiet          mute info; warnings and errors still print
+  -v, --verbose        show each step; also PF_CLI_VERBOSE=1
+  --offline            refuse network; use cache and embedded data
+  -n, --dry-run        show the write without saving it
+  --path-file          explicit projectfile path (skips detection)
+
 Flags:
       --create-only         fail if the path already has a value
       --csv string          value as a comma-separated string list
@@ -24,8 +36,9 @@ Flags:
 Global Flags:
   …
 
-Examples:
-  pf-cli set license.spdx MIT
-  pf-cli set keywords --csv rust,wasm
-  pf-cli set contacts --value-json '{"email":"a@example.com"}'
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-set
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```

@@ -166,5 +166,5 @@ func init() {
 		"list removals without saving")
 	optimizeCmd.Flags().StringVar(&optimizePathFile, "path-file", "",
 		"explicit projectfile path (skips detection)")
-	rootCmd.AddCommand(optimizeCmd)
+	groupCmd(optimizeCmd, "maintain", "optimize")
 }

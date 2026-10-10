@@ -83,5 +83,5 @@ func init() {
 	delCmd.Flags().BoolVar(&delStrict, "strict", false, "exit 1 when the path is already absent")
 	delCmd.Flags().BoolVarP(&delDryRun, "dry-run", "n", false, "show the deletion without saving it")
 	delCmd.Flags().StringVar(&delPathFile, "path-file", "", "explicit projectfile path (skips detection)")
-	rootCmd.AddCommand(delCmd)
+	groupCmd(delCmd, "write", "del")
 }

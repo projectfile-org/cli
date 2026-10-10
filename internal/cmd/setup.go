@@ -27,5 +27,5 @@ var setupCmd = &cobra.Command{
 func init() {
 	setupCmd.Flags().StringVar(&setupFormat, "format", "",
 		"output format: yaml, toml, json (default: prompt)")
-	rootCmd.AddCommand(setupCmd)
+	groupCmd(setupCmd, "maintain", "setup")
 }
