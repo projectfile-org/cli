@@ -195,7 +195,7 @@ func runGet(cmd *cobra.Command, args []string) error {
 		// Missing values without a fallback are a soft failure: stdout
 		// already shows what we *could* resolve, but the process exits 1
 		// so shell pipelines can detect the partial result.
-		reportMissing(cmd, out)
+		reportMissing(cmd, out, doc)
 		genlog.FlushDebug()
 		os.Exit(1)
 	}
@@ -722,7 +722,7 @@ func init() {
 }
 
 // reportMissing names each unresolved path on stderr with the next command to run, unless --quiet.
-func reportMissing(cmd *cobra.Command, entries []resolvedEntry) {
+func reportMissing(cmd *cobra.Command, entries []resolvedEntry, doc *projectfile.Document) {
 	if quietFlag {
 		return
 	}
@@ -731,10 +731,75 @@ func reportMissing(cmd *cobra.Command, entries []resolvedEntry) {
 			continue
 		}
 		hint := "pass --default <value> to fall back"
+		closest := ""
 		if n := len(r.path.Segments); n > 1 {
 			parent := fieldpath.Path{Segments: r.path.Segments[:n-1]}.String()
 			hint = fmt.Sprintf("list what is there with pf-cli get %s --format yaml, or %s", parent, hint)
+			if key, ok := closestSibling(doc, r.path); ok {
+				closest = fmt.Sprintf(" Closest: %s.%s.", parent, key)
+			}
 		}
-		fmt.Fprintf(cmd.ErrOrStderr(), "%s: no such field. To continue, %s.\n", r.path.String(), hint)
+		fmt.Fprintf(cmd.ErrOrStderr(), "%s: no such field.%s To continue, %s.\n", r.path.String(), closest, hint)
 	}
+}
+
+// closestSibling returns the map key under the path's parent nearest to the
+// missing final key, so a mistyped address names the field the user likely
+// meant. Index and selector segments carry no key to match, so they are left
+// to the "list what is there" hint.
+func closestSibling(doc *projectfile.Document, p fieldpath.Path) (string, bool) {
+	if doc == nil {
+		return "", false
+	}
+	last := len(p.Segments) - 1
+	if last < 1 || p.Segments[last].Kind != fieldpath.SegKey {
+		return "", false
+	}
+	key := p.Segments[last].Key
+	value, _, _, present, err := resolveEntry(doc, fieldpath.Path{Segments: p.Segments[:last]})
+	if err != nil || !present {
+		return "", false
+	}
+	m, ok := value.(map[string]any)
+	if !ok {
+		return "", false
+	}
+	names := make([]string, 0, len(m))
+	for name := range m {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	best, bestDist := "", len(key)+1
+	for _, name := range names {
+		if d := editDistance(key, name); d < bestDist {
+			best, bestDist = name, d
+		}
+	}
+	// A near miss is a typo worth naming; a distant match is noise the
+	// "list what is there" hint already covers.
+	if best == "" || bestDist*2 > len(key)+2 {
+		return "", false
+	}
+	return best, true
+}
+
+// editDistance is the Levenshtein distance between a and b.
+func editDistance(a, b string) int {
+	prev := make([]int, len(b)+1)
+	curr := make([]int, len(b)+1)
+	for j := range prev {
+		prev[j] = j
+	}
+	for i := 1; i <= len(a); i++ {
+		curr[0] = i
+		for j := 1; j <= len(b); j++ {
+			cost := 1
+			if a[i-1] == b[j-1] {
+				cost = 0
+			}
+			curr[j] = min(prev[j]+1, min(curr[j-1]+1, prev[j-1]+cost))
+		}
+		prev, curr = curr, prev
+	}
+	return prev[len(b)]
 }

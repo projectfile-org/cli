@@ -14,6 +14,7 @@ import (
 
 	"kiota.ch/projectfile/core/v2/pkg/fieldpath"
 	"kiota.ch/projectfile/core/v2/pkg/genlog"
+	"kiota.ch/projectfile/core/v2/pkg/projectfile"
 )
 
 // envFixtureTOML carries an `env{}` map under an example extension and
@@ -626,7 +627,7 @@ func TestGetDefaultIgnoredWhenPresent(t *testing.T) {
 	if err != nil {
 		t.Fatalf("get present --default: %v", err)
 	}
-	if strings.TrimSpace(out) != "demo" {
+	if strings.TrimSpace(out) != valDemo {
 		t.Fatalf("present-with-default = %q, want demo", out)
 	}
 }
@@ -671,7 +672,7 @@ func TestGetFormatYAMLSubtree(t *testing.T) {
 	if err != nil {
 		t.Fatalf("get scalar yaml: %v", err)
 	}
-	if strings.TrimSpace(scalar) != "demo" {
+	if strings.TrimSpace(scalar) != valDemo {
 		t.Fatalf("yaml scalar = %q, want demo", scalar)
 	}
 }
@@ -794,12 +795,54 @@ func TestGetExpandResolvesDocumentRefsOnly(t *testing.T) {
 
 func TestReportMissingNamesParentAndDefault(t *testing.T) {
 	p, _ := fieldpath.Parse("identity.bogus")
+	doc := projectfile.FromMap(map[string]any{
+		keyIdentity: map[string]any{"namespace": "org.example", keyName: valDemo, "birth": "2026-01-01"},
+	})
 	var buf bytes.Buffer
 	getCmd.SetErr(&buf)
 	t.Cleanup(func() { getCmd.SetErr(nil) })
-	reportMissing(getCmd, []resolvedEntry{{path: p}})
+	reportMissing(getCmd, []resolvedEntry{{path: p}}, doc)
 	want := "identity.bogus: no such field. To continue, list what is there with pf-cli get identity --format yaml, or pass --default <value> to fall back.\n"
 	if buf.String() != want {
 		t.Fatalf("got %q", buf.String())
 	}
+}
+
+func TestReportMissingSuggestsClosestSibling(t *testing.T) {
+	p, _ := fieldpath.Parse("identity.namee")
+	doc := projectfile.FromMap(map[string]any{
+		keyIdentity: map[string]any{"namespace": "org.example", keyName: valDemo, "birth": "2026-01-01"},
+	})
+	var buf bytes.Buffer
+	getCmd.SetErr(&buf)
+	t.Cleanup(func() { getCmd.SetErr(nil) })
+	reportMissing(getCmd, []resolvedEntry{{path: p}}, doc)
+	want := "identity.namee: no such field. Closest: identity.name. To continue, list what is there with pf-cli get identity --format yaml, or pass --default <value> to fall back.\n"
+	if buf.String() != want {
+		t.Fatalf("got %q", buf.String())
+	}
+}
+
+func TestClosestSiblingSkipsNonKeySegments(t *testing.T) {
+	doc := projectfile.FromMap(map[string]any{
+		"keywords":  []any{"a", "b"},
+		keyIdentity: map[string]any{keyName: valDemo},
+	})
+	idx, _ := fieldpath.Parse("keywords[7]")
+	if key, ok := closestSibling(doc, idx); ok {
+		t.Fatalf("index miss suggested a sibling %q", key)
+	}
+	key, ok := closestSibling(doc, mustParse(t, "identity.name"))
+	if !ok || key != keyName {
+		t.Fatalf("exact key resolved to %q (ok=%v), want the exact match", key, ok)
+	}
+}
+
+func mustParse(t *testing.T, addr string) fieldpath.Path {
+	t.Helper()
+	p, err := fieldpath.Parse(addr)
+	if err != nil {
+		t.Fatalf("parse %s: %v", addr, err)
+	}
+	return p
 }
