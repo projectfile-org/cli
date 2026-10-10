@@ -29,7 +29,7 @@ func TestIncludesPin_WritesMappingAndResolves(t *testing.T) {
 	path := writeFile(t, dir, "projectfile.yaml", "$schema: https://projectfile.org/schema/v1.json\nidentity:\n  namespace: org.example\n  name: demo\nincludes:\n  - "+srv.URL+"/base.yaml\n")
 	genlog.SetOutput(&bytes.Buffer{})
 	t.Cleanup(func() { genlog.SetOutput(os.Stderr); includesPinPathFile = "" })
-	rootCmd.SetArgs([]string{"includes", "pin", "--path-file", path})
+	rootCmd.SetArgs([]string{cmdIncludes, "pin", flagPathFile, path})
 	require.NoError(t, rootCmd.Execute())
 	written, err := os.ReadFile(path)
 	require.NoError(t, err)

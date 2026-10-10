@@ -90,7 +90,7 @@ func TestDelegateInitArgv(t *testing.T) {
 	require.NoError(t, os.WriteFile(filepath.Join(bin, "pf-bridge-init"), []byte(script), 0o755))
 	t.Setenv("PATH", bin)
 	oldArgs := os.Args
-	os.Args = []string{"pf-cli", "init", "--format", fmtYAML, "."}
+	os.Args = []string{"pf-cli", cmdInit, flagFormat, fmtYAML, "."}
 	defer func() { os.Args = oldArgs }()
 	var gotArgv []string
 	oldExec := execBin

@@ -65,7 +65,7 @@ func TestArityErrorsNameCommandShapeAndFix(t *testing.T) {
 		args []string
 		want string
 	}{
-		{[]string{"set"}, "pf-cli set needs <path> [value] (got 0). Run pf-cli set --help."},
+		{[]string{cmdSet}, "pf-cli set needs <path> [value] (got 0). Run pf-cli set --help."},
 		{[]string{"add"}, "pf-cli add needs <path> [value…] (got 0). Run pf-cli add --help."},
 		{[]string{"del"}, "pf-cli del needs <path> (got 0). Run pf-cli del --help."},
 		{[]string{cmdConvert, "yaml"}, "pf-cli convert needs <from-format> <to-format> [directory] (got 1). Supported: json, toml, yaml, yml. Run pf-cli convert --help."},

@@ -30,8 +30,11 @@ var setCmd = &cobra.Command{
 	Use:   "set <path> [value]",
 	Short: "Write a value into a projectfile field",
 	Long: "Replace the value at <path>.\n" +
+		"A bare value is stored as text, exactly as typed.\n" +
+		"Use --value-json or --csv for a typed value.\n" +
 		"Missing sections are created.",
 	Example: "  pf-cli set license.spdx MIT\n" +
+		"  pf-cli set identity.version 1.10\n" +
 		"  pf-cli set keywords --csv rust,wasm\n" +
 		"  pf-cli set contacts --value-json '{\"email\":\"a@example.com\"}'",
 	Args: usageArgs(cobra.RangeArgs(1, 2)),
@@ -76,7 +79,10 @@ func runSetInner(addr string, p fieldpath.Path, value any, pfPath string) error 
 
 	out, err := fieldpath.Set(doc, p, value)
 	if errors.Is(err, fieldpath.ErrTypeMismatch) {
-		return fmt.Errorf("%s was not changed: it cannot hold %v. To store it as text, quote it: pf-cli set %s '\"%v\"'", addr, value, addr, value)
+		// A bare positional is text, so a refusal now means the FIELD wants
+		// another type — the fix is the flag that spells it, not a quoting
+		// dance around a value that is already text.
+		return fmt.Errorf("%s was not changed: it cannot hold text (%v). To store a number, list or object, use --value-json: pf-cli set %s --value-json '%v'", addr, value, addr, value)
 	}
 	if err != nil {
 		return err
@@ -97,6 +103,13 @@ func runSetInner(addr string, p fieldpath.Path, value any, pfPath string) error 
 // one source must be supplied: --value-json, --csv, or a bare positional.
 // The triplet conflict is rejected up front so callers see "you said both"
 // instead of silently preferring one over the others.
+//
+// A bare positional is a STRING, full stop. An earlier version ran it
+// through a JSON parse, which silently rewrote what the user typed —
+// `1.10` landed as `1.1`, `true` as a boolean, `null` as null. A version,
+// a serial or a build id looks numeric and is not, and the document then
+// carries a value the user never wrote. The JSON forms stay reachable
+// through the flags that exist for them.
 func resolveSetValue(args []string) (any, error) {
 	sources := 0
 	if len(args) >= 2 {
@@ -129,15 +142,7 @@ func resolveSetValue(args []string) (any, error) {
 		}
 		return out, nil
 	default:
-		raw := args[1]
-		// Try JSON so bare `true`, `false`, integers and floats coerce to their
-		// native Go types (bool, float64). String values that are not valid JSON
-		// literals (e.g. "main", "v1.2.3") pass through unchanged as strings.
-		var v any
-		if err := json.Unmarshal([]byte(raw), &v); err == nil {
-			return v, nil
-		}
-		return raw, nil
+		return args[1], nil
 	}
 }
 
@@ -157,7 +162,7 @@ func readDocumentFromPath(path string) (*projectfile.Document, error) {
 }
 
 func init() {
-	setCmd.Flags().StringVar(&setValueJSON, "value-json", "", "value as JSON (needed for objects and arrays)")
+	setCmd.Flags().StringVar(&setValueJSON, "value-json", "", "value as JSON (a bare value is text)")
 	setCmd.Flags().StringVar(&setCSV, "csv", "", "value as a comma-separated string list")
 	setCmd.Flags().BoolVar(&setCreateOnly, "create-only", false, "fail if the path already has a value")
 	setCmd.Flags().BoolVarP(&setDryRun, "dry-run", "n", false, "show the write without saving it")

@@ -8,6 +8,8 @@ SPDX-License-Identifier: MIT
 ```console
 $ pf-cli set --help
 Replace the value at <path>.
+A bare value is stored as text, exactly as typed.
+Use --value-json or --csv for a typed value.
 Missing sections are created.
 
 Usage:
@@ -15,6 +17,7 @@ Usage:
 
 Examples:
   pf-cli set license.spdx MIT
+  pf-cli set identity.version 1.10
   pf-cli set keywords --csv rust,wasm
   pf-cli set contacts --value-json '{"email":"a@example.com"}'
 
@@ -31,7 +34,7 @@ Flags:
   -n, --dry-run             show the write without saving it
   -h, --help                help for set
       --path-file string    explicit projectfile path (skips detection)
-      --value-json string   value as JSON (needed for objects and arrays)
+      --value-json string   value as JSON (a bare value is text)
 
 Global Flags:
   …
