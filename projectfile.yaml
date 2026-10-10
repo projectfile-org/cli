@@ -109,6 +109,7 @@ org:
     artifacts:
       go-binary:
         command: pf-cli
+        executable: dist/pf-cli
         subcommands: [add, cache, cache purge, cache refresh, cache status, cache warm, completion, convert, del, get, includes, includes pin, init, optimize, set, setup, validate]
         kind: binary
         path: dist/pf-cli
