@@ -15,9 +15,9 @@ import (
 )
 
 var (
-	delStrict   bool
-	delDryRun   bool
-	delPathFile string
+	delStrict bool
+	delDryRun bool
+	delFile   string
 )
 
 var delCmd = &cobra.Command{
@@ -39,7 +39,7 @@ func runDel(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	pfPath, err := resolveProjectfilePath(delPathFile)
+	pfPath, err := resolveProjectfilePath(delFile)
 	if err != nil {
 		return err
 	}
@@ -81,6 +81,6 @@ func runDelInner(addr string, p fieldpath.Path, pfPath string) error {
 func init() {
 	delCmd.Flags().BoolVar(&delStrict, "strict", false, "exit 1 when the path is already absent")
 	delCmd.Flags().BoolVarP(&delDryRun, "dry-run", "n", false, "show the deletion without saving it")
-	delCmd.Flags().StringVar(&delPathFile, "path-file", "", "explicit projectfile path (skips detection)")
+	delCmd.Flags().StringVar(&delFile, "file", "", "explicit projectfile path (skips detection)")
 	groupCmd(delCmd, "write", "del")
 }

@@ -16,8 +16,8 @@ import (
 )
 
 var (
-	optimizeDryRun   bool
-	optimizePathFile string
+	optimizeDryRun bool
+	optimizeFile   string
 )
 
 var optimizeCmd = &cobra.Command{
@@ -38,7 +38,7 @@ func runOptimize(_ *cobra.Command, args []string) error {
 		dir = args[0]
 	}
 
-	pfPath, err := resolveProjectfilePathForDir(dir, optimizePathFile)
+	pfPath, err := resolveProjectfilePathForDir(dir, optimizeFile)
 	if err != nil {
 		return err
 	}
@@ -164,7 +164,7 @@ func includeRef(item any) string {
 func init() {
 	optimizeCmd.Flags().BoolVarP(&optimizeDryRun, "dry-run", "n", false,
 		"list removals without saving")
-	optimizeCmd.Flags().StringVar(&optimizePathFile, "path-file", "",
+	optimizeCmd.Flags().StringVar(&optimizeFile, "file", "",
 		"explicit projectfile path (skips detection)")
 	groupCmd(optimizeCmd, "maintain", "optimize")
 }

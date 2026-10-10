@@ -13,17 +13,26 @@ Shared with pf-bridge and pf-ci.
 Usage:
   pf-cli cache [command]
 
-Commands:
+Other:
   purge       Delete cached includes (all, or one URL)
   refresh     Alias for cache warm --force
   status      Show what is cached and where
   warm        Download includes now so later reads work offline
+
+Common flags:
+  …
 
 Flags:
   -h, --help   help for cache
 
 Global Flags:
   …
+
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-cache
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 
 Use "pf-cli cache [command] --help" for more information about a command.
 ```

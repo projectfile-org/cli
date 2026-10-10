@@ -23,14 +23,14 @@ Common flags:
   -v, --verbose        show each step; also PF_CLI_VERBOSE=1
   --offline            refuse network; use cache and embedded data
   -n, --dry-run        show the append without saving it
-  --path-file          explicit projectfile path (skips detection)
+  --file               explicit projectfile path (skips detection)
 
 Flags:
       --allow-duplicate     append even if already present
   -n, --dry-run             show the append without saving it
       --field stringArray   set one item field as k=v (repeatable)
+      --file string         explicit projectfile path (skips detection)
   -h, --help                help for add
-      --path-file string    explicit projectfile path (skips detection)
       --value-json string   the whole item as JSON
 
 Global Flags:

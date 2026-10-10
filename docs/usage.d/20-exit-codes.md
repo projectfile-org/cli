@@ -12,7 +12,7 @@ finish.
 
 | Code | Meaning | Examples |
 | --- | --- | --- |
-| `1` | Runtime failure — the document could not be read, an include could not be resolved, or a write was refused | `pf-cli get --path-file /nope.yaml identity.name`, an unreachable include, a failed write |
+| `1` | Runtime failure — the document could not be read, an include could not be resolved, or a write was refused | `pf-cli get --file /nope.yaml identity.name`, an unreachable include, a failed write |
 | `2` | Usage error — the invocation itself is wrong, and nothing ran | `pf-cli --nope`, `pf-cli bogus`, `pf-cli set` with no path |
 | `3` | The requested field is absent | `pf-cli get identity.bogus`, `pf-cli get identity.name --exists` on a missing field |
 | `4` | Validation failed — the document was read and violates the v1 schema | `pf-cli validate` on a document missing required fields |

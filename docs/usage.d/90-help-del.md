@@ -25,13 +25,13 @@ Common flags:
   -v, --verbose        show each step; also PF_CLI_VERBOSE=1
   --offline            refuse network; use cache and embedded data
   -n, --dry-run        show the deletion without saving it
-  --path-file          explicit projectfile path (skips detection)
+  --file               explicit projectfile path (skips detection)
 
 Flags:
-  -n, --dry-run            show the deletion without saving it
-  -h, --help               help for del
-      --path-file string   explicit projectfile path (skips detection)
-      --strict             exit 1 when the path is already absent
+  -n, --dry-run       show the deletion without saving it
+      --file string   explicit projectfile path (skips detection)
+  -h, --help          help for del
+      --strict        exit 1 when the path is already absent
 
 Global Flags:
   …

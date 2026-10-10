@@ -16,11 +16,11 @@ import (
 )
 
 // resetSetFlags clears the shared set flag vars before one run: pflag's StringVar keeps the last value, so a --value-json from an earlier test would otherwise coerce this test's bare positional.
-// flagPathFile and flagFormat are spelled once across the cmd tests, where goconst counts the occurrences.
+// flagFile and flagFormat are spelled once across the cmd tests, where goconst counts the occurrences.
 const (
-	flagPathFile = "--path-file"
-	flagFormat   = "--format"
-	valTrue      = "true"
+	flagFile   = "--file"
+	flagFormat = "--format"
+	valTrue    = "true"
 )
 
 func resetSetFlags(t *testing.T) {
@@ -29,7 +29,7 @@ func resetSetFlags(t *testing.T) {
 	setCSV = ""
 	setCreateOnly = false
 	setDryRun = false
-	setPathFile = ""
+	setFile = ""
 }
 
 // TestSetBarePositionalIsTextVerbatim pins the no-silent-rewrite contract: a bare value lands exactly as typed, including the forms a JSON parse used to coerce (1.10 became 1.1, true became a boolean, null became null).
@@ -50,14 +50,14 @@ func TestSetBarePositionalIsTextVerbatim(t *testing.T) {
 		resetSetFlags(t)
 		rootCmd.SetOut(&buf)
 		rootCmd.SetErr(&buf)
-		rootCmd.SetArgs([]string{cmdSet, flagPathFile, path, "identity.version", tc.typed})
+		rootCmd.SetArgs([]string{cmdSet, flagFile, path, "identity.version", tc.typed})
 		require.NoError(t, rootCmd.Execute(), "set %s", tc.typed)
 
 		buf.Reset()
 		resetGetFlags(t)
 		rootCmd.SetOut(&buf)
 		rootCmd.SetErr(&buf)
-		rootCmd.SetArgs([]string{cmdGet, flagPathFile, path, flagFormat, "json", "identity.version"})
+		rootCmd.SetArgs([]string{cmdGet, flagFile, path, flagFormat, "json", "identity.version"})
 		require.NoError(t, rootCmd.Execute())
 		want, _ := json.Marshal(tc.want)
 		assert.JSONEq(t, string(want), buf.String(), "set %s must land verbatim as text", tc.typed)
@@ -73,7 +73,7 @@ func TestSetTypedFormsStillCoerce(t *testing.T) {
 	resetSetFlags(t)
 	rootCmd.SetOut(&buf)
 	rootCmd.SetErr(&buf)
-	rootCmd.SetArgs([]string{"set", flagPathFile, path, "org.demo.count", "--value-json", "5"})
+	rootCmd.SetArgs([]string{"set", flagFile, path, "org.demo.count", "--value-json", "5"})
 	require.NoError(t, rootCmd.Execute())
 
 	out, err := os.ReadFile(path)
@@ -91,7 +91,7 @@ func TestSetRefusesAValueTheFieldCannotHold(t *testing.T) {
 	resetSetFlags(t)
 	rootCmd.SetOut(&buf)
 	rootCmd.SetErr(&buf)
-	rootCmd.SetArgs([]string{"set", flagPathFile, path, addrIdentityName, "--value-json", "true"})
+	rootCmd.SetArgs([]string{"set", flagFile, path, addrIdentityName, "--value-json", "true"})
 	err := rootCmd.Execute()
 
 	require.Error(t, err)

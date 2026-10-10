@@ -23,7 +23,7 @@ var (
 	setCSV        string
 	setCreateOnly bool
 	setDryRun     bool
-	setPathFile   string
+	setFile       string
 )
 
 var setCmd = &cobra.Command{
@@ -53,7 +53,7 @@ func runSet(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	pfPath, err := resolveProjectfilePath(setPathFile)
+	pfPath, err := resolveProjectfilePath(setFile)
 	if err != nil {
 		return err
 	}
@@ -154,6 +154,6 @@ func init() {
 	setCmd.Flags().StringVar(&setCSV, "csv", "", "value as a comma-separated string list")
 	setCmd.Flags().BoolVar(&setCreateOnly, "create-only", false, "fail if the path already has a value")
 	setCmd.Flags().BoolVarP(&setDryRun, "dry-run", "n", false, "show the write without saving it")
-	setCmd.Flags().StringVar(&setPathFile, "path-file", "", "explicit projectfile path (skips detection)")
+	setCmd.Flags().StringVar(&setFile, "file", "", "explicit projectfile path (skips detection)")
 	groupCmd(setCmd, "write", "set")
 }

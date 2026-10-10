@@ -19,8 +19,18 @@ Usage:
 Aliases:
   init, scaffold
 
+Examples:
+  pf-cli init
+  pf-cli init /tmp/demo --namespace org.example --name demo --non-interactive
+
+Common flags:
+    -q, --quiet          mute info; warnings and errors still print
+  -v, --verbose        show each step; also PF_CLI_VERBOSE=1
+  --offline            refuse network; use cache and embedded data
+  --format             output format: yaml, toml, json (default: prompt)
+
 Flags:
-  -f, --format string      output format: yaml, toml, json (default: prompt)
+      --format string      output format: yaml, toml, json (default: prompt)
   -h, --help               help for init
       --license string     license SPDX expression (e.g. MIT)
       --name string        identity.name (project slug)
@@ -31,7 +41,9 @@ Flags:
 Global Flags:
   …
 
-Examples:
-  pf-cli init
-  pf-cli init /tmp/demo --namespace org.example --name demo --non-interactive
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-init
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```

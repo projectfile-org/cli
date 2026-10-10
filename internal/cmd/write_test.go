@@ -39,7 +39,7 @@ func TestWriteProjectfileKeepsTheFold(t *testing.T) {
 	rootCmd.SetOut(&buf)
 	rootCmd.SetErr(&buf)
 	resetSetFlags(t)
-	rootCmd.SetArgs([]string{cmdSet, flagPathFile, path, keyIdentity + "." + keyName, valDemo})
+	rootCmd.SetArgs([]string{cmdSet, flagFile, path, keyIdentity + "." + keyName, valDemo})
 	require.NoError(t, rootCmd.Execute())
 
 	out, err := os.ReadFile(path)

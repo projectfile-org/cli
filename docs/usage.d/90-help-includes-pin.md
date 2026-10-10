@@ -23,12 +23,12 @@ Common flags:
   -v, --verbose        show each step; also PF_CLI_VERBOSE=1
   --offline            refuse network; use cache and embedded data
   -n, --dry-run        print the digests without saving
-  --path-file          explicit projectfile path (skips detection)
+  --file               explicit projectfile path (skips detection)
 
 Flags:
-  -n, --dry-run            print the digests without saving
-  -h, --help               help for pin
-      --path-file string   explicit projectfile path (skips detection)
+  -n, --dry-run       print the digests without saving
+      --file string   explicit projectfile path (skips detection)
+  -h, --help          help for pin
 
 Global Flags:
   …

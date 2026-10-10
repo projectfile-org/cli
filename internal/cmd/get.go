@@ -32,7 +32,7 @@ var (
 	getExists     bool
 	getExpandEnv  bool
 	getPrintPath  bool
-	getPathFile   string
+	getFile       string
 	getNamedPaths []string
 	getLang       string
 	getScopes     []string
@@ -80,12 +80,12 @@ type resolvedEntry struct {
 }
 
 func runGet(cmd *cobra.Command, args []string) error {
-	// --print-path: emit the resolved projectfile path (explicit --path-file, else
+	// --print-path: emit the resolved projectfile path (explicit --file, else
 	// DetectPath in cwd) and exit. Lets callers drop their own mtime/stat probe —
 	// pf-cli is the authority on the §4.5 multi-file arbitration. No path entries
 	// are required in this mode. No projectfile => silent exit 0 (graceful).
 	if getPrintPath {
-		p := getPathFile
+		p := getFile
 		if p == "" {
 			if dp, err := projectfile.DetectPath("."); err == nil {
 				p = dp
@@ -120,7 +120,7 @@ func runGet(cmd *cobra.Command, args []string) error {
 		return errUsage("--default and --or-default are mutually exclusive")
 	}
 
-	doc, err := loadDocument(getPathFile)
+	doc, err := loadDocument(getFile)
 	if err != nil {
 		return err
 	}
@@ -714,7 +714,7 @@ func init() {
 	getCmd.Flags().BoolVar(&getPrintPath, "print-path", false, "print the projectfile path and exit")
 	getCmd.Flags().BoolVar(&getExpandEnv, "expand-env", false,
 		"fill ${VAR} from the environment first")
-	getCmd.Flags().StringVar(&getPathFile, "path-file", "", "explicit projectfile path (skips detection)")
+	getCmd.Flags().StringVar(&getFile, "file", "", "explicit projectfile path (skips detection)")
 	getCmd.Flags().StringArrayVar(&getNamedPaths, "path", nil, "label a path as KEY=ADDR (repeatable)")
 	getCmd.Flags().StringVar(&getLang, "lang", "", "choose a language for translated fields")
 	getCmd.Flags().StringArrayVar(&getScopes, "scope", nil,

@@ -12,13 +12,22 @@ Clear the cache, or one URL. The next read downloads it again.
 Usage:
   pf-cli cache purge [url] [flags]
 
+Examples:
+  pf-cli cache purge
+  pf-cli cache purge https://example.com/fleet.yaml
+
+Common flags:
+  …
+
 Flags:
   -h, --help   help for purge
 
 Global Flags:
   …
 
-Examples:
-  pf-cli cache purge
-  pf-cli cache purge https://example.com/fleet.yaml
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-purge
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```

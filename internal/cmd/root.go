@@ -135,7 +135,7 @@ func registerHelpPalette() {
 	cobra.AddTemplateFunc("cmd", helpCommand.Render)
 	// commonFlags renders the short "flags worth knowing" block the checklist requires ahead of the full list; the exhaustive set follows.
 	cobra.AddTemplateFunc("commonFlags", func(c *cobra.Command) string {
-		names := []string{"quiet", "verbose", "offline", "force", "dry-run", "path-file", "format"}
+		names := []string{"quiet", "verbose", "offline", "force", "dry-run", "file", "format"}
 		var b strings.Builder
 		for _, n := range names {
 			f := c.Flags().Lookup(n)

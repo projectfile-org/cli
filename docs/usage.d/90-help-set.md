@@ -26,14 +26,14 @@ Common flags:
   -v, --verbose        show each step; also PF_CLI_VERBOSE=1
   --offline            refuse network; use cache and embedded data
   -n, --dry-run        show the write without saving it
-  --path-file          explicit projectfile path (skips detection)
+  --file               explicit projectfile path (skips detection)
 
 Flags:
       --create-only         fail if the path already has a value
       --csv string          value as a comma-separated string list
   -n, --dry-run             show the write without saving it
+      --file string         explicit projectfile path (skips detection)
   -h, --help                help for set
-      --path-file string    explicit projectfile path (skips detection)
       --value-json string   value as JSON (a bare value is text)
 
 Global Flags:

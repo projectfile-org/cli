@@ -32,15 +32,15 @@ func TestShortFlagFIsForceEverywhere(t *testing.T) {
 	}
 }
 
-// TestPathFileHasNoShortForm keeps the long spelling, so the flag's meaning never changes with the command it sits on.
-func TestPathFileHasNoShortForm(t *testing.T) {
+// TestFileHasNoShortForm keeps the long spelling, so the flag's meaning never changes with the command it sits on.
+func TestFileHasNoShortForm(t *testing.T) {
 	for _, cmd := range rootCmd.Commands() {
-		f := cmd.Flags().Lookup("path-file")
+		f := cmd.Flags().Lookup("file")
 		if f == nil {
 			continue
 		}
 		if f.Shorthand != "" {
-			t.Errorf("pf-cli %s: --path-file carries shorthand %q, want none", cmd.Name(), f.Shorthand)
+			t.Errorf("pf-cli %s: --file carries shorthand %q, want none", cmd.Name(), f.Shorthand)
 		}
 	}
 }

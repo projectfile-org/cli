@@ -12,12 +12,21 @@ Show what is cached and where
 Usage:
   pf-cli cache status [flags]
 
+Examples:
+  pf-cli cache status
+
+Common flags:
+  …
+
 Flags:
   -h, --help   help for status
 
 Global Flags:
   …
 
-Examples:
-  pf-cli cache status
+Documentation:
+  https://github.com/projectfile-org/cli/blob/main/docs/USAGE.md#pf-cli-status
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 ```

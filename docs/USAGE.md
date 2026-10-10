@@ -21,20 +21,44 @@ File and forge sync (bridge, forge, scan): use pf-bridge.
 Usage:
   pf-cli [command]
 
-Commands:
-  add         Append items to a projectfile list
-  cache       Manage pf-cli’s local cache for offline use
-  completion  Generate the autocompletion script for the specified shell
-  convert     Convert a projectfile between encodings (toml/yaml/json)
-  del         Remove a field, list item, or map entry from projectfile
+Examples:
+  pf-cli init --namespace org.example --name demo
+  pf-cli get identity.name
+  pf-cli set license.spdx MIT
+  pf-cli add keywords rust wasm
+  pf-cli del keywords[0]
+  pf-cli validate
+  pf-cli convert yaml toml
+  pf-cli optimize
+  pf-cli cache status
+
+Read:
   get         Read one or more projectfile fields
-  help        Help about any command
+
+Write:
+  add         Append items to a projectfile list
+  del         Remove a field, list item, or map entry from projectfile
+  set         Write a value into a projectfile field
+
+Validate:
+  validate    Validate a projectfile against the v1 JSON Schema
+
+Maintain:
+  cache       Manage pf-cli’s local cache for offline use
+  convert     Convert a projectfile between encodings (toml/yaml/json)
   includes    Manage the includes list
   init        Scaffold a new projectfile document
   optimize    Remove local fields that duplicate include values
-  set         Write a value into a projectfile field
   setup       Edit your per-user configuration interactively
-  validate    Validate a projectfile against the v1 JSON Schema
+
+Other:
+  completion  Generate the autocompletion script for the specified shell
+  help        Help about any command
+
+Common flags:
+    -q, --quiet          mute info; warnings and errors still print
+  -v, --verbose        show each step; also PF_CLI_VERBOSE=1
+  --offline            refuse network; use cache and embedded data
 
 Flags:
       --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
@@ -48,16 +72,11 @@ Flags:
   -v, --verbose              show each step; also PF_CLI_VERBOSE=1
   -V, --version              print the version
 
-Examples:
-  pf-cli init --namespace org.example --name demo
-  pf-cli get identity.name
-  pf-cli set license.spdx MIT
-  pf-cli add keywords rust wasm
-  pf-cli del keywords[0]
-  pf-cli validate
-  pf-cli convert yaml toml
-  pf-cli optimize
-  pf-cli cache status
+Documentation:
+  https://github.com/projectfile-org/cli/tree/main/docs
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 
 Use "pf-cli [command] --help" for more information about a command.
 ```
@@ -93,7 +112,7 @@ finish.
 
 | Code | Meaning | Examples |
 | --- | --- | --- |
-| `1` | Runtime failure — the document could not be read, an include could not be resolved, or a write was refused | `pf-cli get --path-file /nope.yaml identity.name`, an unreachable include, a failed write |
+| `1` | Runtime failure — the document could not be read, an include could not be resolved, or a write was refused | `pf-cli get --file /nope.yaml identity.name`, an unreachable include, a failed write |
 | `2` | Usage error — the invocation itself is wrong, and nothing ran | `pf-cli --nope`, `pf-cli bogus`, `pf-cli set` with no path |
 | `3` | The requested field is absent | `pf-cli get identity.bogus`, `pf-cli get identity.name --exists` on a missing field |
 | `4` | Validation failed — the document was read and violates the v1 schema | `pf-cli validate` on a document missing required fields |
@@ -153,14 +172,14 @@ Common flags:
   -v, --verbose        show each step; also PF_CLI_VERBOSE=1
   --offline            refuse network; use cache and embedded data
   -n, --dry-run        show the append without saving it
-  --path-file          explicit projectfile path (skips detection)
+  --file               explicit projectfile path (skips detection)
 
 Flags:
       --allow-duplicate     append even if already present
   -n, --dry-run             show the append without saving it
       --field stringArray   set one item field as k=v (repeatable)
+      --file string         explicit projectfile path (skips detection)
   -h, --help                help for add
-      --path-file string    explicit projectfile path (skips detection)
       --value-json string   the whole item as JSON
 
 Global Flags:
@@ -420,13 +439,13 @@ Common flags:
   -v, --verbose        show each step; also PF_CLI_VERBOSE=1
   --offline            refuse network; use cache and embedded data
   -n, --dry-run        show the deletion without saving it
-  --path-file          explicit projectfile path (skips detection)
+  --file               explicit projectfile path (skips detection)
 
 Flags:
-  -n, --dry-run            show the deletion without saving it
-  -h, --help               help for del
-      --path-file string   explicit projectfile path (skips detection)
-      --strict             exit 1 when the path is already absent
+  -n, --dry-run       show the deletion without saving it
+      --file string   explicit projectfile path (skips detection)
+  -h, --help          help for del
+      --strict        exit 1 when the path is already absent
 
 Global Flags:
   …
@@ -462,7 +481,7 @@ Common flags:
     -q, --quiet          mute info; warnings and errors still print
   -v, --verbose        show each step; also PF_CLI_VERBOSE=1
   --offline            refuse network; use cache and embedded data
-  --path-file          explicit projectfile path (skips detection)
+  --file               explicit projectfile path (skips detection)
   --format             raw, json, yaml, toml, sh, flat
 
 Flags:
@@ -471,12 +490,12 @@ Flags:
       --exists              exit 0 if present, 1 if absent; prints nothing
       --expand              fill ${…} from the document; leave the rest as written
       --expand-env          fill ${VAR} from the environment first
+      --file string         explicit projectfile path (skips detection)
       --format string       raw, json, yaml, toml, sh, flat (default "raw")
   -h, --help                help for get
       --lang string         choose a language for translated fields
       --or-default          use the built-in default if missing
       --path stringArray    label a path as KEY=ADDR (repeatable)
-      --path-file string    explicit projectfile path (skips detection)
       --print-path          print the projectfile path and exit
       --scope stringArray   fill ${…} from this address (repeatable)
       --suggest             on a missing path, print the nearest existing address instead of failing
@@ -541,12 +560,12 @@ Common flags:
   -v, --verbose        show each step; also PF_CLI_VERBOSE=1
   --offline            refuse network; use cache and embedded data
   -n, --dry-run        print the digests without saving
-  --path-file          explicit projectfile path (skips detection)
+  --file               explicit projectfile path (skips detection)
 
 Flags:
-  -n, --dry-run            print the digests without saving
-  -h, --help               help for pin
-      --path-file string   explicit projectfile path (skips detection)
+  -n, --dry-run       print the digests without saving
+      --file string   explicit projectfile path (skips detection)
+  -h, --help          help for pin
 
 Global Flags:
   …
@@ -625,12 +644,12 @@ Common flags:
   -v, --verbose        show each step; also PF_CLI_VERBOSE=1
   --offline            refuse network; use cache and embedded data
   -n, --dry-run        list removals without saving
-  --path-file          explicit projectfile path (skips detection)
+  --file               explicit projectfile path (skips detection)
 
 Flags:
-  -n, --dry-run            list removals without saving
-  -h, --help               help for optimize
-      --path-file string   explicit projectfile path (skips detection)
+  -n, --dry-run       list removals without saving
+      --file string   explicit projectfile path (skips detection)
+  -h, --help          help for optimize
 
 Global Flags:
   …
@@ -665,14 +684,14 @@ Common flags:
   -v, --verbose        show each step; also PF_CLI_VERBOSE=1
   --offline            refuse network; use cache and embedded data
   -n, --dry-run        show the write without saving it
-  --path-file          explicit projectfile path (skips detection)
+  --file               explicit projectfile path (skips detection)
 
 Flags:
       --create-only         fail if the path already has a value
       --csv string          value as a comma-separated string list
   -n, --dry-run             show the write without saving it
+      --file string         explicit projectfile path (skips detection)
   -h, --help                help for set
-      --path-file string    explicit projectfile path (skips detection)
       --value-json string   value as JSON (a bare value is text)
 
 Global Flags:

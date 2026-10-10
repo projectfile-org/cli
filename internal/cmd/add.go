@@ -21,7 +21,7 @@ var (
 	addValueJSON string
 	addAllowDup  bool
 	addDryRun    bool
-	addPathFile  string
+	addFile      string
 )
 
 var addCmd = &cobra.Command{
@@ -44,7 +44,7 @@ func runAdd(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	pfPath, err := resolveProjectfilePath(addPathFile)
+	pfPath, err := resolveProjectfilePath(addFile)
 	if err != nil {
 		return err
 	}
@@ -174,6 +174,6 @@ func init() {
 	addCmd.Flags().StringVar(&addValueJSON, "value-json", "", "the whole item as JSON")
 	addCmd.Flags().BoolVar(&addAllowDup, "allow-duplicate", false, "append even if already present")
 	addCmd.Flags().BoolVarP(&addDryRun, "dry-run", "n", false, "show the append without saving it")
-	addCmd.Flags().StringVar(&addPathFile, "path-file", "", "explicit projectfile path (skips detection)")
+	addCmd.Flags().StringVar(&addFile, "file", "", "explicit projectfile path (skips detection)")
 	groupCmd(addCmd, "write", "add")
 }

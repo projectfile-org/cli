@@ -49,7 +49,7 @@ func resetGetFlags(t *testing.T) {
 	getExists = false
 	getExpandEnv = false
 	getExpand = false
-	getPathFile = ""
+	getFile = ""
 	getNamedPaths = nil
 	getLang = ""
 	// StringArrayVar APPENDS on every parse, so a scoped case would leak its
@@ -96,7 +96,7 @@ func TestGetMapProjectRaw(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, envFixtureTOML)
 
-	out, err := runGetCmd(t, "ext.com.example.env{}", "--path-file", path)
+	out, err := runGetCmd(t, "ext.com.example.env{}", "--file", path)
 	if err != nil {
 		t.Fatalf("get env{}: %v", err)
 	}
@@ -113,7 +113,7 @@ func TestGetMapProjectDottedLabels(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, envFixtureTOML)
 
-	out, err := runGetCmd(t, "ext.com.example.build.labels{}", "--path-file", path)
+	out, err := runGetCmd(t, "ext.com.example.build.labels{}", "--file", path)
 	if err != nil {
 		t.Fatalf("get labels{}: %v", err)
 	}
@@ -130,7 +130,7 @@ func TestGetMapProjectSh(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, envFixtureTOML)
 
-	out, err := runGetCmd(t, "ext.com.example.build.labels{}", "--path-file", path, "--format", "sh")
+	out, err := runGetCmd(t, "ext.com.example.build.labels{}", "--file", path, "--format", "sh")
 	if err != nil {
 		t.Fatalf("get labels{} sh: %v", err)
 	}
@@ -151,7 +151,7 @@ func TestGetMapProjectJSON(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, envFixtureTOML)
 
-	out, err := runGetCmd(t, "ext.com.example.env{}", "--path-file", path, "--format", "json")
+	out, err := runGetCmd(t, "ext.com.example.env{}", "--file", path, "--format", "json")
 	if err != nil {
 		t.Fatalf("get env{} json: %v", err)
 	}
@@ -173,7 +173,7 @@ func TestGetFlatSubtree(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, envFixtureTOML)
 
-	out, err := runGetCmd(t, "ext.com.example.env", "--path-file", path, "--format", "flat")
+	out, err := runGetCmd(t, "ext.com.example.env", "--file", path, "--format", "flat")
 	if err != nil {
 		t.Fatalf("get env flat: %v", err)
 	}
@@ -190,7 +190,7 @@ func TestGetFlatNested(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, envFixtureTOML)
 
-	out, err := runGetCmd(t, "ext.com.example", "--path-file", path, "--format", "flat")
+	out, err := runGetCmd(t, "ext.com.example", "--file", path, "--format", "flat")
 	if err != nil {
 		t.Fatalf("get subtree flat: %v", err)
 	}
@@ -235,7 +235,7 @@ func TestGetFlatListOfMaps(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, listOfMapsFixtureTOML)
 
-	out, err := runGetCmd(t, "ext.com.example", "--path-file", path, "--format", "flat")
+	out, err := runGetCmd(t, "ext.com.example", "--file", path, "--format", "flat")
 	if err != nil {
 		t.Fatalf("get subtree flat: %v", err)
 	}
@@ -295,7 +295,7 @@ func TestGetScopeComposesDeclaredTemplates(t *testing.T) {
 		"org.projectfile.sinks.ghcr.ref":  "ghcr.io/buho/ubuntu-is-fucking-pissed:latest",
 	}
 	for addr, want := range cases {
-		out, err := runGetCmd(t, addr, "--path-file", path, "--scope", partsScope)
+		out, err := runGetCmd(t, addr, "--file", path, "--scope", partsScope)
 		if err != nil {
 			t.Fatalf("get %s: %v", addr, err)
 		}
@@ -311,7 +311,7 @@ func TestGetScopeResolvesAPartThatIsItselfAReference(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, partsFixtureTOML)
 
-	out, err := runGetCmd(t, "name", "--path-file", path, "--scope", partsScope)
+	out, err := runGetCmd(t, "name", "--file", path, "--scope", partsScope)
 	if err != nil {
 		t.Fatalf("get name --scope: %v", err)
 	}
@@ -328,7 +328,7 @@ func TestGetWithoutScopeLeavesTheTemplateVerbatim(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, partsFixtureTOML)
 
-	out, err := runGetCmd(t, "org.projectfile.sinks.kiota.ref", "--path-file", path)
+	out, err := runGetCmd(t, "org.projectfile.sinks.kiota.ref", "--file", path)
 	if err != nil {
 		t.Fatalf("get ref (no scope): %v", err)
 	}
@@ -345,7 +345,7 @@ func TestGetScopeComposesEverySinkInOneCall(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, partsFixtureTOML)
 
-	out, err := runGetCmd(t, "org.projectfile.sinks{}.values", "--path-file", path, "--scope", partsScope)
+	out, err := runGetCmd(t, "org.projectfile.sinks{}.values", "--file", path, "--scope", partsScope)
 	if err != nil {
 		t.Fatalf("get sinks{}.values: %v", err)
 	}
@@ -403,7 +403,7 @@ func TestUnboundScopesCollapseABatchOntoOneSubject(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, manySubjectsTOML)
 
-	out, err := runGetCmd(t, "--batch", "--format", "sh", "--path-file", path,
+	out, err := runGetCmd(t, "--batch", "--format", "sh", "--file", path,
 		"--path", "GO=org.projectfile.images.go-tools.ref",
 		"--path", "JS=org.projectfile.images.js-tools.ref",
 		"--scope", "org.projectfile.images.go-tools",
@@ -423,7 +423,7 @@ func TestBoundScopesComposeEachSubjectInOneCall(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, manySubjectsTOML)
 
-	out, err := runGetCmd(t, "--batch", "--format", "sh", "--path-file", path,
+	out, err := runGetCmd(t, "--batch", "--format", "sh", "--file", path,
 		"--path", "GO=org.projectfile.images.go-tools.ref",
 		"--path", "JS=org.projectfile.images.js-tools.ref",
 		"--scope", "GO=org.projectfile.images.go-tools",
@@ -497,7 +497,7 @@ func TestGetLocalizedSingleLangRaw(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, localizedFixtureTOML)
 
-	out, err := runGetCmd(t, "identity.summary", "--path-file", path)
+	out, err := runGetCmd(t, "identity.summary", "--file", path)
 	if err != nil {
 		t.Fatalf("get identity.summary: %v", err)
 	}
@@ -512,7 +512,7 @@ func TestGetLocalizedSingleLangSh(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, localizedFixtureTOML)
 
-	out, err := runGetCmd(t, "identity{}", "--path-file", path, "--format", "sh")
+	out, err := runGetCmd(t, "identity{}", "--file", path, "--format", "sh")
 	if err != nil {
 		t.Fatalf("get identity{} sh: %v", err)
 	}
@@ -527,7 +527,7 @@ func TestGetLocalizedLangFlag(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, localizedFixtureTOML)
 
-	out, err := runGetCmd(t, "identity.title", "--path-file", path, "--lang", "es")
+	out, err := runGetCmd(t, "identity.title", "--file", path, "--lang", "es")
 	if err != nil {
 		t.Fatalf("get identity.title --lang es: %v", err)
 	}
@@ -542,7 +542,7 @@ func TestGetLocalizedLangFlagJSON(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, localizedFixtureTOML)
 
-	out, err := runGetCmd(t, "identity{}", "--path-file", path, "--format", "json", "--lang", "en")
+	out, err := runGetCmd(t, "identity{}", "--file", path, "--format", "json", "--lang", "en")
 	if err != nil {
 		t.Fatalf("get identity{} json --lang en: %v", err)
 	}
@@ -565,7 +565,7 @@ func TestGetExpandEnv(t *testing.T) {
 	t.Setenv("TEST_VAR", "expanded-value")
 
 	// Without --expand-env: literal placeholder survives.
-	noExpand, err := runGetCmd(t, "ext.com.example.env.TARGET", "--path-file", path)
+	noExpand, err := runGetCmd(t, "ext.com.example.env.TARGET", "--file", path)
 	if err != nil {
 		t.Fatalf("get TARGET (no expand): %v", err)
 	}
@@ -574,7 +574,7 @@ func TestGetExpandEnv(t *testing.T) {
 	}
 
 	// With --expand-env: value resolves to the env-var contents.
-	expanded, err := runGetCmd(t, "ext.com.example.env.TARGET", "--path-file", path, "--expand-env")
+	expanded, err := runGetCmd(t, "ext.com.example.env.TARGET", "--file", path, "--expand-env")
 	if err != nil {
 		t.Fatalf("get TARGET (expand): %v", err)
 	}
@@ -593,7 +593,7 @@ func TestGetDefaultEmptyString(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, envFixtureTOML)
 
-	out, err := runGetCmd(t, "identity.summary", "--path-file", path, "--default", "")
+	out, err := runGetCmd(t, "identity.summary", "--file", path, "--default", "")
 	if err != nil {
 		t.Fatalf("get missing --default='': %v", err)
 	}
@@ -608,7 +608,7 @@ func TestGetDefaultValueUsed(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, envFixtureTOML)
 
-	out, err := runGetCmd(t, "identity.summary", "--path-file", path, "--default", "fallback")
+	out, err := runGetCmd(t, "identity.summary", "--file", path, "--default", "fallback")
 	if err != nil {
 		t.Fatalf("get missing --default=fallback: %v", err)
 	}
@@ -623,7 +623,7 @@ func TestGetDefaultIgnoredWhenPresent(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, envFixtureTOML)
 
-	out, err := runGetCmd(t, addrIdentityName, "--path-file", path, "--default", "fallback")
+	out, err := runGetCmd(t, addrIdentityName, "--file", path, "--default", "fallback")
 	if err != nil {
 		t.Fatalf("get present --default: %v", err)
 	}
@@ -642,7 +642,7 @@ func TestGetDefaultBrokenStillErrors(t *testing.T) {
 	// path lookup (and its default) is never reached.
 	path := writeFixture(t, dir, "spec_version = \"1\"\n[identity\nname = \"x\"\n")
 
-	if _, err := runGetCmd(t, addrIdentityName, "--path-file", path, "--default", "fallback"); err == nil {
+	if _, err := runGetCmd(t, addrIdentityName, "--file", path, "--default", "fallback"); err == nil {
 		t.Fatalf("broken projectfile with --default should error, got nil")
 	}
 }
@@ -658,7 +658,7 @@ func TestGetFormatYAMLSubtree(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, envFixtureTOML)
 
-	out, err := runGetCmd(t, "ext.com.example.env", "--path-file", path, "--format", "yaml")
+	out, err := runGetCmd(t, "ext.com.example.env", "--file", path, "--format", "yaml")
 	if err != nil {
 		t.Fatalf("get env yaml: %v", err)
 	}
@@ -668,7 +668,7 @@ func TestGetFormatYAMLSubtree(t *testing.T) {
 		}
 	}
 
-	scalar, err := runGetCmd(t, addrIdentityName, "--path-file", path, "--format", "yaml")
+	scalar, err := runGetCmd(t, addrIdentityName, "--file", path, "--format", "yaml")
 	if err != nil {
 		t.Fatalf("get scalar yaml: %v", err)
 	}
@@ -682,11 +682,11 @@ func TestGetFormatYMLAlias(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, envFixtureTOML)
 
-	yamlOut, err := runGetCmd(t, "ext.com.example.env", "--path-file", path, "--format", "yaml")
+	yamlOut, err := runGetCmd(t, "ext.com.example.env", "--file", path, "--format", "yaml")
 	if err != nil {
 		t.Fatalf("get env yaml: %v", err)
 	}
-	ymlOut, err := runGetCmd(t, "ext.com.example.env", "--path-file", path, "--format", "yml")
+	ymlOut, err := runGetCmd(t, "ext.com.example.env", "--file", path, "--format", "yml")
 	if err != nil {
 		t.Fatalf("get env yml: %v", err)
 	}
@@ -700,7 +700,7 @@ func TestGetFormatYAMLPairs(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, envFixtureTOML)
 
-	out, err := runGetCmd(t, "ext.com.example.env{}", "--path-file", path, "--format", "yaml")
+	out, err := runGetCmd(t, "ext.com.example.env{}", "--file", path, "--format", "yaml")
 	if err != nil {
 		t.Fatalf("get env{} yaml: %v", err)
 	}
@@ -716,7 +716,7 @@ func TestGetFormatYAMLBatch(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, envFixtureTOML)
 
-	out, err := runGetCmd(t, "--batch", "--format", "yaml", "--path-file", path,
+	out, err := runGetCmd(t, "--batch", "--format", "yaml", "--file", path,
 		"--path", "NAME=identity.name",
 		"--path", "ENV=ext.com.example.env")
 	if err != nil {
@@ -735,7 +735,7 @@ func TestGetFormatTOMLSubtree(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, envFixtureTOML)
 
-	out, err := runGetCmd(t, "ext.com.example.env", "--path-file", path, "--format", "toml")
+	out, err := runGetCmd(t, "ext.com.example.env", "--file", path, "--format", "toml")
 	if err != nil {
 		t.Fatalf("get env toml: %v", err)
 	}
@@ -752,7 +752,7 @@ func TestGetFormatTOMLScalarErrors(t *testing.T) {
 	dir := t.TempDir()
 	path := writeFixture(t, dir, envFixtureTOML)
 
-	_, err := runGetCmd(t, addrIdentityName, "--path-file", path, "--format", "toml")
+	_, err := runGetCmd(t, addrIdentityName, "--file", path, "--format", "toml")
 	if err == nil || !strings.Contains(err.Error(), "yaml or json") {
 		t.Fatalf("toml scalar should hint at yaml/json, got %v", err)
 	}
@@ -769,13 +769,13 @@ func TestGetUsageErrorType(t *testing.T) {
 		t.Fatalf("write broken: %v", err)
 	}
 
-	_, uErr := runGetCmd(t, addrIdentityName, "--path-file", good, "--format", "bogus")
+	_, uErr := runGetCmd(t, addrIdentityName, "--file", good, "--format", "bogus")
 	var ue *usageError
 	if !errors.As(uErr, &ue) {
 		t.Fatalf("unknown --format should be a *usageError (exit 2), got %T: %v", uErr, uErr)
 	}
 
-	_, rErr := runGetCmd(t, addrIdentityName, "--path-file", broken)
+	_, rErr := runGetCmd(t, addrIdentityName, "--file", broken)
 	if rErr == nil || errors.As(rErr, &ue) {
 		t.Fatalf("broken doc should be a non-usage runtime error (exit 1), got %v", rErr)
 	}
@@ -784,7 +784,7 @@ func TestGetUsageErrorType(t *testing.T) {
 // TestGetExpandResolvesDocumentRefsOnly pins that --expand fills document references and leaves a make variable as written.
 func TestGetExpandResolvesDocumentRefsOnly(t *testing.T) {
 	path := writeFixture(t, t.TempDir(), "[identity]\nname = \"pg\"\n\n[\"org.projectfile\".build.args]\nIMG = \"${B19_DOCKER_REGISTRY}/${identity.name}\"\n")
-	out, err := runGetCmd(t, "--expand", "--format", "flat", "org.projectfile.build", "--path-file", path)
+	out, err := runGetCmd(t, "--expand", "--format", "flat", "org.projectfile.build", "--file", path)
 	if err != nil {
 		t.Fatalf("get --expand: %v", err)
 	}
@@ -897,7 +897,7 @@ func TestGetSuggestPrintsTheAddressAndExitsZero(t *testing.T) {
 	resetGetFlags(t)
 	rootCmd.SetOut(&buf)
 	rootCmd.SetErr(&buf)
-	rootCmd.SetArgs([]string{cmdGet, flagPathFile, path, "identity.nam", flagSuggest})
+	rootCmd.SetArgs([]string{cmdGet, flagFile, path, "identity.nam", flagSuggest})
 	if err := rootCmd.Execute(); err != nil {
 		t.Fatalf("get --suggest: %v", err)
 	}

@@ -15,8 +15,8 @@ import (
 )
 
 var (
-	includesPinDryRun   bool
-	includesPinPathFile string
+	includesPinDryRun bool
+	includesPinFile   string
 )
 
 var includesCmd = &cobra.Command{
@@ -37,7 +37,7 @@ var includesPinCmd = &cobra.Command{
 }
 
 func runIncludesPin(_ *cobra.Command, args []string) error {
-	pfPath, err := resolveProjectfilePathForDir(".", includesPinPathFile)
+	pfPath, err := resolveProjectfilePathForDir(".", includesPinFile)
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func runIncludesPin(_ *cobra.Command, args []string) error {
 func init() {
 	includesPinCmd.Flags().BoolVarP(&includesPinDryRun, "dry-run", "n", false,
 		"print the digests without saving")
-	includesPinCmd.Flags().StringVar(&includesPinPathFile, "path-file", "",
+	includesPinCmd.Flags().StringVar(&includesPinFile, "file", "",
 		"explicit projectfile path (skips detection)")
 	includesCmd.AddCommand(includesPinCmd)
 	groupCmd(includesCmd, "maintain", "includes")
