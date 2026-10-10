@@ -168,6 +168,10 @@ Puntos de entrada de la canalización:
 - `make check-outdated` — Informa de cada dependencia fijada que va por detrás de su versión upstream
 - `make ready-to-publish` — Ejecuta localmente el pipeline pseudo-CI — compila, prueba y escanea, sin publicar
 
+## Documentación
+
+- [Configuration](../how-to/configuration.md)
+
 ## Políticas
 
 - [Cómo contribuir](CONTRIBUTING.md)

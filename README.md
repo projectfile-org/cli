@@ -166,6 +166,10 @@ Pipeline entry points:
 - `make check-outdated` — Report every pinned dependency that lags upstream
 - `make ready-to-publish` — Run the pseudo-CI pipeline locally — build, test and scan, without publishing
 
+## Documentation
+
+- [Configuration](docs/how-to/configuration.md)
+
 ## Policies
 
 - [How to contribute](CONTRIBUTING.md)
