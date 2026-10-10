@@ -40,7 +40,7 @@ func TestDroppedAliasesAndPrefixesAreUnknown(t *testing.T) {
 }
 
 func TestKeptAliasesResolve(t *testing.T) {
-	for alias, want := range map[string]string{"lint": "validate", "delete": "del", "conv": "convert", "opt": "optimize", "scaffold": "init"} {
+	for alias, want := range map[string]string{"lint": cmdValidate, "delete": "del", "conv": cmdConvert, "opt": "optimize", "scaffold": "init"} {
 		c, _, err := rootCmd.Find([]string{alias})
 		if err != nil || c.Name() != want {
 			t.Errorf("pf-cli %s: got %v %v, want %s", alias, c, err, want)

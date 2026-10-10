@@ -79,7 +79,7 @@ func runConvertCmd(t *testing.T, args ...string) (string, error) {
 	var buf bytes.Buffer
 	rootCmd.SetOut(&buf)
 	rootCmd.SetErr(&buf)
-	rootCmd.SetArgs(append([]string{"convert"}, args...))
+	rootCmd.SetArgs(append([]string{cmdConvert}, args...))
 	err := rootCmd.Execute()
 	return buf.String(), err
 }

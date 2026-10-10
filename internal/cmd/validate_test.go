@@ -23,7 +23,7 @@ func runValidateCmd(t *testing.T, dir string) (string, error) {
 	var buf bytes.Buffer
 	rootCmd.SetOut(&buf)
 	rootCmd.SetErr(&buf)
-	rootCmd.SetArgs([]string{"validate", dir})
+	rootCmd.SetArgs([]string{cmdValidate, dir})
 	err := rootCmd.Execute()
 	return buf.String(), err
 }
