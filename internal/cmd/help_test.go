@@ -11,15 +11,13 @@ import (
 	"testing"
 )
 
-// ansiRE matches the escape sequences the help palette emits, so assertions
-// read the text a user sees rather than the stream.
+// ansiRE matches the escape sequences the help palette emits, so assertions read the text a user sees.
 var ansiRE = regexp.MustCompile(`\x1b\[[0-9;]*m`)
 
 // plain strips ANSI escapes from one rendered help screen.
 func plain(s string) string { return ansiRE.ReplaceAllString(s, "") }
 
-// pfYAMLForLinks is a minimal projectfile carrying the two link families the
-// help renders: a public source repository (docs) and a bug tracker.
+// pfYAMLForLinks is a minimal projectfile carrying the two link families the help renders: a public source repository (docs) and a bug tracker.
 const pfYAMLForLinks = `identity:
   name: cli
 links:
@@ -33,9 +31,7 @@ links:
     url: https://github.com/projectfile-org/cli/issues
 `
 
-// TestBareInvocationIsConcise pins the first screen a new user sees: a
-// one-line description, a few examples, the common flags and the pointer to
-// --help — never the full command list.
+// TestBareInvocationIsConcise pins the first screen a new user sees: a one-line description, a few examples, the common flags and the pointer to --help — never the full command list.
 func TestBareInvocationIsConcise(t *testing.T) {
 	out, err := runRootCmd(t)
 	out = plain(out)
@@ -63,8 +59,7 @@ func TestBareInvocationIsConcise(t *testing.T) {
 	}
 }
 
-// TestFullHelpKeepsEveryCommand pins that the full screen still carries the
-// exhaustive list, so the concise form never hides a command.
+// TestFullHelpKeepsEveryCommand pins that the full screen still carries the exhaustive list, so the concise form never hides a command.
 func TestFullHelpKeepsEveryCommand(t *testing.T) {
 	out, err := runRootCmd(t, "--help")
 	out = plain(out)
@@ -78,8 +73,7 @@ func TestFullHelpKeepsEveryCommand(t *testing.T) {
 	}
 }
 
-// TestHelpLeadsWithExamples pins the checklist order: Examples come before
-// the command list, so a reader sees a worked invocation first.
+// TestHelpLeadsWithExamples pins the checklist order: Examples come before the command list, so a reader sees a worked invocation first.
 func TestHelpLeadsWithExamples(t *testing.T) {
 	out, err := runRootCmd(t, "--help")
 	out = plain(out)
@@ -93,8 +87,7 @@ func TestHelpLeadsWithExamples(t *testing.T) {
 	}
 }
 
-// TestHelpGroupsCommandsAlphabetically pins the grouping: each group is
-// alphabetical, and the everyday read/write commands head the list.
+// TestHelpGroupsCommandsAlphabetically pins that each group is alphabetical and the everyday read/write commands head the list.
 func TestHelpGroupsCommandsAlphabetically(t *testing.T) {
 	out, err := runRootCmd(t, "--help")
 	out = plain(out)
@@ -133,8 +126,7 @@ func groupCommands(block string) []string {
 	return names
 }
 
-// TestHelpRendersDocAndIssueLinks pins that the root and each subcommand link
-// the documentation and the tracker, the subcommand page being an anchor.
+// TestHelpRendersDocAndIssueLinks pins that the root and each subcommand link the docs and the tracker, the subcommand page being an anchor.
 func TestHelpRendersDocAndIssueLinks(t *testing.T) {
 	saved := projectfileYAML
 	t.Cleanup(func() { projectfileYAML = saved })
@@ -168,8 +160,7 @@ func TestHelpRendersDocAndIssueLinks(t *testing.T) {
 	}
 }
 
-// TestDocLinksPreferThePublicForge pins that the docs URL is the reachable
-// one, not the preferred private host.
+// TestDocLinksPreferThePublicForge pins that the docs URL is the reachable one, not the preferred private host.
 func TestDocLinksPreferThePublicForge(t *testing.T) {
 	saved := projectfileYAML
 	t.Cleanup(func() { projectfileYAML = saved })
@@ -183,9 +174,7 @@ func TestDocLinksPreferThePublicForge(t *testing.T) {
 	}
 }
 
-// TestEveryCommandHasADocPage keeps the per-subcommand link honest: a command
-// with no page annotation links nothing, so this catches a registration that
-// bypassed groupCmd. Cobra's own completion and help resolve from their names.
+// TestEveryCommandHasADocPage keeps the per-subcommand link honest: a command with no page links nothing, so this catches a registration that bypassed groupCmd; cobra's own completion and help resolve from their names.
 func TestEveryCommandHasADocPage(t *testing.T) {
 	saved := projectfileYAML
 	t.Cleanup(func() { projectfileYAML = saved })

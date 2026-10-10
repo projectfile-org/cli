@@ -13,21 +13,13 @@ import (
 	"kiota.ch/projectfile/core/v2/pkg/projectfile"
 )
 
-// yamlLineWidth is the physical line a folded block scalar may reach before
-// it is re-folded. The fleet's yamllint runs line-length: 120, and a document
-// past that cannot be pushed at all.
+// yamlLineWidth caps a folded block scalar's physical line: the fleet's yamllint runs line-length: 120, and a document past that cannot be pushed.
 const yamlLineWidth = 120
 
-// foldedIndicatorRE matches a line whose value is a folded block scalar
-// (`>-`, `>`, `>2-`, `>+`), the one style whose single line break folds back
-// to a space. A `>` inside a plain scalar (`a > b`) never matches: the
-// indicator must end the line, modulo a comment and chomping digits.
+// foldedIndicatorRE matches a folded block scalar (`>-`, `>`, `>2-`, `>+`) — the one style whose single line break folds back to a space; a `>` inside a plain scalar (`a > b`) never matches, since the indicator ends the line.
 var foldedIndicatorRE = regexp.MustCompile(`(^|\s)>[-+]?[0-9]?\s*(#.*)?$`)
 
-// writeProjectfile writes the document and then restores the fold of any
-// block scalar the writer collapsed onto one physical line. Every command
-// that writes the projectfile goes through here, so one place owns the
-// round-trip.
+// writeProjectfile writes the document then restores the fold of any block scalar the writer collapsed onto one line; every mutating command writes through here.
 func writeProjectfile(doc *projectfile.Document, path string) error {
 	if err := projectfile.Write(doc, path); err != nil {
 		return err
@@ -35,15 +27,7 @@ func writeProjectfile(doc *projectfile.Document, path string) error {
 	return refoldFoldedScalars(path)
 }
 
-// refoldFoldedScalars re-folds a folded (>) block scalar the writer emitted as
-// one long line. The YAML emitter's preferred line width is unbounded, so a
-// value it holds as one string always comes back as a single physical line —
-// the `>-` marker survives but the breaks the author wrote are gone, and a
-// long description then exceeds every consumer's line-length rule.
-//
-// This is a TEXT pass, not a value pass: folding a space into a line break is
-// what the author wrote, and the reader folds it straight back, so the value
-// is untouched. Only YAML carries block scalars.
+// refoldFoldedScalars re-folds a folded (>) block the writer emitted as one long line: the YAML emitter's preferred width is unbounded, so the `>-` marker survives but the author's breaks are gone, and every consumer's line-length rule then fails. The pass is TEXT-level, not a value pass — folding a space into a break is what the author wrote and the reader folds it straight back — and YAML-only, the one encoding carrying block scalars.
 func refoldFoldedScalars(path string) error {
 	switch strings.ToLower(filepath.Ext(path)) {
 	case ".yaml", ".yml":
@@ -61,9 +45,7 @@ func refoldFoldedScalars(path string) error {
 	return os.WriteFile(path, []byte(out), 0o600) // #nosec G306,G703 -- metadata file, not a secret; path validated upstream
 }
 
-// refoldFoldedBlocks rewraps every over-long content line of a folded block
-// at single spaces. A blank line inside the block is a paragraph break in the
-// value and is left alone, and a line with no safe fold point is left alone.
+// refoldFoldedBlocks rewraps every over-long content line of a folded block at single spaces; an empty line inside the block is a paragraph break in the value, and a line with no safe fold point is left alone.
 func refoldFoldedBlocks(text string) (string, bool) {
 	lines := strings.Split(text, "\n")
 	out := make([]string, 0, len(lines))
@@ -98,17 +80,14 @@ func refoldFoldedBlocks(text string) (string, bool) {
 	return strings.Join(out, "\n"), changed
 }
 
-// wrapAtSpaces breaks line at isolated spaces so no line exceeds width.
-// Reports false when nothing needs folding or no safe point exists.
+// wrapAtSpaces breaks line at isolated spaces so no line exceeds width; false when nothing needs folding or no safe point exists.
 func wrapAtSpaces(line string, width int) ([]string, bool) {
 	if len(line) <= width {
 		return nil, false
 	}
 	indent := line[:indentOf(line)]
 	content := line[indentOf(line):]
-	// budget is what the content may occupy so the whole line, indent
-	// included, stays inside width. A line breaks at the last space whose
-	// next word still fits, so no output line exceeds the budget.
+	// budget is the content length that keeps the whole line inside width; a line breaks at the last space whose next word still fits, so no output line exceeds it.
 	budget := width - len(indent)
 	var out []string
 	var b strings.Builder
@@ -133,8 +112,7 @@ func wrapAtSpaces(line string, width int) ([]string, bool) {
 	return out, true
 }
 
-// isFoldPoint reports whether the space at i is isolated — no space or
-// newline on either side — so folding there round-trips to exactly one space.
+// isFoldPoint reports whether the space at i is isolated — no space or newline on either side — so folding there round-trips to exactly one space.
 func isFoldPoint(s string, i int) bool {
 	if i > 0 {
 		if c := s[i-1]; c == ' ' || c == '\n' {
@@ -149,9 +127,7 @@ func isFoldPoint(s string, i int) bool {
 	return true
 }
 
-// nextWordLen is the length of the word starting at i, up to the next isolated
-// space or the end — the run a line break at the previous space would move
-// onto its own line.
+// nextWordLen is the word length starting at i, up to the next isolated space or the end — the run a break at the previous space moves onto its own line.
 func nextWordLen(s string, i int) int {
 	n := 0
 	for i+n < len(s) && s[i+n] != ' ' && s[i+n] != '\n' {

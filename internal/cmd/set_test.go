@@ -15,11 +15,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// resetSetFlags clears the shared set flag vars before one run. pflag's
-// StringVar keeps the last value, so without a reset a --value-json from an
-// earlier test would coerce this test's bare positional.
-// flagPathFile and flagFormat are spelled once across the cmd tests, where
-// goconst counts the occurrences.
+// resetSetFlags clears the shared set flag vars before one run: pflag's StringVar keeps the last value, so a --value-json from an earlier test would otherwise coerce this test's bare positional.
+// flagPathFile and flagFormat are spelled once across the cmd tests, where goconst counts the occurrences.
 const (
 	flagPathFile = "--path-file"
 	flagFormat   = "--format"
@@ -35,9 +32,7 @@ func resetSetFlags(t *testing.T) {
 	setPathFile = ""
 }
 
-// TestSetBarePositionalIsTextVerbatim pins the no-silent-rewrite contract: a
-// bare value lands exactly as typed, including the forms a JSON parse used
-// to coerce (1.10 became 1.1, true became a boolean, null became null).
+// TestSetBarePositionalIsTextVerbatim pins the no-silent-rewrite contract: a bare value lands exactly as typed, including the forms a JSON parse used to coerce (1.10 became 1.1, true became a boolean, null became null).
 func TestSetBarePositionalIsTextVerbatim(t *testing.T) {
 	for _, tc := range []struct{ typed, want string }{
 		{"1.10", "1.10"},
@@ -69,9 +64,7 @@ func TestSetBarePositionalIsTextVerbatim(t *testing.T) {
 	}
 }
 
-// TestSetTypedFormsStillCoerce pins that the JSON and CSV forms are the
-// documented route to a non-text value, so removing the bare parse costs
-// nothing.
+// TestSetTypedFormsStillCoerce pins that the JSON and CSV forms are the documented route to a non-text value, so removing the bare parse costs nothing.
 func TestSetTypedFormsStillCoerce(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "projectfile.yaml")
 	require.NoError(t, os.WriteFile(path, []byte("identity:\n  namespace: org.example\n  name: demo\n"), 0o600))
@@ -88,9 +81,7 @@ func TestSetTypedFormsStillCoerce(t *testing.T) {
 	assert.Contains(t, string(out), "count: 5")
 }
 
-// TestSetRefusesAValueTheFieldCannotHold pins the type guard on the path that
-// can still produce a non-text value: --value-json. The message names the
-// flag that spells the type instead of asking for a quoting dance.
+// TestSetRefusesAValueTheFieldCannotHold pins the type guard on the one path that still produces a non-text value, --value-json; the message names the flag that spells the type instead of a quoting dance.
 func TestSetRefusesAValueTheFieldCannotHold(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "projectfile.yaml")
 	before := []byte("identity:\n  name: demo\n")

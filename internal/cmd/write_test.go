@@ -16,8 +16,7 @@ import (
 	"kiota.ch/projectfile/core/v2/pkg/projectfile"
 )
 
-// foldedFixture is a document whose description is a folded scalar written the
-// way an author writes it: several physical lines, none near the limit.
+// foldedFixture is a document whose description is a folded scalar written the way an author writes it: several physical lines, none near the limit.
 const foldedFixture = `---
 $schema: https://projectfile.org/schema/v1.json
 identity:
@@ -31,10 +30,7 @@ license:
   spdx: MIT
 `
 
-// TestWriteProjectfileKeepsTheFold is the regression the fleet felt in
-// projectfile/actions: a plain `set` elsewhere in the document rewrote the
-// whole canvas and collapsed the folded description onto one 300-character
-// line, which the pre-push yamllint (line-length: 120) refused.
+// TestWriteProjectfileKeepsTheFold is the regression the fleet felt in projectfile/actions: a plain `set` elsewhere in the document rewrote the canvas and collapsed the folded description onto one 300-character line, which the pre-push yamllint (line-length: 120) refused.
 func TestWriteProjectfileKeepsTheFold(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "projectfile.yaml")
 	require.NoError(t, os.WriteFile(path, []byte(foldedFixture), 0o600))
@@ -58,9 +54,7 @@ func TestWriteProjectfileKeepsTheFold(t *testing.T) {
 	assert.Contains(t, string(out), "en: >-")
 }
 
-// TestWriteProjectfileKeepsTheValue pins that the refold is a shape change
-// only: folding a space into a line break is what the author wrote, so the
-// value reads back exactly as it was.
+// TestWriteProjectfileKeepsTheValue pins that the refold is a shape change only: folding a space into a line break is what the author wrote, so the value reads back exactly as it was.
 func TestWriteProjectfileKeepsTheValue(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "projectfile.yaml")
 	require.NoError(t, os.WriteFile(path, []byte(foldedFixture), 0o600))
@@ -76,9 +70,7 @@ func TestWriteProjectfileKeepsTheValue(t *testing.T) {
 	assert.Equal(t, before, after, "the refold must not change the value")
 }
 
-// TestRefoldFoldedBlocksKeepsParagraphBreaks pins that a blank line inside a
-// folded block — a real newline in the value — survives the rewrap and is
-// never used as a fold point, while each paragraph around it is still wrapped.
+// TestRefoldFoldedBlocksKeepsParagraphBreaks pins that an empty line inside a folded block — a real newline in the value — survives the rewrap and is never a fold point, while each paragraph around it is still wrapped.
 func TestRefoldFoldedBlocksKeepsParagraphBreaks(t *testing.T) {
 	long := strings.Repeat("word ", 40)
 	in := "a:\n  b: >-\n    " + long + "\n\n    " + long + "\n"
@@ -97,8 +89,7 @@ func TestRefoldFoldedBlocksKeepsParagraphBreaks(t *testing.T) {
 		"the value must be unchanged:\n%s", out)
 }
 
-// TestRefoldFoldedBlocksWrapsTheLongLine pins the positive case: the block is
-// rewrapped at isolated spaces and the value still reads back the same.
+// TestRefoldFoldedBlocksWrapsTheLongLine pins the positive case: the block is rewrapped at isolated spaces and the value still reads back the same.
 func TestRefoldFoldedBlocksWrapsTheLongLine(t *testing.T) {
 	in := "a:\n  b: >-\n    " + strings.Repeat("word ", 40) + "\n"
 	out, changed := refoldFoldedBlocks(in)
@@ -112,8 +103,7 @@ func TestRefoldFoldedBlocksWrapsTheLongLine(t *testing.T) {
 		"the value must be unchanged:\n%s", out)
 }
 
-// TestRefoldFoldedScalarsSkipsOtherEncodings pins that a TOML or JSON document
-// — which carries no block scalar — is left alone.
+// TestRefoldFoldedScalarsSkipsOtherEncodings pins that a TOML or JSON document, which carries no block scalar, is left alone.
 func TestRefoldFoldedScalarsSkipsOtherEncodings(t *testing.T) {
 	dir := t.TempDir()
 	toml := filepath.Join(dir, "projectfile.toml")
@@ -125,9 +115,7 @@ func TestRefoldFoldedScalarsSkipsOtherEncodings(t *testing.T) {
 	assert.Equal(t, "spec_version = \"1\"\n", string(out))
 }
 
-// TestRefoldFoldedBlocksLeavesUntouchedShapes pins the guards: a literal block
-// carries its newlines as data, a value with no fold point cannot be wrapped,
-// and a `>` inside a plain scalar is not a block indicator.
+// TestRefoldFoldedBlocksLeavesUntouchedShapes pins the guards: a literal block carries its newlines as data, a value with no fold point cannot be wrapped, and a `>` inside a plain scalar is not a block indicator.
 func TestRefoldFoldedBlocksLeavesUntouchedShapes(t *testing.T) {
 	for _, tc := range []struct{ name, in string }{
 		{"literal block", "a:\n  b: |\n    " + strings.Repeat("word ", 40) + "\n"},

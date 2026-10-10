@@ -9,9 +9,7 @@ import (
 	"testing"
 )
 
-// TestShortFlagFIsForceEverywhere pins the one-letter namespace: -f means
-// --force wherever a --force exists, and nothing else claims the letter.
-// A command may only add -f back by taking on a --force flag.
+// TestShortFlagFIsForceEverywhere pins the one-letter namespace: -f means --force wherever a --force exists, and nothing else claims the letter — a command may only add -f back by taking on a --force flag.
 func TestShortFlagFIsForceEverywhere(t *testing.T) {
 	forceOwners := map[string]bool{
 		cmdConvert: true,
@@ -34,8 +32,7 @@ func TestShortFlagFIsForceEverywhere(t *testing.T) {
 	}
 }
 
-// TestPathFileHasNoShortForm keeps the long spelling, so the flag's meaning
-// never changes with the command it sits on.
+// TestPathFileHasNoShortForm keeps the long spelling, so the flag's meaning never changes with the command it sits on.
 func TestPathFileHasNoShortForm(t *testing.T) {
 	for _, cmd := range rootCmd.Commands() {
 		f := cmd.Flags().Lookup("path-file")
@@ -48,8 +45,7 @@ func TestPathFileHasNoShortForm(t *testing.T) {
 	}
 }
 
-// TestFormatShortFormIsUniform pins the same rule one level down: a short
-// form for --format either exists on every command or on none.
+// TestFormatShortFormIsUniform pins the same rule one level down: a short form for --format exists on every command or on none.
 func TestFormatShortFormIsUniform(t *testing.T) {
 	withShort, without := []string{}, []string{}
 	for _, cmd := range rootCmd.Commands() {
@@ -68,8 +64,7 @@ func TestFormatShortFormIsUniform(t *testing.T) {
 	}
 }
 
-// TestConvertForceKeepsShortF is the companion: the flag that DOES own the
-// letter still answers it, so the reallocation is visible and deliberate.
+// TestConvertForceKeepsShortF is the companion: the flags that DO own the letter still answer it, so the reallocation is visible and deliberate.
 func TestConvertForceKeepsShortF(t *testing.T) {
 	f := convertCmd.Flags().ShorthandLookup("f")
 	if f == nil || f.Name != "force" {

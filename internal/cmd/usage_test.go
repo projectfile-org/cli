@@ -35,9 +35,7 @@ const (
 	flagNope         = "--nope"
 )
 
-// runRootCmd drives the shared root with args, capturing both streams. Flags
-// are reset afterwards: pflag keeps a --help value across runs, so one help
-// execution would silently turn every later one into a help print.
+// runRootCmd drives the shared root with args, capturing both streams; flags are reset afterwards, because pflag keeps a --help value across runs and one help execution would silently turn every later one into a help print.
 func runRootCmd(t *testing.T, args ...string) (string, error) {
 	t.Helper()
 	var buf bytes.Buffer

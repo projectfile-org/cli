@@ -79,9 +79,7 @@ func runSetInner(addr string, p fieldpath.Path, value any, pfPath string) error 
 
 	out, err := fieldpath.Set(doc, p, value)
 	if errors.Is(err, fieldpath.ErrTypeMismatch) {
-		// A bare positional is text, so a refusal now means the FIELD wants
-		// another type — the fix is the flag that spells it, not a quoting
-		// dance around a value that is already text.
+		// A bare positional is text, so a refusal means the FIELD wants another type — the flag that spells it is the fix, not a quoting dance on a value that is already text.
 		return fmt.Errorf("%s was not changed: it cannot hold text (%v). To store a number, list or object, use --value-json: pf-cli set %s --value-json '%v'", addr, value, addr, value)
 	}
 	if err != nil {
@@ -99,17 +97,7 @@ func runSetInner(addr string, p fieldpath.Path, value any, pfPath string) error 
 	return nil
 }
 
-// resolveSetValue picks the value from the flags + positional. Exactly
-// one source must be supplied: --value-json, --csv, or a bare positional.
-// The triplet conflict is rejected up front so callers see "you said both"
-// instead of silently preferring one over the others.
-//
-// A bare positional is a STRING, full stop. An earlier version ran it
-// through a JSON parse, which silently rewrote what the user typed —
-// `1.10` landed as `1.1`, `true` as a boolean, `null` as null. A version,
-// a serial or a build id looks numeric and is not, and the document then
-// carries a value the user never wrote. The JSON forms stay reachable
-// through the flags that exist for them.
+// resolveSetValue picks the value from the flags + positional; exactly one source is required (--value-json, --csv, a bare positional), and the triplet conflict is rejected up front so callers see "you said both" instead of a silent preference. A bare positional is a STRING, full stop: the JSON parse an earlier version ran it through silently rewrote what the user typed (1.10 landed as 1.1, true as a boolean), and a version, serial or build id looks numeric and is not. The JSON forms stay reachable through their flags.
 func resolveSetValue(args []string) (any, error) {
 	sources := 0
 	if len(args) >= 2 {

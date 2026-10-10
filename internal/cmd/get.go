@@ -748,9 +748,7 @@ func reportMissing(cmd *cobra.Command, entries []resolvedEntry, doc *projectfile
 	}
 }
 
-// suggestEntries prints the nearest existing address for every unresolved
-// path and reports how many it produced. When nothing is close enough to
-// name, the caller falls back to the ordinary not-found message.
+// suggestEntries prints the nearest existing address for every unresolved path and reports how many; when nothing is close enough to name, the caller falls back to the ordinary not-found message.
 func suggestEntries(cmd *cobra.Command, entries []resolvedEntry, doc *projectfile.Document) int {
 	n := 0
 	for _, r := range entries {
@@ -765,11 +763,7 @@ func suggestEntries(cmd *cobra.Command, entries []resolvedEntry, doc *projectfil
 	return n
 }
 
-// suggestAddress returns the address a mistyped path most likely meant: walk
-// the path down, and wherever a key does not exist substitute the nearest one
-// that does, so a typo in an early segment still yields the full address the
-// user was reaching for. An index or selector segment carries no key to match
-// on, and a walk that corrects nothing is not a suggestion at all.
+// suggestAddress returns the address a mistyped path most likely meant: walk the path down and substitute the nearest existing key wherever one is missing, so a typo in an early segment still yields the full address; an index/selector segment has no key to match, and a walk that corrects nothing is not a suggestion.
 func suggestAddress(doc *projectfile.Document, p fieldpath.Path) (string, bool) {
 	if doc == nil {
 		return "", false
@@ -808,8 +802,7 @@ func suggestAddress(doc *projectfile.Document, p fieldpath.Path) (string, bool) 
 	return fieldpath.Path{Segments: prefix}.String(), true
 }
 
-// closestKey picks the key in m nearest to want, or reports that nothing is
-// close enough to be the one the user meant.
+// closestKey picks the key in m nearest to want, or reports nothing was close enough to be the one meant.
 func closestKey(m map[string]any, want string) (string, bool) {
 	names := make([]string, 0, len(m))
 	for name := range m {

@@ -9,9 +9,7 @@ import (
 	"testing"
 )
 
-// TestExitCodeTableValues pins the numeric map itself, which USAGE.md and the
-// release notes promise to callers keying on specific codes. Every failure
-// class gets its own number; an unrecognised error is a runtime failure.
+// TestExitCodeTableValues pins the numeric map USAGE.md and the release notes promise callers keying on specific codes; an unrecognised error is a runtime failure.
 func TestExitCodeTableValues(t *testing.T) {
 	table := map[string]struct {
 		err  error
@@ -40,9 +38,7 @@ func TestExitCodeTableValues(t *testing.T) {
 	}
 }
 
-// TestDispatchErrorClassification keeps cobra's own dispatch failures in the
-// usage class while every RunE failure keeps its own — a blanket re-class
-// would turn a missing file into a usage mistake.
+// TestDispatchErrorClassification keeps cobra's own dispatch failures in the usage class while every RunE failure keeps its own: a blanket re-class would turn a missing file into a usage mistake.
 func TestDispatchErrorClassification(t *testing.T) {
 	for _, msg := range []string{
 		`unknown command "bogus" for "pf-cli"`,

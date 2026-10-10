@@ -41,8 +41,7 @@ var (
 	helpCommand = lipgloss.NewStyle().Bold(true).Foreground(lipgloss.Color("86"))
 )
 
-// helpGroups is the order the root help lists commands in: read, write,
-// validate, maintain. A command outside every group lands under "Other:".
+// helpGroups is the order the root help lists commands in: read, write, validate, maintain; a command outside every group lands under "Other:".
 var helpGroups = []*cobra.Group{
 	{ID: "read", Title: "Read:"},
 	{ID: "write", Title: "Write:"},
@@ -50,8 +49,7 @@ var helpGroups = []*cobra.Group{
 	{ID: "maintain", Title: "Maintain:"},
 }
 
-// helpTemplate orders every help screen as Description, Examples, Commands
-// (grouped), the common flags, then the full flag lists and the doc links.
+// helpTemplate orders every help screen as Description, Examples, Commands (grouped), the common flags, then the full flag lists and the doc links.
 const helpTemplate = `{{hdr "Usage:"}}{{if .HasAvailableSubCommands}}
   {{.CommandPath}} [command]{{else}}
   {{.UseLine}}{{end}}{{if gt (len .Aliases) 0}}
@@ -121,8 +119,7 @@ func flagError(cmd *cobra.Command, err error) error {
 	return errUsage(fmt.Sprintf("%s: %s. Run %s --help.", cmd.CommandPath(), err, cmd.CommandPath()))
 }
 
-// commandError rewrites cobra's own dispatch failure in the tool's own voice,
-// so an unknown command names the command and points at the command list.
+// commandError rewrites cobra's own dispatch failure in the tool's own voice, so an unknown command names itself and points at the command list.
 func commandError(_ *cobra.Command, err error) error {
 	msg := err.Error()
 	if strings.HasPrefix(msg, "unknown command") {
@@ -136,8 +133,7 @@ func commandError(_ *cobra.Command, err error) error {
 func registerHelpPalette() {
 	cobra.AddTemplateFunc("hdr", helpHeading.Render)
 	cobra.AddTemplateFunc("cmd", helpCommand.Render)
-	// commonFlags renders the short "flags worth knowing" block the checklist
-	// requires ahead of the full flag list; the exhaustive set follows.
+	// commonFlags renders the short "flags worth knowing" block the checklist requires ahead of the full list; the exhaustive set follows.
 	cobra.AddTemplateFunc("commonFlags", func(c *cobra.Command) string {
 		names := []string{"quiet", "verbose", "offline", "force", "dry-run", "path-file", "format"}
 		var b strings.Builder
@@ -154,16 +150,13 @@ func registerHelpPalette() {
 		}
 		return strings.TrimRight(b.String(), "\n")
 	})
-	// The three doc-link funcs resolve at render time: SetProjectfileYAML runs
-	// after package init, so an annotation stamped there would read empty.
+	// The three doc-link funcs resolve at RENDER time, because SetProjectfileYAML runs after package init and an eagerly stamped annotation reads empty.
 	cobra.AddTemplateFunc("hasDocLinks", func(_ *cobra.Command) bool {
 		docs, _ := docLinks()
 		return docs != ""
 	})
 	cobra.AddTemplateFunc("docDocs", func(c *cobra.Command) string {
-		// Cobra's own commands (completion) are added lazily and never pass
-		// through groupCmd, so the name is the fallback page; the root links
-		// the docs index and cobra's `help` has no page to link.
+		// Cobra's own commands are added lazily and never pass through groupCmd, so the name is the fallback page; the root keeps the index and `help` has no page.
 		page := c.Annotations["doc-page"]
 		if page == "" && c.Parent() != nil && c.Name() != "help" {
 			page = c.Name()
@@ -176,17 +169,13 @@ func registerHelpPalette() {
 	})
 }
 
-// linkTypeSourceCode and linkTypeBugs are the projectfile link types the docs
-// renderer reads; the projectfile schema names them.
+// linkTypeSourceCode and linkTypeBugs are the projectfile link types the docs renderer reads, named by the projectfile schema.
 const (
 	linkTypeSourceCode = "source-code"
 	linkTypeBugs       = "bugs"
 )
 
-// docLinks derives the documentation and issue-tracker URLs from the embedded
-// projectfile, so help points at the project's own declared addresses rather
-// than a hardcoded host. A public source repository is preferred for the docs
-// URL, since that is the page every reader can reach.
+// docLinks derives the docs and issue-tracker URLs from the embedded projectfile, so help points at declared addresses rather than a hardcoded host; the PUBLIC source repo is preferred for docs, being the page every reader can reach.
 func docLinks() (docs, issues string) {
 	var doc struct {
 		Links []struct {
@@ -235,9 +224,7 @@ func docLinks() (docs, issues string) {
 	return docs, issues
 }
 
-// docsForPage turns the docs index into the exact page or anchor a command's
-// own help links: the root keeps the index, a subcommand gets its USAGE.md
-// heading anchor.
+// docsForPage turns the docs index into the exact page a command's help links: the root keeps the index, a subcommand gets its USAGE.md heading anchor.
 func docsForPage(page string) string {
 	docs, _ := docLinks()
 	if page == "" {
@@ -247,18 +234,14 @@ func docsForPage(page string) string {
 	return base + "/blob/main/docs/USAGE.md#pf-cli-" + strings.ReplaceAll(page, " ", "-")
 }
 
-// groupCmd registers one subcommand under its help group and stamps its docs
-// page, so the root help lists it in a named group and its own --help carries
-// the exact page link.
+// groupCmd registers one subcommand under its help group and stamps its docs page, so the root lists it in a named group and its own --help carries the page link.
 func groupCmd(c *cobra.Command, groupID, page string) {
 	c.GroupID = groupID
 	stampDocLinks(c, page)
 	rootCmd.AddCommand(c)
 }
 
-// stampDocLinks records which docs page a command's help links. The URLs are
-// resolved lazily at render time — SetProjectfileYAML lands after package
-// init, so an eagerly computed value would read empty.
+// stampDocLinks records which docs page a command's help links; the URLs resolve lazily at render time, since SetProjectfileYAML lands after package init.
 func stampDocLinks(c *cobra.Command, page string) {
 	if c.Annotations == nil {
 		c.Annotations = map[string]string{}
@@ -266,8 +249,7 @@ func stampDocLinks(c *cobra.Command, page string) {
 	c.Annotations["doc-page"] = page
 }
 
-// conciseHelp is the bare-invocation screen: one line on what the tool does,
-// two worked examples, the flags worth knowing, and the pointer to --help.
+// conciseHelp is the bare-invocation screen: one line on what the tool does, worked examples, the flags worth knowing, and the pointer to --help.
 func conciseHelp(out io.Writer, docs, issues string) {
 	fmt.Fprintln(out, rootShort+" — read, write and validate projectfile documents.")
 	fmt.Fprintln(out)
@@ -333,9 +315,7 @@ func wrap80(s string) string {
 	return b.String()
 }
 
-// Exit codes, in one table so the mapping cannot drift between the call
-// sites and the docs that render it. A caller branches on the CLASS of the
-// failure; every nonzero that is not 2 is "the tool ran and could not finish".
+// Exit codes, in one table so the mapping cannot drift between the call sites and the docs that render it; a caller branches on the CLASS of failure, and every nonzero that is not 2 is "the tool ran and could not finish".
 const (
 	exitOK          = 0 // success
 	exitFailure     = 1 // runtime/IO failure: unreadable file, bad include, refused write
@@ -544,11 +524,7 @@ func init() {
 	stampDocLinks(rootCmd, "")
 }
 
-// classifyDispatchError re-classes cobra's own dispatch failures — unknown
-// command, unknown shorthand — into the usage class, so `pf-cli bogus` exits
-// 2 like every other bad invocation instead of a runtime failure's 1. A
-// subcommand's error never reaches here: only cobra's pre-dispatch failures
-// carry these shapes, and RunE errors are already classified.
+// classifyDispatchError re-classes cobra's own dispatch failures (unknown command, unknown shorthand) into the usage class, so `pf-cli bogus` exits 2 like every other bad invocation; a subcommand's error never reaches here.
 func classifyDispatchError(cmd *cobra.Command, err error) error {
 	msg := err.Error()
 	isDispatch := strings.HasPrefix(msg, "unknown command") ||
