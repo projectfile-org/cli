@@ -98,20 +98,44 @@ File and forge sync (bridge, forge, scan): use pf-bridge.
 Usage:
   pf-cli [command]
 
-Commands:
-  add         Append items to a projectfile list
-  cache       Manage pf-cli’s local cache for offline use
-  completion  Generate the autocompletion script for the specified shell
-  convert     Convert a projectfile between encodings (toml/yaml/json)
-  del         Remove a field, list item, or map entry from projectfile
+Examples:
+  pf-cli init --namespace org.example --name demo
+  pf-cli get identity.name
+  pf-cli set license.spdx MIT
+  pf-cli add keywords rust wasm
+  pf-cli del keywords[0]
+  pf-cli validate
+  pf-cli convert yaml toml
+  pf-cli optimize
+  pf-cli cache status
+
+Read:
   get         Read one or more projectfile fields
-  help        Help about any command
+
+Write:
+  add         Append items to a projectfile list
+  del         Remove a field, list item, or map entry from projectfile
+  set         Write a value into a projectfile field
+
+Validate:
+  validate    Validate a projectfile against the v1 JSON Schema
+
+Maintain:
+  cache       Manage pf-cli’s local cache for offline use
+  convert     Convert a projectfile between encodings (toml/yaml/json)
   includes    Manage the includes list
   init        Scaffold a new projectfile document
   optimize    Remove local fields that duplicate include values
-  set         Write a value into a projectfile field
   setup       Edit your per-user configuration interactively
-  validate    Validate a projectfile against the v1 JSON Schema
+
+Other:
+  completion  Generate the autocompletion script for the specified shell
+  help        Help about any command
+
+Common flags:
+    -q, --quiet          mute info; warnings and errors still print
+  -v, --verbose        show each step; also PF_CLI_VERBOSE=1
+  --offline            refuse network; use cache and embedded data
 
 Flags:
       --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
@@ -125,16 +149,11 @@ Flags:
   -v, --verbose              show each step; also PF_CLI_VERBOSE=1
   -V, --version              print the version
 
-Examples:
-  pf-cli init --namespace org.example --name demo
-  pf-cli get identity.name
-  pf-cli set license.spdx MIT
-  pf-cli add keywords rust wasm
-  pf-cli del keywords[0]
-  pf-cli validate
-  pf-cli convert yaml toml
-  pf-cli optimize
-  pf-cli cache status
+Documentation:
+  https://github.com/projectfile-org/cli/tree/main/docs
+
+Report a bug:
+  https://github.com/projectfile-org/cli/issues
 
 Use "pf-cli [command] --help" for more information about a command.
 ```
