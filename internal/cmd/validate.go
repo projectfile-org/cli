@@ -7,6 +7,7 @@ package cmd
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/santhosh-tekuri/jsonschema/v6"
 	"github.com/spf13/cobra"
@@ -64,13 +65,12 @@ var validateCmd = &cobra.Command{
 		schemaErr := validate.Validate(raw)
 		strictFail := strictIncludesFlag && len(redundant) > 0
 
-		if schemaErr == nil && !strictFail {
-			msg := fmt.Sprintf("%s: valid", path)
-			if len(redundant) > 0 {
-				msg = fmt.Sprintf("%s: valid (%d redundant include(s) — see warnings)", path, len(redundant))
-			}
-			genlog.Plain(msg)
-			return nil
+		// Violations accumulate so checks the schema cannot express contribute
+		// their own line: the TOML discriminator (spec §3.4) is keyed on the
+		// file extension because anyOf cannot tell encodings apart.
+		violations := make([]string, 0, 4)
+		if line, bad := tomlDiscriminator(path, raw); bad {
+			violations = append(violations, line)
 		}
 
 		// Schema violations print as a flat list of "location: reason" lines so
@@ -81,14 +81,26 @@ var validateCmd = &cobra.Command{
 			if !ok {
 				return fmt.Errorf("validate %s: %w", path, schemaErr)
 			}
-			lines := flattenViolations(ve)
+			violations = append(violations, flattenViolations(ve)...)
+		}
+
+		if len(violations) == 0 && !strictFail {
+			msg := fmt.Sprintf("%s: valid", path)
+			if len(redundant) > 0 {
+				msg = fmt.Sprintf("%s: valid (%d redundant include(s) — see warnings)", path, len(redundant))
+			}
+			genlog.Plain(msg)
+			return nil
+		}
+
+		if len(violations) > 0 {
 			out := cmd.ErrOrStderr()
-			fmt.Fprintf(out, "%s: invalid (%d violation", path, len(lines))
-			if len(lines) != 1 {
+			fmt.Fprintf(out, "%s: invalid (%d violation", path, len(violations))
+			if len(violations) != 1 {
 				fmt.Fprint(out, "s")
 			}
 			fmt.Fprintln(out, ")")
-			for _, line := range lines {
+			for _, line := range violations {
 				fmt.Fprintln(out, "  "+line)
 			}
 		}
@@ -98,10 +110,28 @@ var validateCmd = &cobra.Command{
 			return fmt.Errorf("schema validation failed; %d redundant include(s)", len(redundant))
 		case schemaErr != nil:
 			return fmt.Errorf("schema validation failed")
+		case len(violations) > 0:
+			return fmt.Errorf("TOML documents require spec_version = %q", specVersion)
 		default:
 			return fmt.Errorf("%d redundant include(s) — remove them or drop --strict-includes", len(redundant))
 		}
 	},
+}
+
+// specVersion is the value the TOML discriminator must carry (spec §3.4).
+const specVersion = "1"
+
+// tomlDiscriminator enforces the encoding-specific discriminator the schema's
+// anyOf cannot check: a .toml document MUST carry spec_version = "1" even when
+// it also has "$schema" (spec §3.4/§4.1). Keyed on the file extension.
+func tomlDiscriminator(path string, raw map[string]any) (string, bool) {
+	if !strings.EqualFold(filepath.Ext(path), ".toml") {
+		return "", false
+	}
+	if v, _ := raw["spec_version"].(string); v == specVersion {
+		return "", false
+	}
+	return "TOML carries its discriminator in spec_version — add spec_version = \"1\" at the top level", true
 }
 
 // flattenViolations walks the ValidationError tree depth-first and returns
