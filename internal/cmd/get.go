@@ -44,7 +44,7 @@ var getCmd = &cobra.Command{
 	Short: "Read one or more projectfile fields",
 	Long: "Read values out of the projectfile by path.\n" +
 		"Prints plain text, one value per line.\n" +
-		"Exits 1 when a path is missing.",
+		"Exits 3 when a path is missing, 2 when the invocation is wrong.",
 	Example: "  pf-cli get identity.name\n" +
 		"  pf-cli get repositories[role=origin].url\n" +
 		"  pf-cli get repositories[].url\n" +
@@ -152,7 +152,7 @@ func runGet(cmd *cobra.Command, args []string) error {
 		// --exists reports presence via exit code only; suppress stdout.
 		if missingAny {
 			genlog.FlushDebug()
-			os.Exit(1)
+			os.Exit(exitAbsent)
 		}
 		return nil
 	}
@@ -193,11 +193,12 @@ func runGet(cmd *cobra.Command, args []string) error {
 
 	if missingAny && !getExists {
 		// Missing values without a fallback are a soft failure: stdout
-		// already shows what we *could* resolve, but the process exits 1
-		// so shell pipelines can detect the partial result.
+		// already shows what we *could* resolve, but the process exits
+		// exitAbsent so shell pipelines can detect the partial result and
+		// tell an absent field from a runtime failure.
 		reportMissing(cmd, out, doc)
 		genlog.FlushDebug()
-		os.Exit(1)
+		os.Exit(exitAbsent)
 	}
 	return nil
 }
@@ -689,16 +690,6 @@ func isLangCode(s string) bool {
 	}
 	return true
 }
-
-// errUsage signals a usage problem so the CLI exits 2 (see Execute's
-// usageError branch) while still surfacing a readable error message.
-func errUsage(msg string) error {
-	return &usageError{msg: msg}
-}
-
-type usageError struct{ msg string }
-
-func (e *usageError) Error() string { return e.msg }
 
 func init() {
 	orderHelp(getCmd)

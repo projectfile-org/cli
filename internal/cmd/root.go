@@ -93,9 +93,20 @@ func usageArgs(fn cobra.PositionalArgs, detail ...string) cobra.PositionalArgs {
 
 // flagError rewrites pflag's parse failures in the tool's own voice — the
 // command, the library's reason, the fix — and routes them through errUsage so
-// they join the usage exit class (Execute's exit 2).
+// they join the usage exit class.
 func flagError(cmd *cobra.Command, err error) error {
 	return errUsage(fmt.Sprintf("%s: %s. Run %s --help.", cmd.CommandPath(), err, cmd.CommandPath()))
+}
+
+// commandError rewrites cobra's own dispatch failure in the tool's own voice,
+// so an unknown command names the command and points at the command list.
+func commandError(_ *cobra.Command, err error) error {
+	msg := err.Error()
+	if strings.HasPrefix(msg, "unknown command") {
+		msg = fmt.Sprintf("%s. Run pf-cli --help to see every command.", msg)
+		return errUsage(msg)
+	}
+	return errUsage(fmt.Sprintf("pf-cli: %s. Run pf-cli --help.", msg))
 }
 
 // registerHelpPalette exposes the lipgloss styles to the help template.
@@ -144,6 +155,54 @@ func wrap80(s string) string {
 	b.WriteString(line)
 	return b.String()
 }
+
+// Exit codes, in one table so the mapping cannot drift between the call
+// sites and the docs that render it. A caller branches on the CLASS of the
+// failure; every nonzero that is not 2 is "the tool ran and could not finish".
+const (
+	exitOK          = 0 // success
+	exitFailure     = 1 // runtime/IO failure: unreadable file, bad include, refused write
+	exitUsage       = 2 // the invocation itself: unknown flag/command, wrong arity, bad value
+	exitAbsent      = 3 // the requested field does not exist
+	exitInvalidated = 4 // the document was read and fails the v1 schema
+)
+
+// exitCodeFor maps a returned error onto its exit class; Execute applies it.
+func exitCodeFor(err error) int {
+	var ve *validationError
+	var ue *usageError
+	var ae *absentError
+	switch {
+	case errors.As(err, &ve):
+		return exitInvalidated
+	case errors.As(err, &ue):
+		return exitUsage
+	case errors.As(err, &ae):
+		return exitAbsent
+	}
+	return exitFailure
+}
+
+// usageError marks an invocation mistake — a bad flag, wrong arity, a value
+// the command cannot accept.
+type usageError struct{ msg string }
+
+func (e *usageError) Error() string { return e.msg }
+
+// absentError marks a requested field that does not exist, so a script tells
+// a mistyped address apart from a broken document.
+type absentError struct{ msg string }
+
+func (e *absentError) Error() string { return e.msg }
+
+// validationError marks a document that violates the v1 schema.
+type validationError struct{ msg string }
+
+func (e *validationError) Error() string { return e.msg }
+
+func errUsage(msg string) error      { return &usageError{msg: msg} }
+func errAbsent(msg string) error     { return &absentError{msg: msg} }
+func errValidation(msg string) error { return &validationError{msg: msg} }
 
 var rootCmd = &cobra.Command{
 	Use:   "pf-cli [command]",
@@ -283,6 +342,7 @@ func init() {
 		"colour output: auto|always|never; also PF_CLI_NO_COLOR=1")
 	rootCmd.PersistentFlags().DurationVar(&timeoutFlag, "timeout", netfetch.DefaultTimeout,
 		"per-attempt network timeout")
+	rootCmd.SetFlagErrorFunc(flagError)
 	rootCmd.SetOut(genlog.Styled(os.Stdout))
 	rootCmd.SetErr(genlog.Styled(os.Stderr))
 	defaultHelp := rootCmd.HelpFunc()
@@ -293,6 +353,22 @@ func init() {
 		defaultHelp(c, args)
 	})
 	rootCmd.Flags().BoolP("version", "V", false, "print the version")
+}
+
+// classifyDispatchError re-classes cobra's own dispatch failures — unknown
+// command, unknown shorthand — into the usage class, so `pf-cli bogus` exits
+// 2 like every other bad invocation instead of a runtime failure's 1. A
+// subcommand's error never reaches here: only cobra's pre-dispatch failures
+// carry these shapes, and RunE errors are already classified.
+func classifyDispatchError(cmd *cobra.Command, err error) error {
+	msg := err.Error()
+	isDispatch := strings.HasPrefix(msg, "unknown command") ||
+		strings.HasPrefix(msg, "unknown shorthand flag") ||
+		strings.HasPrefix(msg, "unknown flag")
+	if !isDispatch {
+		return err
+	}
+	return commandError(cmd, err)
 }
 
 // resolveVersion falls back to the Go build info when no release stamp was linked in.
@@ -322,16 +398,20 @@ func resolveVersion() string {
 func Execute() {
 	rootCmd.Long = rootLong()
 	rootCmd.Version = resolveVersion()
-	if err := rootCmd.Execute(); err != nil {
+	err := rootCmd.Execute()
+	if err != nil {
+		// Cobra's own dispatch failures (unknown command, unknown shorthand)
+		// are usage mistakes, not runtime failures; re-class before printing
+		// so they take the exit-2 class.
+		err = classifyDispatchError(rootCmd, err)
+		code := exitCodeFor(err)
 		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-		// Usage mistakes (bad flags/args) exit 2, distinct from a runtime
-		// failure's exit 1 — the standard CLI convention, so callers can tell
-		// "you invoked me wrong" apart from "the operation failed".
-		var ue *usageError
-		if errors.As(err, &ue) {
-			os.Exit(2)
-		}
+		// Exit classes let a caller tell "you invoked me wrong" (2), "the
+		// field you asked for is absent" (3) and "the document fails the
+		// schema" (4) apart from a runtime failure (1). Old-to-new: a
+		// failure that used to exit 1 and now exits 3 or 4 is still a
+		// nonzero, so every existing caller keeps its branch.
 		genlog.FlushDebug()
-		os.Exit(1)
+		os.Exit(code)
 	}
 }

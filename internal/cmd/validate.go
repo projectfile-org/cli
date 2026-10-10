@@ -118,13 +118,13 @@ var validateCmd = &cobra.Command{
 
 		switch {
 		case schemaErr != nil && strictFail:
-			return fmt.Errorf("schema validation failed; %d redundant include(s)", len(redundant))
+			return errValidation(fmt.Sprintf("schema validation failed; %d redundant include(s)", len(redundant)))
 		case schemaErr != nil:
-			return fmt.Errorf("schema validation failed")
+			return errValidation("schema validation failed")
 		case len(violations) > 0:
-			return fmt.Errorf("TOML documents require spec_version = %q", specVersion)
+			return errValidation(fmt.Sprintf("TOML documents require spec_version = %q", specVersion))
 		default:
-			return fmt.Errorf("%d redundant include(s) — remove them or drop --strict-includes", len(redundant))
+			return errValidation(fmt.Sprintf("%d redundant include(s) — remove them or drop --strict-includes", len(redundant)))
 		}
 	},
 }

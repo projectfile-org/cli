@@ -9,7 +9,7 @@ SPDX-License-Identifier: MIT
 $ pf-cli get --help
 Read values out of the projectfile by path.
 Prints plain text, one value per line.
-Exits 1 when a path is missing.
+Exits 3 when a path is missing, 2 when the invocation is wrong.
 
 Usage:
   pf-cli get <path>… [flags]
