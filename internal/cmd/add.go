@@ -14,7 +14,6 @@ import (
 	"kiota.ch/projectfile/core/v2/pkg/fieldpath"
 	"kiota.ch/projectfile/core/v2/pkg/genlog"
 	"kiota.ch/projectfile/core/v2/pkg/pflock"
-	"kiota.ch/projectfile/core/v2/pkg/projectfile"
 )
 
 var (
@@ -89,7 +88,7 @@ func runAddInner(addr string, p fieldpath.Path, values []any, pfPath string) err
 		genlog.Plain(fmt.Sprintf("add %s: %d skipped (already present)", addr, skippedCount))
 		return nil
 	}
-	if err := projectfile.Write(doc, pfPath); err != nil {
+	if err := writeProjectfile(doc, pfPath); err != nil {
 		return fmt.Errorf("write projectfile: %w", err)
 	}
 	genlog.Success(fmt.Sprintf("add %s: %d added, %d skipped", addr, addedCount, skippedCount))

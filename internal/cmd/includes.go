@@ -61,7 +61,7 @@ func runIncludesPin(_ *cobra.Command, args []string) error {
 			genlog.Success(fmt.Sprintf("(%d include(s) would be pinned — dry-run, not written)", len(pinned)))
 			return nil
 		}
-		if err := projectfile.Write(projectfile.FromMap(raw), pfPath); err != nil {
+		if err := writeProjectfile(projectfile.FromMap(raw), pfPath); err != nil {
 			return fmt.Errorf("write projectfile: %w", err)
 		}
 		genlog.Success(fmt.Sprintf("pinned %d include(s) in %s", len(pinned), pfPath))

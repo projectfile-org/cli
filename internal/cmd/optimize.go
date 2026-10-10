@@ -84,7 +84,7 @@ func runOptimizeInner(pfPath string) error {
 		genlog.Plain("no includes declared — nothing to optimize")
 		if projectfile.YAMLOutputSortedEnabled() && !optimizeDryRun {
 			doc := projectfile.FromMap(rawBase)
-			return projectfile.Write(doc, pfPath)
+			return writeProjectfile(doc, pfPath)
 		}
 		return nil
 	}
@@ -95,7 +95,7 @@ func runOptimizeInner(pfPath string) error {
 		genlog.Plain("already optimized — no redundant fields found")
 		if projectfile.YAMLOutputSortedEnabled() && !optimizeDryRun {
 			doc := projectfile.FromMap(rawBase)
-			return projectfile.Write(doc, pfPath)
+			return writeProjectfile(doc, pfPath)
 		}
 		return nil
 	}
@@ -113,7 +113,7 @@ func runOptimizeInner(pfPath string) error {
 	}
 
 	doc := projectfile.FromMap(rawBase)
-	if err := projectfile.Write(doc, pfPath); err != nil {
+	if err := writeProjectfile(doc, pfPath); err != nil {
 		return fmt.Errorf("write projectfile: %w", err)
 	}
 

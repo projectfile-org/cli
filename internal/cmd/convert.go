@@ -131,6 +131,9 @@ func runConvert(_ *cobra.Command, args []string) error {
 		if err := projectfile.WriteClean(doc, dstPath); err != nil {
 			return fmt.Errorf("write %s: %w", dstPath, err)
 		}
+		if err := refoldFoldedScalars(dstPath); err != nil {
+			return fmt.Errorf("refold %s: %w", dstPath, err)
+		}
 		genlog.Success(fmt.Sprintf("convert: wrote %s", dstPath))
 
 		outRaw, err := projectfile.ReadRawBaseFromPath(dstPath)

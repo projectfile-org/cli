@@ -92,7 +92,7 @@ func runSetInner(addr string, p fieldpath.Path, value any, pfPath string) error 
 		genlog.Success(fmt.Sprintf("set %s = %v (dry-run, not written)", addr, value))
 		return nil
 	}
-	if err := projectfile.Write(out, pfPath); err != nil {
+	if err := writeProjectfile(out, pfPath); err != nil {
 		return fmt.Errorf("write projectfile: %w", err)
 	}
 	genlog.Success(fmt.Sprintf("set %s = %v", addr, value))

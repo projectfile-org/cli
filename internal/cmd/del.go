@@ -12,7 +12,6 @@ import (
 	"kiota.ch/projectfile/core/v2/pkg/fieldpath"
 	"kiota.ch/projectfile/core/v2/pkg/genlog"
 	"kiota.ch/projectfile/core/v2/pkg/pflock"
-	"kiota.ch/projectfile/core/v2/pkg/projectfile"
 )
 
 var (
@@ -72,7 +71,7 @@ func runDelInner(addr string, p fieldpath.Path, pfPath string) error {
 		genlog.Success(fmt.Sprintf("del %s (dry-run, not written)", addr))
 		return nil
 	}
-	if err := projectfile.Write(out, pfPath); err != nil {
+	if err := writeProjectfile(out, pfPath); err != nil {
 		return fmt.Errorf("write projectfile: %w", err)
 	}
 	genlog.Success(fmt.Sprintf("del %s", addr))

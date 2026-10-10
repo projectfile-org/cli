@@ -196,7 +196,7 @@ func basicInit(out io.Writer, in io.Reader, dir string, opts basicOptions) error
 		return fmt.Errorf("create directory %s: %w", dir, err)
 	}
 	path := filepath.Join(dir, "projectfile."+format)
-	if err := projectfile.Write(doc, path); err != nil {
+	if err := writeProjectfile(doc, path); err != nil {
 		return fmt.Errorf("write projectfile: %w", err)
 	}
 	genlog.Success(fmt.Sprintf("created %s (basic scaffold — install pf-bridge for full detection)", filepath.Base(path)))
