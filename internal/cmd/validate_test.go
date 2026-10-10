@@ -48,3 +48,59 @@ func TestValidateAcceptsTOMLWithSpecVersion(t *testing.T) {
 		t.Fatalf("document with spec_version = \"1\" failed: %s (%v)", out, err)
 	}
 }
+
+func TestValidateNamesRepositoriesOriginRule(t *testing.T) {
+	for _, tc := range []struct {
+		name string
+		body string
+		want string
+	}{
+		{
+			name: "none origin",
+			body: "repositories:\n  - url: https://example.org/a\n    role: mirror\n  - url: https://example.org/b\n    role: archive\n",
+			want: "2 entries, 0 marked role: origin, exactly one required",
+		},
+		{
+			name: "two origin",
+			body: "repositories:\n  - url: https://example.org/a\n    role: origin\n  - url: https://example.org/b\n    role: origin\n",
+			want: "2 entries, 2 marked role: origin, exactly one required",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			writeFile(t, dir, "projectfile.yaml", "schema: https://projectfile.org/schema/v1.json\n\nidentity:\n  namespace: org.example\n  name: demo\n\n"+tc.body)
+			out, err := runValidateCmd(t, dir)
+			if err == nil {
+				t.Fatalf("broken origin cardinality validated clean: %s", out)
+			}
+			if !strings.Contains(out, tc.want) {
+				t.Fatalf("got %q, want the count message %q", out, tc.want)
+			}
+			if !strings.Contains(out, "https://example.org/a") {
+				t.Fatalf("got %q, want the entry URLs listed", out)
+			}
+			for _, raw := range []string{"maxItems", "max 1 items required"} {
+				if strings.Contains(out, raw) {
+					t.Fatalf("got %q, want the opaque schema wording replaced", out)
+				}
+			}
+		})
+	}
+}
+
+func TestValidateKeepsNonCardinalityRepositoriesFailures(t *testing.T) {
+	dir := t.TempDir()
+	// Two entries, exactly one origin — the cardinality rule holds, so a
+	// malformed second entry must keep its own schema line.
+	writeFile(t, dir, "projectfile.yaml", "$schema: https://projectfile.org/schema/v1.json\nidentity:\n  namespace: org.example\n  name: demo\n\nrepositories:\n  - url: https://example.org/a\n    role: origin\n  - not-a-map\n")
+	out, err := runValidateCmd(t, dir)
+	if err == nil {
+		t.Fatalf("malformed entry validated clean: %s", out)
+	}
+	if strings.Contains(out, "exactly one required") {
+		t.Fatalf("got %q, want the cardinality message absent", out)
+	}
+	if !strings.Contains(out, "/repositories/1") {
+		t.Fatalf("got %q, want the per-entry failure kept", out)
+	}
+}

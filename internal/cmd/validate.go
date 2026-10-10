@@ -75,13 +75,24 @@ var validateCmd = &cobra.Command{
 
 		// Schema violations print as a flat list of "location: reason" lines so
 		// the output is grep-friendly and stable across schema-library upgrades
-		// — the nested ValidationError tree is an internal detail.
+		// — the nested ValidationError tree is an internal detail. The
+		// origin-cardinality oneOf over the whole list is replaced by a message
+		// naming the entries, since the schema never says which they are.
 		if schemaErr != nil {
 			ve, ok := validate.AsValidationError(schemaErr)
 			if !ok {
 				return fmt.Errorf("validate %s: %w", path, schemaErr)
 			}
-			violations = append(violations, flattenViolations(ve)...)
+			named, bad := repositoriesOriginViolation(raw)
+			for _, line := range flattenViolations(ve) {
+				if bad && isRepositoriesViolation(line) {
+					continue
+				}
+				violations = append(violations, line)
+			}
+			if bad {
+				violations = append(violations, named)
+			}
 		}
 
 		if len(violations) == 0 && !strictFail {
@@ -132,6 +143,49 @@ func tomlDiscriminator(path string, raw map[string]any) (string, bool) {
 		return "", false
 	}
 	return "TOML carries its discriminator in spec_version — add spec_version = \"1\" at the top level", true
+}
+
+// repositoriesPrefixes match every leaf location the origin-cardinality oneOf
+// reports under, from the list itself down to a single entry's role.
+var repositoriesPrefixes = []string{"at '/repositories'", "at '/repositories/"}
+
+func isRepositoriesViolation(line string) bool {
+	for _, p := range repositoriesPrefixes {
+		if strings.HasPrefix(line, p) {
+			return true
+		}
+	}
+	return false
+}
+
+// repositoriesOriginViolation rewrites the schema's opaque oneOf failure over
+// the whole list (spec §4.3a) into a message naming the entries: with more than
+// one repository, exactly one MUST carry role: origin — a sole entry is
+// implicitly origin and unconstrained. It only reports when the rule is
+// actually broken, so genuine per-entry failures keep their own lines.
+func repositoriesOriginViolation(raw map[string]any) (string, bool) {
+	list, ok := raw["repositories"].([]any)
+	if !ok || len(list) < 2 {
+		return "", false
+	}
+	origins, urls := 0, make([]string, 0, len(list))
+	for _, item := range list {
+		entry, ok := item.(map[string]any)
+		if !ok {
+			return "", false
+		}
+		if role, _ := entry["role"].(string); role == "origin" {
+			origins++
+		}
+		if url, _ := entry["url"].(string); url != "" {
+			urls = append(urls, url)
+		}
+	}
+	if origins == 1 {
+		return "", false
+	}
+	return fmt.Sprintf("repositories: %d entries, %d marked role: origin, exactly one required. URLs: %s",
+		len(list), origins, strings.Join(urls, " ")), true
 }
 
 // flattenViolations walks the ValidationError tree depth-first and returns
