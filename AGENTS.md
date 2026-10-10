@@ -155,6 +155,29 @@ color in the setup-wizard palette, auto-off when piped or under NO_COLOR;
 every help line stays within 80 visible columns.
 Iterate with `go build ./... && go test ./...`.
 
+### Help rendering
+
+The root `--help` order (Description, Examples, Commands, Common flags,
+Flags, Global flags, doc links) and the concise screen a bare invocation
+prints both live in `helpTemplate` in `internal/cmd/root.go`. Commands are
+grouped read / write / validate / maintain through `groupCmd(cmd, groupID,
+page)` — a new command MUST go through that helper or it lands ungrouped and
+loses its docs page. The docs and issue URLs are resolved at RENDER time from
+`projectfileYAML` (`docLinks`), because `SetProjectfileYAML` runs after package
+init, so an eagerly stamped annotation reads empty.
+
+### The YAML emitter cannot fold
+
+`go.yaml.in/yaml/v3` sets `best_width = -1` (unbounded) and exposes no width
+knob, so every folded `>-` block scalar comes back from a write as ONE physical
+line — the marker survives, the author breaks do not, and a long description
+then fails every consumer yamllint (`line-length: 120`). `internal/cmd/write.go`
+closes that gap: `writeProjectfile` (the only writer every mutating command uses)
+re-folds the block at isolated spaces after the write. Keep the pass TEXT-level
+and YAML-only: a value with embedded newlines is re-emitted by the emitter with a
+empty line per break, which changes the value. A literal `|` block, a single
+unbreakable word, a paragraph break and a `>` inside a plain scalar are left alone.
+
 ## Contracts (do NOT rename)
 
 The binary is `pf-cli` (the `pf-*` triad with `pf-ci` + `pf-bridge`); its image
@@ -164,3 +187,13 @@ contracts share the `cli`/`pf-cli` spelling: the `# pf-cli-managed:` sentinel,
 shared `pf/` XDG cache slot (its includes cache under
 `$XDG_CACHE_HOME/pf/`, shared with pf-bridge and pf-ci). Renaming any of
 these would orphan existing files/config.
+
+### Exit codes
+
+`Execute` maps every failure onto one class through the table in
+`internal/cmd/root.go`: 1 runtime/IO, 2 bad invocation (the cobra unknown-command
+and unknown shorthand are re-classed into this one), 3 the requested field is
+absent, 4 the document fails the v1 schema. A new failure mode gets its own
+number in that table and a row in `docs/usage.d/20-exit-codes.md` — folding it
+silently into 1 is what makes a script branch useless. The table is pinned by
+`internal/cmd/exit_codes_test.go`.
