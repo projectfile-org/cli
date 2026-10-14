@@ -37,8 +37,8 @@ set -eu
 REPO="${PROJECTFILE_SPECIFICATION_REPO:-https://kiota.ch/projectfile/specification.git}"
 REF="${PROJECTFILE_SPECIFICATION_REF:-main}"
 DEST="_specification"
-SOURCE="${DEST}/spec/schema/v1.json"
-TARGET="internal/validate/embedded/v1.json"
+SCHEMAS="v1.json v1-fragment.json"
+TARGET_DIR="internal/validate/embedded"
 
 log() { printf '[fetch-schema] %s\n' "$*" >&2; }
 
@@ -83,15 +83,15 @@ else
     git clone --quiet --no-tags --branch "${REF}" "${REPO}" "${DEST}"
 fi
 
-if [ ! -f "${SOURCE}" ]; then
-    log "ERROR: ${SOURCE} missing in the specification clone at ref=${REF}"
-    exit 1
-fi
-
-# The REUSE sidecar travels with the file: the embed target is untracked here,
-# so nothing else would carry its licence.
-mkdir --parents "$(dirname "${TARGET}")"
-cp "${SOURCE}" "${TARGET}"
-cp "${SOURCE}.license" "${TARGET}.license"
-
-log "ok schema=${TARGET} bytes=$(wc --bytes <"${TARGET}") spec=$(git -C "${DEST}" rev-parse --short HEAD) ref=${REF}"
+mkdir --parents "${TARGET_DIR}"
+for schema in ${SCHEMAS}; do
+    source="${DEST}/spec/schema/${schema}"
+    if [ ! -f "${source}" ]; then
+        log "ERROR: ${source} missing in the specification clone at ref=${REF}"
+        exit 1
+    fi
+    # The REUSE sidecar travels with the file: the embed target is untracked here.
+    cp "${source}" "${TARGET_DIR}/${schema}"
+    cp "${source}.license" "${TARGET_DIR}/${schema}.license"
+    log "ok schema=${TARGET_DIR}/${schema} bytes=$(wc --bytes <"${TARGET_DIR}/${schema}") spec=$(git -C "${DEST}" rev-parse --short HEAD) ref=${REF}"
+done

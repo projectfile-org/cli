@@ -130,3 +130,14 @@ func TestValidateLinkExtraProperty(t *testing.T) {
 	err := validate.Validate(doc)
 	assert.NoError(t, err)
 }
+
+func TestFragmentAcceptsPartialDoc(t *testing.T) {
+	doc := map[string]any{"description": "shared fields only"}
+	assert.NoError(t, validate.Fragment(doc))
+	assert.Error(t, validate.Validate(doc))
+}
+
+func TestFragmentRejectsWrongShape(t *testing.T) {
+	doc := map[string]any{"identity": "not-an-object"}
+	require.Error(t, validate.Fragment(doc))
+}

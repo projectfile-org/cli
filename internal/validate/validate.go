@@ -4,8 +4,7 @@
 
 // Package validate runs the projectfile v1 JSON Schema against a parsed
 // projectfile document. The schema is embedded at build time so validation
-// is offline; embedded/v1.json is a verbatim copy of the canonical
-// ../specification/spec/schema/v1.json and is refreshed by hand.
+// is offline; .scripts/fetch-schema.sh installs embedded/ from the specification.
 package validate
 
 import (
@@ -23,37 +22,54 @@ import (
 //go:embed embedded/v1.json
 var schemaBytes []byte
 
+//go:embed embedded/v1-fragment.json
+var fragmentSchemaBytes []byte
+
 // SchemaURL is the canonical $id of the embedded schema; the compiler keys
 // its resource cache on this URL.
 const SchemaURL = "https://projectfile.org/schema/v1.json"
 
-// compileOnce guards the one-shot schema compile — the schema is constant
-// per binary, and re-parsing it on every Validate call would be wasteful.
+// FragmentSchemaURL is the $id of the schema for a document only ever included.
+const FragmentSchemaURL = "https://projectfile.org/schema/v1-fragment.json"
+
+// compileOnce guards the one-shot schema compile — the schemas are constant
+// per binary, and re-parsing them on every Validate call would be wasteful.
 var (
 	compileOnce sync.Once
-	compiled    *jsonschema.Schema
+	compiled    map[string]*jsonschema.Schema
 	compileErr  error
 )
 
-func loadSchema() (*jsonschema.Schema, error) {
+func loadSchema(url string) (*jsonschema.Schema, error) {
 	compileOnce.Do(func() {
-		raw, err := jsonschema.UnmarshalJSON(bytes.NewReader(schemaBytes))
-		if err != nil {
-			compileErr = fmt.Errorf("parse embedded projectfile schema: %w", err)
-			return
-		}
 		c := jsonschema.NewCompiler()
 		// JSON Schema specifies ECMA-262 regex semantics, which Go's stdlib
 		// regexp (RE2) does not implement — RE2 rejects lookarounds and
 		// backreferences. regexp2 is the ECMA-262-compatible engine.
 		c.UseRegexpEngine(ecma262Regexp)
-		if err := c.AddResource(SchemaURL, raw); err != nil {
-			compileErr = fmt.Errorf("register embedded projectfile schema: %w", err)
-			return
+		resources := map[string][]byte{SchemaURL: schemaBytes, FragmentSchemaURL: fragmentSchemaBytes}
+		for id, data := range resources {
+			raw, err := jsonschema.UnmarshalJSON(bytes.NewReader(data))
+			if err != nil {
+				compileErr = fmt.Errorf("parse embedded schema %s: %w", id, err)
+				return
+			}
+			if err := c.AddResource(id, raw); err != nil {
+				compileErr = fmt.Errorf("register embedded schema %s: %w", id, err)
+				return
+			}
 		}
-		compiled, compileErr = c.Compile(SchemaURL)
+		compiled = make(map[string]*jsonschema.Schema, len(resources))
+		for id := range resources {
+			s, err := c.Compile(id)
+			if err != nil {
+				compileErr = fmt.Errorf("compile embedded schema %s: %w", id, err)
+				return
+			}
+			compiled[id] = s
+		}
 	})
-	return compiled, compileErr
+	return compiled[url], compileErr
 }
 
 // Validate runs the projectfile v1 schema against doc. doc may come from any
@@ -62,7 +78,16 @@ func loadSchema() (*jsonschema.Schema, error) {
 // encoding/json to normalise non-JSON natives (TOML int64, time.Time, YAML
 // alias collapse).
 func Validate(doc any) error {
-	s, err := loadSchema()
+	return validateAgainst(SchemaURL, doc)
+}
+
+// Fragment runs the fragment schema against doc, a document only ever reached through includes.
+func Fragment(doc any) error {
+	return validateAgainst(FragmentSchemaURL, doc)
+}
+
+func validateAgainst(url string, doc any) error {
+	s, err := loadSchema(url)
 	if err != nil {
 		return err
 	}

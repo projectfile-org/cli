@@ -193,6 +193,8 @@ org:
           - _specification
           - internal/validate/embedded/v1.json
           - internal/validate/embedded/v1.json.license
+          - internal/validate/embedded/v1-fragment.json
+          - internal/validate/embedded/v1-fragment.json.license
     status: maintained
 repositories:
   - branch: main

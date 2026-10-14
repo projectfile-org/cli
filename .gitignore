@@ -21,6 +21,8 @@
 _specification
 coverage.html
 coverage.out
+internal/validate/embedded/v1-fragment.json
+internal/validate/embedded/v1-fragment.json.license
 internal/validate/embedded/v1.json
 internal/validate/embedded/v1.json.license
 reports/

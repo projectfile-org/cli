@@ -22,6 +22,9 @@ import (
 // without breaking existing valid documents; a CI gate opts in explicitly.
 var strictIncludesFlag bool
 
+// fragmentFlag validates one included file against v1-fragment.json, without merging includes.
+var fragmentFlag bool
+
 var validateCmd = &cobra.Command{
 	Use:   "validate [directory]",
 	Short: "Validate a projectfile against the v1 JSON Schema",
@@ -29,13 +32,17 @@ var validateCmd = &cobra.Command{
 		"Warns about repeated includes.",
 	Example: "  pf-cli validate\n" +
 		"  pf-cli validate /tmp/demo\n" +
-		"  pf-cli validate --strict-includes",
+		"  pf-cli validate --strict-includes\n" +
+		"  pf-cli validate --fragment .projectfile/release.yaml",
 	Aliases: []string{"lint"},
 	Args:    usageArgs(cobra.MaximumNArgs(1)),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		dir := "."
 		if len(args) > 0 {
 			dir = args[0]
+		}
+		if fragmentFlag {
+			return validateFragment(cmd, args)
 		}
 
 		raw, path, err := projectfile.ReadRawWithOptions(dir, readOpts())
@@ -129,6 +136,33 @@ var validateCmd = &cobra.Command{
 	},
 }
 
+// validateFragment checks one file the way an including document sees it: no discriminator, no required fields.
+func validateFragment(cmd *cobra.Command, args []string) error {
+	if len(args) == 0 {
+		return errUsage("--fragment needs the file to check")
+	}
+	raw, err := projectfile.ReadRawBaseFromPath(args[0])
+	if err != nil {
+		return err
+	}
+	schemaErr := validate.Fragment(raw)
+	if schemaErr == nil {
+		genlog.Plain(fmt.Sprintf("%s: valid fragment", args[0]))
+		return nil
+	}
+	ve, ok := validate.AsValidationError(schemaErr)
+	if !ok {
+		return fmt.Errorf("validate %s: %w", args[0], schemaErr)
+	}
+	violations := flattenViolations(ve)
+	out := cmd.ErrOrStderr()
+	fmt.Fprintf(out, "%s: invalid fragment (%d violation(s))\n", args[0], len(violations))
+	for _, line := range violations {
+		fmt.Fprintln(out, "  "+line)
+	}
+	return errValidation("fragment schema validation failed")
+}
+
 // specVersion is the value the TOML discriminator must carry (spec §3.4).
 const specVersion = "1"
 
@@ -212,5 +246,7 @@ func flattenViolations(ve *jsonschema.ValidationError) []string {
 func init() {
 	validateCmd.Flags().BoolVar(&strictIncludesFlag, "strict-includes", false,
 		"fail on repeated includes (default: warn)")
+	validateCmd.Flags().BoolVar(&fragmentFlag, "fragment", false,
+		"treat the argument as one included file and check it against the fragment schema")
 	groupCmd(validateCmd, "validate", "validate")
 }
