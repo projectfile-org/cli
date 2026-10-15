@@ -708,11 +708,13 @@ Examples:
   pf-cli validate
   pf-cli validate /tmp/demo
   pf-cli validate --strict-includes
+  pf-cli validate --fragment .projectfile/release.yaml
 
 Common flags:
   …
 
 Flags:
+      --fragment          treat the argument as one included file and check it against the fragment schema
   -h, --help              help for validate
       --strict-includes   fail on repeated includes (default: warn)
 
