@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"projectfile.org/projectfile/cli/internal/validate"
+	"projectfile.org/projectfile/cli/v3/internal/validate"
 )
 
 const testURLKey = "url"

@@ -2,7 +2,7 @@
 //
 // SPDX-License-Identifier: MIT
 
-module projectfile.org/projectfile/cli
+module projectfile.org/projectfile/cli/v3
 
 go 1.27.2
 

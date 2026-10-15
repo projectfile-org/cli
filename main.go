@@ -7,7 +7,7 @@ package main
 import (
 	_ "embed"
 
-	"projectfile.org/projectfile/cli/internal/cmd"
+	"projectfile.org/projectfile/cli/v3/internal/cmd"
 )
 
 //go:embed projectfile.yaml

@@ -74,7 +74,7 @@ without pf-cli knowing what a base image is.
 ```text
 projectfile/cli/
 ├── main.go               entry point → internal/cmd.Execute (Cobra root)
-├── go.mod                module projectfile.org/projectfile/cli
+├── go.mod                module projectfile.org/projectfile/cli/v3
 │                         require kiota.ch/projectfile/core + replace => ../core
 └── internal/
     ├── cmd/              Cobra commands + scope (scoped resolve + `${…}` expansion for get)
@@ -146,7 +146,7 @@ make install-binary   # build-binaries + copy dist/pf-cli into ~/.local/bin
 make help             # every target
 ```
 
-`-X projectfile.org/projectfile/cli/internal/cmd.version` carries the release
+`-X projectfile.org/projectfile/cli/v3/internal/cmd.version` carries the release
 version (a clean tag on the forge, `git describe`/`dev` on the make-plane).
 The root help Description is `identity.description.en` from `projectfile.yaml`,
 embedded via `main.go` (`//go:embed`, so the `Dockerfile` builder `COPY` must

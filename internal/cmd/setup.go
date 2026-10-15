@@ -7,7 +7,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"projectfile.org/projectfile/cli/internal/usersetup"
+	"projectfile.org/projectfile/cli/v3/internal/usersetup"
 )
 
 var setupFormat string

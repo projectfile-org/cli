@@ -14,7 +14,7 @@ import (
 
 	"kiota.ch/projectfile/core/v2/pkg/genlog"
 	"kiota.ch/projectfile/core/v2/pkg/projectfile"
-	"projectfile.org/projectfile/cli/internal/validate"
+	"projectfile.org/projectfile/cli/v3/internal/validate"
 )
 
 // strictIncludesFlag promotes redundant-include findings from warnings to a

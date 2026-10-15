@@ -16,7 +16,7 @@ import (
 	"kiota.ch/projectfile/core/v2/pkg/genlog"
 	"kiota.ch/projectfile/core/v2/pkg/pflock"
 	"kiota.ch/projectfile/core/v2/pkg/projectfile"
-	"projectfile.org/projectfile/cli/internal/validate"
+	"projectfile.org/projectfile/cli/v3/internal/validate"
 )
 
 const (

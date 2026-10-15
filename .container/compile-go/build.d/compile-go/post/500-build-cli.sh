@@ -9,7 +9,7 @@
   # shellcheck source=/dev/null
   . b19-i18n
 
-  LDFLAGS="-s -w -X projectfile.org/projectfile/cli/internal/cmd.version=${M6E_VERSION:-dev}"
+  LDFLAGS="-s -w -X projectfile.org/projectfile/cli/v3/internal/cmd.version=${M6E_VERSION:-dev}"
 
   b19-run "CLI" "$(_ 'Download modules')" --      \
     go mod download
