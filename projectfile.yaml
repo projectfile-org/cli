@@ -184,6 +184,8 @@ org:
           - internal/validate/embedded/v1-fragment.json
           - internal/validate/embedded/v1-fragment.json.license
     status: maintained
+    release:
+      tag-prefix: v
 repositories:
   - branch: main
     role: origin
