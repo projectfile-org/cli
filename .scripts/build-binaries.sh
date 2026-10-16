@@ -17,8 +17,8 @@ esac
 
 hostos="$(go env GOHOSTOS)"   # the real host even under a cross-compile
 hostarch="$(go env GOHOSTARCH)"
-goos="${GOOS:-${hostos}}"     # the matrix sets these per cell; unset means a host-native build
-goarch="${GOARCH:-${hostarch}}"
+goos="${TARGET_OS:-${GOOS:-${hostos}}}"     # the matrix sets these per cell; unset means a host-native build
+goarch="${TARGET_ARCH:-${GOARCH:-${hostarch}}}"
 out="$(GOOS="${goos}" GOARCH="${goarch}" .makefile/core/scripts/asset-name.sh dist/pf-cli)"
 
 log() { printf '[build-binaries] %s\n' "$*" >&2; }
