@@ -15,7 +15,7 @@
     go mod download
 
   b19-run "CLI" "$(_ 'Build pf-cli')" --      \
-    go build -ldflags="${LDFLAGS}" -o pf-cli .
+    go build -ldflags="${LDFLAGS}" -o pf-cli ./cmd/pf-cli
 
   b19-strip "CLI" pf-cli
 

@@ -23,6 +23,6 @@ log() { printf '[build-binaries] %s\n' "$*" >&2; }
 log "building pf-cli ${version} for ${goos}/${goarch}"
 
 go build -ldflags="-s -w -X projectfile.org/projectfile/cli/v3/internal/cmd.version=${version}"      \
-         -o "${out}" .
+         -o "${out}" ./cmd/pf-cli
 
 printf '%s\n' "${out}"

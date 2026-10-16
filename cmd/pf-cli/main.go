@@ -5,15 +5,11 @@
 package main
 
 import (
-	_ "embed"
-
+	"projectfile.org/projectfile/cli/v3"
 	"projectfile.org/projectfile/cli/v3/internal/cmd"
 )
 
-//go:embed projectfile.yaml
-var projectfileYAML []byte
-
 func main() {
-	cmd.SetProjectfileYAML(projectfileYAML)
+	cmd.SetProjectfileYAML(cli.ProjectfileYAML)
 	cmd.Execute()
 }
