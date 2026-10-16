@@ -49,6 +49,19 @@ func TestValidateAcceptsTOMLWithSpecVersion(t *testing.T) {
 	}
 }
 
+func TestValidateRejectsUndeclaredArtifactExclude(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, "projectfile.yaml", "$schema: https://projectfile.org/schema/v1.json\nidentity:\n  namespace: org.example\n  name: demo\n"+
+		"org:\n  projectfile:\n    architecture: [amd64]\n    artifacts:\n      cli:\n        kind: binary\n        path: dist/demo\n        exclude: [{arch: riscv64}]\n")
+	out, err := runValidateCmd(t, dir)
+	if err == nil {
+		t.Fatalf("an exclude cell outside the declared architectures validated clean: %s", out)
+	}
+	if !strings.Contains(out, `arch "riscv64" is not in org.projectfile.architecture`) {
+		t.Fatalf("got %q, want the undeclared cell named", out)
+	}
+}
+
 func TestValidateNamesRepositoriesOriginRule(t *testing.T) {
 	for _, tc := range []struct {
 		name string

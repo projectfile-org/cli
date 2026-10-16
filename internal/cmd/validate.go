@@ -76,9 +76,12 @@ var validateCmd = &cobra.Command{
 		// their own line: the TOML discriminator (spec §3.4) is keyed on the
 		// file extension because anyOf cannot tell encodings apart.
 		violations := make([]string, 0, 4)
-		if line, bad := tomlDiscriminator(path, raw); bad {
-			violations = append(violations, line)
+		tomlLine, tomlBad := tomlDiscriminator(path, raw)
+		if tomlBad {
+			violations = append(violations, tomlLine)
 		}
+		excludes := validate.ArtifactExcludes(raw)
+		violations = append(violations, excludes...)
 
 		// Schema violations print as a flat list of "location: reason" lines so
 		// the output is grep-friendly and stable across schema-library upgrades
@@ -128,7 +131,9 @@ var validateCmd = &cobra.Command{
 			return errValidation(fmt.Sprintf("schema validation failed; %d redundant include(s)", len(redundant)))
 		case schemaErr != nil:
 			return errValidation("schema validation failed")
-		case len(violations) > 0:
+		case len(excludes) > 0:
+			return errValidation(fmt.Sprintf("%d artifact exclude cell(s) name an undeclared platform", len(excludes)))
+		case tomlBad:
 			return errValidation(fmt.Sprintf("TOML documents require spec_version = %q", specVersion))
 		default:
 			return errValidation(fmt.Sprintf("%d redundant include(s) — remove them or drop --strict-includes", len(redundant)))
