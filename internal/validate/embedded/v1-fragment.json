@@ -1,0 +1,7 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projectfile.org/schema/v1-fragment.json",
+  "title": "projectfile v1 includes fragment",
+  "description": "Schema for a document that is only ever included (spec §4.9): the field shapes of v1.json, with no discriminator and no required fields. Validate the merged document against v1.json.",
+  "$ref": "v1.json#/$defs/fragment"
+}

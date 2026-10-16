@@ -8,8 +8,6 @@ set -eu
 
 # build-binaries.sh — cross-compile pf-cli for one GOOS/GOARCH, writing dist/pf-cli-<os>-<uname -m>.
 
-sh .scripts/fetch-schema.sh # //go:embed input; fetched here since a matrixed cell can't take it from another job's artifact
-
 version="${1:-${GITHUB_REF_NAME:-}}"
 case "${version}" in
 	'' | *['{}']*) version="$(git describe --tags --always --dirty 2>/dev/null || echo dev)" ;; # empty or an unexpanded template placeholder

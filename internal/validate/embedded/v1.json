@@ -1,0 +1,440 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projectfile.org/schema/v1.json",
+  "title": "projectfile v1",
+  "description": "Schema for the projectfile specification, version 1. See https://projectfile.org/spec/v1. Applies to the in-memory tree resulting from parsing a projectfile.toml, projectfile.yaml, or projectfile.json file. The schema enforces the structural contract (required fields, types, identifier shapes). Semantic SHOULDs and recommended vocabularies (technology tags, OS/arch values, ) are intentionally NOT enforced — see spec §3.4 and §3.7 (peaceful cohabitation).",
+
+  "type": "object",
+  "$ref": "#/$defs/fragment",
+  "properties": { "repositories": { "items": { "required": ["url"] } } },
+
+  "if": { "required": ["includes"] },
+  "else": {
+    "description": "A document without includes carries its own identity. One with includes MAY take identity from them; validators check the merged document (spec §4.9).",
+    "required": ["identity"],
+    "properties": { "identity": { "required": ["namespace", "name"] } }
+  },
+
+  "anyOf": [
+    {
+      "description": "YAML/JSON discriminator: $schema must be present and equal the v1 URL (spec §3.4).",
+      "required": ["$schema"],
+      "properties": { "$schema": { "const": "https://projectfile.org/schema/v1.json" } }
+    },
+    {
+      "description": "TOML discriminator: spec_version must be present and equal '1' (spec §3.4). The schema cannot see the encoding, so validators enforce this branch for .toml files by extension; the #:schema magic comment is an editor hint and does not survive parse.",
+      "required": ["spec_version"]
+    }
+  ],
+
+  "$defs": {
+    "fragment": {
+      "type": "object",
+      "description": "Field shapes shared by a document and an includes fragment, with nothing required (spec §4.9).",
+      "properties": {
+        "$schema": {
+          "enum": ["https://projectfile.org/schema/v1.json", "https://projectfile.org/schema/v1-fragment.json"],
+          "description": "Discriminator for YAML/JSON encodings; pins the specification version. A fragment MAY name the fragment schema instead (spec §4.9)."
+        },
+        "spec_version": {
+          "const": "1",
+          "description": "Discriminator for TOML encoding; pins the specification version."
+        },
+        "kind": {
+          "type": "string",
+          "default": "SoftwareSourceCode",
+          "description": "Schema.org type. Recommended: SoftwareSourceCode, SoftwareApplication, WebApplication.",
+          "examples": ["SoftwareSourceCode", "SoftwareApplication", "WebApplication"]
+        },
+        "identity":     { "$ref": "#/$defs/identity" },
+        "repositories": { "$ref": "#/$defs/repositories" },
+        "license":      { "$ref": "#/$defs/license" },
+        "copyright":    { "$ref": "#/$defs/copyright" },
+        "upstream":     { "$ref": "#/$defs/upstream" },
+        "people":       { "type": "array", "items": { "$ref": "#/$defs/person" } },
+        "organizations": { "type": "array", "items": { "$ref": "#/$defs/organization" } },
+        "keywords":     { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/keyword" } },
+        "technologies": { "type": "array", "uniqueItems": true, "items": { "$ref": "#/$defs/technology" } },
+        "requirements": { "$ref": "#/$defs/requirements" },
+        "includes":     { "$ref": "#/$defs/includes" },
+        "links":        { "type": "array", "items": { "$ref": "#/$defs/linkEntry" } }
+      },
+
+      "patternProperties": {
+        "^[a-z][a-z0-9-]*$": {
+          "description": "Top-level single-segment key. May be (a) an unknown reserved key not defined in this revision of Section 4 — accepted and preserved (peaceful cohabitation, §3.7); or (b) the first segment of a nested-mapping extension namespace — its subtree is opaque to this schema and MUST be preserved on round-trip. Dotted-string top-level keys are rejected by additionalProperties:false."
+        }
+      },
+
+      "additionalProperties": false
+    },
+
+    "localizedString": {
+      "description": "BCP 47 language-tagged string map. As a shorthand, a bare string is permitted and treated as { und: <string> } (§7).",
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "minProperties": 1,
+          "patternProperties": {
+            "^([a-zA-Z]{2,3}|und)(-[a-zA-Z0-9]+)*$": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+
+    "uri": {
+      "type": "string",
+      "format": "uri"
+    },
+
+    "reverseDns": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*(\\.[a-z0-9-]+)+$"
+    },
+
+    "dnsLabel": {
+      "type": "string",
+      "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"
+    },
+
+    "version": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Project version in the project's own scheme. SemVer 2.0.0 is RECOMMENDED, not required (spec §4.3).",
+      "examples": ["1.0.0", "2.1.3-rc.1", "24.04", "16.2", "2026.10.1"]
+    },
+
+    "semverRange": {
+      "type": "string",
+      "description": "SemVer-style range expression. Advisory pattern; consumers should consult the language-native manifest for authoritative resolution.",
+      "pattern": "^[\\^~><=*xXvV0-9. |&()\\-,]+$",
+      "examples": [">=1.0.0", "^2.1", "~3.14", "1.x", ">=8.5 <9"]
+    },
+
+    "relativePath": {
+      "type": "string",
+      "description": "Relative path inside project directory; MUST NOT be absolute, contain '..' segments, or include a Windows drive letter.",
+      "pattern": "^(?![/\\\\])(?![A-Za-z]:[\\\\/])(?!.*\\.\\.).+$"
+    },
+
+    "keyword": {
+      "type": "string",
+      "description": "Bare or namespaced (prefix:value) keyword. See spec §4.6.",
+      "pattern": "^[a-z0-9]([a-z0-9-]| [a-z0-9])*(?::[a-z0-9]([a-z0-9-]| [a-z0-9])*)?$"
+    },
+
+    "isoDate": {
+      "type": "string",
+      "description": "ISO-8601 calendar date string in YYYY-MM-DD form.",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+
+    "identity": {
+      "type": "object",
+      "properties": {
+        "namespace":   { "$ref": "#/$defs/reverseDns" },
+        "name":        { "$ref": "#/$defs/dnsLabel" },
+        "version":     { "$ref": "#/$defs/version" },
+        "title":       { "$ref": "#/$defs/localizedString" },
+        "summary":     { "$ref": "#/$defs/localizedString" },
+        "description": { "$ref": "#/$defs/localizedString" },
+        "created":     { "$ref": "#/$defs/isoDate" },
+        "released":    { "$ref": "#/$defs/isoDate" },
+        "modified":    { "$ref": "#/$defs/isoDate" }
+      },
+      "additionalProperties": true
+    },
+
+    "repositories": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Source-control clone endpoints. Each entry has a url (a fragment MAY omit it: its origin entry merges into the including document’s, spec §4.9) and optional type/path/branch; role categorizes it (origin/mirror/archive, open vocab) and the reserved value role=origin marks the canonical entry, issues=true marks the forge used for issue tracking, packages=true the one package registries name as the source. Exactly one entry MUST carry role=origin when count > 1; a sole entry is implicitly origin. At most one entry MAY have issues=true, and at most one packages=true. url accepts any scheme git accepts — https, ssh (git@host:path), git+ssh, etc. The forge landing page is NOT a repositories[] value; it goes in links[type=source-code]. See spec §4.3a.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url":     { "type": "string", "minLength": 1, "description": "Clone endpoint. Any scheme git accepts — not constrained to http(s)." },
+          "type":    { "type": "string", "examples": ["git", "hg", "svn", "fossil", "bzr"] },
+          "path":    { "type": "string" },
+          "branch":  { "type": "string" },
+          "issues":   { "type": "boolean", "description": "True for the repository whose forge issue tracker is the project's canonical bug tracker. At most one entry MAY carry issues = true. When absent on all entries, the origin entry is used." },
+          "packages": { "type": "boolean", "description": "True for the repository that package registries name as the project's source. At most one entry MAY carry packages = true. When absent on all entries, the origin entry is used." },
+          "role":    {
+            "type": "string",
+            "description": "Open vocabulary; recommended values: origin, mirror, archive. The value origin is reserved: it marks the canonical entry (exactly one when the array has more than one element; the sole element is implicitly origin).",
+            "examples": ["origin", "mirror", "archive"]
+          }
+        },
+        "additionalProperties": true
+      },
+      "oneOf": [
+        {
+          "description": "Sole entry — implicitly origin; no origin-cardinality constraint applies.",
+          "maxItems": 1
+        },
+        {
+          "description": "Two or more entries — exactly one MUST carry role = origin; at most one MAY have issues = true, and at most one packages = true.",
+          "minItems": 2,
+          "contains": {
+            "type": "object",
+            "properties": { "role": { "const": "origin" } },
+            "required": ["role"]
+          },
+          "minContains": 1,
+          "maxContains": 1,
+          "allOf": [
+            {
+              "contains": {
+                "type": "object",
+                "properties": { "issues": { "const": true } },
+                "required": ["issues"]
+              },
+              "minContains": 0,
+              "maxContains": 1
+            },
+            {
+              "contains": {
+                "type": "object",
+                "properties": { "packages": { "const": true } },
+                "required": ["packages"]
+              },
+              "minContains": 0,
+              "maxContains": 1
+            }
+          ]
+        }
+      ]
+    },
+
+    "license": {
+      "type": "object",
+      "required": ["spdx"],
+      "properties": {
+        "spdx": {
+          "type": "string",
+          "description": "SPDX license expression.",
+          "minLength": 1
+        },
+        "covers": {
+          "type": "string",
+          "description": "What corpus the SPDX expression applies to. 'project' (default) covers the whole source tree; 'additions' covers only original/packaging work in this repository, while bundled upstream software retains its own licensing. See spec §4.4.",
+          "enum": ["project", "additions"],
+          "default": "project"
+        },
+        "file": {
+          "description": "Relative path(s) to license file(s). Single string or sequence of strings. Each path MUST be inside the project directory.",
+          "oneOf": [
+            { "$ref": "#/$defs/relativePath" },
+            {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/relativePath" }
+            }
+          ]
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "upstream": {
+      "type": "array",
+      "description": "Third-party software the project packages or forks. See spec §4.4b.",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name":     { "$ref": "#/$defs/localizedString" },
+          "url":      { "type": "string", "format": "uri" },
+          "version":  { "type": "string" },
+          "license":  { "type": "string", "description": "SPDX license expression of the upstream." },
+          "relation": { "type": "string", "description": "Open vocabulary: packages (default), fork." }
+        }
+      }
+    },
+    "copyright": {
+      "type": "object",
+      "description": "Top-level copyright block. Holder identities live under `people` with the `copyright` role; per-person `from` / `to` supply the per-holder date range. See spec §4.4a.",
+      "properties": {
+        "year": {
+          "type": "integer",
+          "description": "Default copyright year, applied when a copyright-role person has no `from` date.",
+          "minimum": 1900,
+          "maximum": 9999
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "person": {
+      "type": "object",
+      "required": ["family-names"],
+      "description": "A person entry in `people[]`. Persons only — entities go in `organizations[]`. See spec §4.5.",
+      "properties": {
+        "family-names":  { "type": "string", "minLength": 1, "description": "Family name(s). Multi-part surnames are a single string." },
+        "given-names":   { "type": "string", "minLength": 1 },
+        "name-particle": { "type": "string", "minLength": 1, "description": "Particle, e.g. 'van', 'van der', 'de', 'von'." },
+        "name-suffix":   { "type": "string", "minLength": 1, "description": "Generational or honorific suffix, e.g. 'Jr.', 'III', 'PhD'." },
+        "alias":         { "type": "string", "minLength": 1 },
+        "display-name":  { "type": "string", "minLength": 1, "description": "Producer-supplied flat name. Consumers emitting to single-name formats MUST prefer this over any synthesized form. See spec §4.5.2." },
+        "email":         { "type": "string", "format": "email" },
+        "url":           { "$ref": "#/$defs/uri" },
+        "handles":       { "$ref": "#/$defs/handles" },
+        "affiliation":   { "type": "string", "minLength": 1 },
+        "orcid": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$"
+        },
+        "from":  { "$ref": "#/$defs/isoDate", "description": "First date this person was associated with the project. For copyright-role entries the year contributes to assembled copyright lines (§4.4a)." },
+        "to":    { "$ref": "#/$defs/isoDate", "description": "Last date this person was associated with the project. Absent means 'present'." },
+        "pronouns": { "type": "string", "minLength": 1, "description": "Personal pronouns, e.g. 'she/her', 'he/him', 'they/them'." },
+        "roles": { "$ref": "#/$defs/roles" }
+      },
+      "additionalProperties": true
+    },
+
+    "organization": {
+      "type": "object",
+      "required": ["name"],
+      "description": "An organization or non-person entity in `organizations[]`. See spec §4.5a.",
+      "properties": {
+        "name":  { "type": "string", "minLength": 1, "description": "Organization or entity name." },
+        "alias": { "type": "string", "minLength": 1 },
+        "email": { "type": "string", "format": "email" },
+        "url":   { "$ref": "#/$defs/uri" },
+        "handles": { "$ref": "#/$defs/handles" },
+        "orcid": {
+          "type": "string",
+          "pattern": "^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{3}[0-9X]$"
+        },
+        "from":  { "$ref": "#/$defs/isoDate", "description": "First date this organization was associated with the project. For copyright-role entries the year contributes to assembled copyright lines (§4.4a)." },
+        "to":    { "$ref": "#/$defs/isoDate", "description": "Last date this organization was associated with the project. Absent means 'present'." },
+        "roles": { "$ref": "#/$defs/roles" }
+      },
+      "additionalProperties": true
+    },
+
+    "roles": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "examples": ["author", "maintainer", "founder", "contributor", "reviewer", "funder", "packager", "security", "community", "copyright"]
+      }
+    },
+
+    "handles": {
+      "type": "object",
+      "description": "Platform handles and usernames. Open-vocabulary map from platform name to the handle or identifier on that platform (e.g. 'signal', 'matrix', 'mastodon'). Each value MAY be a string, an array of strings (multiple handles on the same platform), or a map of strings (named sub-keys, e.g. a GPG key with distinct messaging/code fingerprints).",
+      "additionalProperties": { "$ref": "#/$defs/handleValue" }
+    },
+
+    "handleValue": {
+      "description": "A single platform handle value. String for the common case, array of strings when a platform has multiple handles, or map of strings for named sub-keys.",
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        { "type": "array", "items": { "type": "string", "minLength": 1 }, "minItems": 1, "uniqueItems": true },
+        { "type": "object", "additionalProperties": { "type": "string", "minLength": 1 }, "minProperties": 1 }
+      ]
+    },
+
+    "linkEntry": {
+      "type": "object",
+      "required": ["type", "url"],
+      "description": "A typed navigational URL. See spec §4.10.",
+      "properties": {
+        "type":  {
+          "type": "string",
+          "minLength": 1,
+          "description": "URL category. Open vocabulary; consumers MUST NOT reject for unknown types. See spec §4.10 for recommended values.",
+          "examples": [
+            "homepage", "source-code", "bugs", "documentation", "changelog",
+            "chat", "forum", "contact", "translate", "donation",
+            "security-policy", "security-report", "security-severity", "security-acknowledgments",
+            "bug-bounty", "pgp-key", "openssf-best-practices",
+            "cla", "first-contribution", "enforcement", "conduct-full-text",
+            "paid-support", "status-page", "zenodo-archive", "doi-landing",
+            "governance", "roadmap", "renovate-dashboard", "ci", "package-registry"
+          ]
+        },
+        "url":       { "$ref": "#/$defs/uri" },
+        "label":     { "$ref": "#/$defs/localizedString" },
+        "preferred": {
+          "type": "boolean",
+          "description": "Marks the canonical entry of its type when more than one entry shares the same type. At most one entry per type MAY carry preferred = true. See spec §4.10."
+        },
+        "derived": {
+          "type": "boolean",
+          "description": "True when this link was auto-generated by a producer (e.g. the projectfile CLI's derive pass). Consumers MUST treat derived and hand-written links identically; the flag exists so producers can track ownership and avoid overwriting user-edited entries. See spec §4.10."
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "technology": {
+      "type": "string",
+      "description": "Recommended values are listed in spec/technologies.yaml. The vocabulary is non-normative (§4.7) — consumers MUST NOT reject documents for tags outside the recommended list.",
+      "pattern": "^[a-z0-9][a-z0-9.+-]*$"
+    },
+
+    "requirements": {
+      "type": "object",
+      "properties": {
+        "browsers": {
+          "description": "Browser targets as Browserslist query strings (§4.8). A flat sequence applies to all environments; a mapping of environment names to query arrays generates per-environment [section] headers in .browserslistrc.",
+          "oneOf": [
+            {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "type": "string", "minLength": 1 }
+            },
+            {
+              "type": "object",
+              "minProperties": 1,
+              "patternProperties": {
+                "^[a-z][a-z0-9-]*$": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": { "type": "string", "minLength": 1 }
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
+        },
+        "runtime": {
+          "type": "object",
+          "patternProperties": {
+            "^[a-z][a-z0-9-]*$": { "$ref": "#/$defs/semverRange" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "includes": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {
+            "type": "string",
+            "minLength": 1,
+            "description": "Relative path or HTTP(S) URL referencing a projectfile document to deep-merge before reading. Resolution is recursive: an included document MAY itself declare includes; relative paths resolve against the including document's directory; cycles MUST be rejected. See spec §4.9."
+          },
+          {
+            "type": "object",
+            "required": ["url", "sha256"],
+            "properties": {
+              "url": { "type": "string", "pattern": "^https?://", "description": "HTTP(S) URL of the included document." },
+              "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$", "description": "Lowercase hex SHA-256 of the fetched bytes. Consumers MUST reject a mismatch (spec §4.9)." }
+            },
+            "description": "A pinned remote include (spec §4.9)."
+          }
+        ]
+      },
+      "description": "Documents to deep-merge into the base document. Later entries win over earlier ones; the base document always wins. Includes resolve recursively; cycles are rejected. See spec §4.9."
+    }
+  }
+}

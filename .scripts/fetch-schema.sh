@@ -90,8 +90,16 @@ for schema in ${SCHEMAS}; do
         log "ERROR: ${source} missing in the specification clone at ref=${REF}"
         exit 1
     fi
-    # The REUSE sidecar travels with the file: the embed target is untracked here.
+    # The REUSE sidecar travels with the file
     cp "${source}" "${TARGET_DIR}/${schema}"
     cp "${source}.license" "${TARGET_DIR}/${schema}.license"
     log "ok schema=${TARGET_DIR}/${schema} bytes=$(wc --bytes <"${TARGET_DIR}/${schema}") spec=$(git -C "${DEST}" rev-parse --short HEAD) ref=${REF}"
 done
+
+# CI fails when the committed copy, which `go install` embeds, lags the specification
+if [ -n "${CI:-}" ] && ! git diff --quiet -- "${TARGET_DIR}"; then
+    log "ERROR: ${TARGET_DIR} differs from specification ref=${REF}; run .scripts/fetch-schema.sh and commit it"
+    git diff --stat -- "${TARGET_DIR}" >&2
+    exit 1
+fi
+log "embedded schema matches specification ref=${REF} ci=${CI:-unset}"
