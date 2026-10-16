@@ -18,7 +18,7 @@ func TestVersionWithoutLdflags(t *testing.T) {
 		t.Skip("builds a binary")
 	}
 	bin := filepath.Join(t.TempDir(), "pf-cli")
-	build := exec.Command("go", "build", "-o", bin, "../..")
+	build := exec.Command("go", "build", "-o", bin, "../../cmd/pf-cli")
 	build.Env = withoutGitEnv(os.Environ())
 	if out, err := build.CombinedOutput(); err != nil {
 		t.Fatalf("go build: %v\n%s", err, out)
