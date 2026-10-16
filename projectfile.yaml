@@ -113,6 +113,9 @@ org:
         subcommands: [add, cache, cache purge, cache refresh, cache status, cache warm, completion, convert, del, get, includes, includes pin, init, optimize, set, setup, validate]
         kind: binary
         path: dist/pf-cli
+        operating-system: [linux, darwin]
+        exclude:
+          - {os: darwin, arch: riscv64}
     architecture:
       - amd64
       - arm64
