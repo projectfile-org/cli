@@ -69,6 +69,16 @@ Después, ejecútalo como si estuviera instalado; el alias ejecuta cada ejemplo 
 pf-cli --help
 ```
 
+### Herramientas de Go
+
+Instala con las herramientas de Go:
+
+```sh
+go install projectfile.org/projectfile/cli/v3/cmd/pf-cli@latest
+```
+
+Después, ejecuta `pf-cli --help`.
+
 ### Binario precompilado
 
 Descarga el binario precompilado para tu plataforma desde las versiones de GitHub:

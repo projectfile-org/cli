@@ -69,6 +69,16 @@ alias pf-cli='docker run --rm --user "$(id -u):$(id -g)" --group-add 0 --volume 
 pf-cli --help
 ```
 
+### Інструменти Go
+
+Встановіть за допомогою інструментів Go:
+
+```sh
+go install projectfile.org/projectfile/cli/v3/cmd/pf-cli@latest
+```
+
+Потім виконайте `pf-cli --help`.
+
 ### Готовий бінарний файл
 
 Завантажте готовий бінарний файл для своєї платформи з випусків на GitHub:

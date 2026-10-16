@@ -67,6 +67,16 @@ Then run it as if it were installed — the alias runs every example as written 
 pf-cli --help
 ```
 
+### Go toolchain
+
+Install with the Go toolchain:
+
+```sh
+go install projectfile.org/projectfile/cli/v3/cmd/pf-cli@latest
+```
+
+Then run `pf-cli --help`.
+
 ### Prebuilt binary
 
 Download the prebuilt binary for your platform from GitHub Releases:
