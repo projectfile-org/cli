@@ -125,31 +125,9 @@ org:
     ci:
       nodes:
         binaries-are-built:
-          matrix:
-            axes:
-              GOARCH:
-                - amd64
-                - arm64
-                - riscv64
-              GOOS:
-                - linux
-                - darwin
-            exclude:
-              - GOARCH: riscv64
-                GOOS: darwin
+          matrix: {artifact: go-binary}
         gsa:
-          matrix:
-            axes:
-              GOARCH:
-                - amd64
-                - arm64
-                - riscv64
-              GOOS:
-                - linux
-                - darwin
-            exclude:
-              - GOARCH: riscv64
-                GOOS: darwin
+          matrix: {artifact: go-binary}
         # Torrenting waits on the signature: a signed artifact is bundled with its .asc before hashing.
         # NO matrix: one torrent carries every cell, so this node runs once and takes them all.
         binaries-are-torrented:
