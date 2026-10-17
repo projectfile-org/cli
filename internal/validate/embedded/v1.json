@@ -142,9 +142,18 @@
         "description": { "$ref": "#/$defs/localizedString" },
         "created":     { "$ref": "#/$defs/isoDate" },
         "released":    { "$ref": "#/$defs/isoDate" },
-        "modified":    { "$ref": "#/$defs/isoDate" }
+        "modified":    { "$ref": "#/$defs/isoDate" },
+        "visibility":  { "$ref": "#/$defs/visibility" }
       },
       "additionalProperties": true
+    },
+
+    "visibility": {
+      "type": "string",
+      "enum": ["public", "private"],
+      "default": "private",
+      "description": "Whether the project is meant for public distribution. Absence resolves to private; the default governs local derivation only, never a change to remote state (spec §4.3).",
+      "examples": ["public", "private"]
     },
 
     "repositories": {
