@@ -69,6 +69,10 @@ var validateCmd = &cobra.Command{
 			genlog.Warn("redundant include", "include", r.Ref, "already-provided-by", r.Via, "kind", r.Reason)
 		}
 
+		for _, line := range validate.VisibilityAdvisories(raw) {
+			genlog.Warn(line, "remedy", "declare identity.visibility, or org.projectfile.artifacts.<key>.visibility for one artifact")
+		}
+
 		schemaErr := validate.Validate(raw)
 		strictFail := strictIncludesFlag && len(redundant) > 0
 
@@ -82,6 +86,8 @@ var validateCmd = &cobra.Command{
 		}
 		excludes := validate.ArtifactExcludes(raw)
 		violations = append(violations, excludes...)
+		contradiction := validate.VisibilityContradiction(raw)
+		violations = append(violations, contradiction...)
 
 		// Schema violations print as a flat list of "location: reason" lines so
 		// the output is grep-friendly and stable across schema-library upgrades
@@ -133,6 +139,8 @@ var validateCmd = &cobra.Command{
 			return errValidation("schema validation failed")
 		case len(excludes) > 0:
 			return errValidation(fmt.Sprintf("%d artifact exclude cell(s) name an undeclared platform", len(excludes)))
+		case len(contradiction) > 0:
+			return errValidation("identity.visibility contradicts a public-tagged source-code link")
 		case tomlBad:
 			return errValidation(fmt.Sprintf("TOML documents require spec_version = %q", specVersion))
 		default:
