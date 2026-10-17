@@ -26,9 +26,9 @@ includes:
   - .makefile/b19/traits/image/signed.yaml
   - .makefile/container/traits/readme/tool-image.yaml
   - .makefile/library/languages/go.yaml
-  - .makefile/library/traits/go/binary.yaml
   - .makefile/library/traits/binary/signed.yaml
   - .makefile/library/traits/binary/torrent.yaml
+  - .makefile/library/traits/go/binary.yaml
   - https://kiota.ch/damian-buho/metadata/raw/branch/main/forge/codeberg.yaml
   - https://kiota.ch/damian-buho/metadata/raw/branch/main/forge/github.yaml
   - https://kiota.ch/damian-buho/metadata/raw/branch/main/include.yaml
@@ -46,17 +46,17 @@ license:
   covers: project
 links:
   - label:
-      en: Projectfile CLI on kiota.ch
-      es: Projectfile CLI en kiota.ch
-      uk: Projectfile CLI на kiota.ch
+      en: Repository on kiota.ch
+      es: Repositorio en kiota.ch
+      uk: Репозиторій на kiota.ch
     preferred: true
     priority: 10
     type: source-code
     url: https://kiota.ch/projectfile/cli
   - label:
-      en: Projectfile CLI on GitHub
-      es: Projectfile CLI en GitHub
-      uk: Projectfile CLI на GitHub
+      en: Repository on GitHub
+      es: Repositorio en GitHub
+      uk: Репозиторій на GitHub
     priority: 80
     tags:
       - public
@@ -80,9 +80,9 @@ links:
     type: package-registry
     url: https://github.com/projectfile-org/cli/pkgs/container/cli
   - label:
-      en: Projectfile CLI on Codeberg
-      es: Projectfile CLI en Codeberg
-      uk: Projectfile CLI на Codeberg
+      en: Repository on Codeberg
+      es: Repositorio en Codeberg
+      uk: Репозиторій на Codeberg
     priority: 90
     tags:
       - public
@@ -175,5 +175,8 @@ repositories:
   - role: mirror
     type: git
     url: git@codeberg.org:projectfile/cli.git
+  - role: mirror
+    type: git
+    url: ssh://git@codeberg.org/projectfile/cli.git
 technologies:
   - go
