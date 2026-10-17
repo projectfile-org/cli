@@ -17,6 +17,7 @@ identity:
     uk: 'pf-cli — командний інтерфейс projectfile: читає, записує та валідує поля, розвʼязує віддалені includes і генерує похідні артефакти. Містить вбудовану JSON-схему v1 для офлайн-валідації та є канонічним інструментом редагування projectfile-файлів локально й у CI.'
   version: 3.3.0
   released: "2026-10-16"
+  visibility: public
 includes:
   - .makefile/b19/ci.yaml
   - .makefile/b19/images/go.yaml
