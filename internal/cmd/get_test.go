@@ -798,7 +798,7 @@ func TestGetExpandResolvesDocumentRefsOnly(t *testing.T) {
 func TestReportMissingNamesParentAndDefault(t *testing.T) {
 	p, _ := fieldpath.Parse("identity.bogus")
 	doc := projectfile.FromMap(map[string]any{
-		keyIdentity: map[string]any{"namespace": "org.example", keyName: valDemo, "birth": "2026-01-01"},
+		keyIdentity: map[string]any{"namespace": initTestNamespace, keyName: valDemo, "birth": "2026-01-01"},
 	})
 	var buf bytes.Buffer
 	getCmd.SetErr(&buf)
@@ -813,7 +813,7 @@ func TestReportMissingNamesParentAndDefault(t *testing.T) {
 func TestReportMissingSuggestsClosestSibling(t *testing.T) {
 	p, _ := fieldpath.Parse("identity.namee")
 	doc := projectfile.FromMap(map[string]any{
-		keyIdentity: map[string]any{"namespace": "org.example", keyName: valDemo, "birth": "2026-01-01"},
+		keyIdentity: map[string]any{"namespace": initTestNamespace, keyName: valDemo, "birth": "2026-01-01"},
 	})
 	var buf bytes.Buffer
 	getCmd.SetErr(&buf)
