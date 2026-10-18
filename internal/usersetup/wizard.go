@@ -27,6 +27,16 @@ const (
 	formatYML  = "yml"
 )
 
+// The three prompt drivers are package vars so a test can substitute a scripted answer for the terminal
+// they would otherwise open. runSection is the field form, yesNo the two-option list, pickFormat the
+// encoding picker; personOrEntity wraps its own selector and is reached through pickFormat's sibling.
+var (
+	runSectionPrompt = runSection
+	yesNoPrompt      = yesNo
+	pickFormat       = promptFormat
+	pickEntityKind   = personOrEntity
+)
+
 // Options controls one run of Run. Format, when set, bypasses the
 // interactive format picker — useful for callers that already know the
 // answer (`pf-cli setup --format yaml`).
@@ -55,6 +65,7 @@ func Run(opts Options) error {
 	ext := "." + format
 
 	if err := walkSections(cfg); err != nil {
+
 		if errors.Is(err, errCancelled) {
 			genlog.Warn("setup cancelled, no changes written")
 			return nil
@@ -86,7 +97,7 @@ func Run(opts Options) error {
 // rather than load-shadowing.
 func offerMigrationCleanup(oldPath, newPath string) error {
 	genlog.Debug("setup: previous config remains on disk", "old", oldPath, "new", newPath)
-	del, err := yesNo(fmt.Sprintf("Delete the previous config at %s?", oldPath), false)
+	del, err := yesNoPrompt(fmt.Sprintf("Delete the previous config at %s?", oldPath), false)
 	if err != nil {
 		if errors.Is(err, errCancelled) {
 			// Cancellation during the cleanup prompt is treated as "leave
@@ -140,17 +151,7 @@ func resolveFormat(preset, existingPath string) (string, error) {
 		genlog.Debug("setup: keeping existing format; pass --format to change", "format", ext)
 		return ext, nil
 	}
-	type item struct{ name, desc string }
-	choice, err := selector.Run(selector.Choices[item]{
-		Title: "Pick config file format:",
-		Items: []item{
-			{formatYAML, "YAML (recommended)"},
-			{"toml", "TOML"},
-			{"json", "JSON"},
-		},
-		Label:  func(i item) string { return i.name },
-		Detail: func(i item) string { return i.desc },
-	})
+	choice, err := pickFormat()
 	if err != nil {
 		// Translate selector cancellation into the wizard's own sentinel so
 		// the top-level Run treats it identically to a mid-wizard escape:
@@ -159,6 +160,32 @@ func resolveFormat(preset, existingPath string) (string, error) {
 			return "", errCancelled
 		}
 		return "", fmt.Errorf("format selection: %w", err)
+	}
+	return choice, nil
+}
+
+// formatOption is one row of the encoding picker.
+type formatOption struct{ name, desc string }
+
+// formatOptions is YAML-led so pressing Enter accepts it (workspace preference + spec §4.1).
+func formatOptions() []formatOption {
+	return []formatOption{
+		{formatYAML, "YAML (recommended)"},
+		{"toml", "TOML"},
+		{"json", "JSON"},
+	}
+}
+
+// promptFormat is the interactive encoding picker.
+func promptFormat() (string, error) {
+	choice, err := selector.Run(selector.Choices[formatOption]{
+		Title:  "Pick config file format:",
+		Items:  formatOptions(),
+		Label:  func(i formatOption) string { return i.name },
+		Detail: func(i formatOption) string { return i.desc },
+	})
+	if err != nil {
+		return "", err
 	}
 	return choice.name, nil
 }
@@ -210,7 +237,7 @@ func identityStep(cfg *userconfig.Config) error {
 
 	// Ask the discriminator up front; default person. Pre-existing configs
 	// keep their IsEntity choice and override the default.
-	isEntity, err := personOrEntity(id.IsEntity)
+	isEntity, err := pickEntityKind(id.IsEntity)
 	if err != nil {
 		return err
 	}
@@ -223,7 +250,7 @@ func identityStep(cfg *userconfig.Config) error {
 		id.FamilyNames = ""
 		id.GivenNames = ""
 		id.Affiliation = ""
-		return runSection("Identity (organization) — auto-attached to an organizations[] entry with matching email", []field{
+		return runSectionPrompt("Identity (organization) — auto-attached to an organizations[] entry with matching email", []field{
 			{
 				Label: "name", Description: "organization name (e.g. Acme Foundation)",
 				Current: id.Name, Setter: func(v string) { id.Name = v },
@@ -251,7 +278,7 @@ func identityStep(cfg *userconfig.Config) error {
 	// person leaves no stale label. The split-name fields are the
 	// canonical form per spec §5.5.5.
 	id.Name = ""
-	return runSection("Identity (person) — auto-attached to a people[] person whose email matches", []field{
+	return runSectionPrompt("Identity (person) — auto-attached to a people[] person whose email matches", []field{
 		{
 			Label: "family-names", Description: "family name(s) / surname(s) — required for persons",
 			Current: id.FamilyNames, Setter: func(v string) { id.FamilyNames = v },
@@ -286,23 +313,29 @@ func identityStep(cfg *userconfig.Config) error {
 // personOrEntity asks the discriminator. Wrapping selector.Run rather than
 // reusing yesNo keeps the labels meaningful — "person" / "organization"
 // reads less ambiguously than "yes" / "no" on a question of identity kind.
-func personOrEntity(currentIsEntity bool) (bool, error) {
-	type opt struct {
-		label, desc string
-		value       bool
-	}
-	items := []opt{
-		{"person", "natural person — split into family / given names", false},
-		{"organization", "company, team, project — single name field", true},
-	}
+// kindOption is one row of the person/organization discriminator.
+type kindOption struct {
+	label, desc string
+	value       bool
+}
+
+// kindOptions leads with the kind the config already records, so re-running setup pre-selects what the user
+// chose last time rather than the package default.
+func kindOptions(currentIsEntity bool) []kindOption {
+	person := kindOption{"person", "natural person — split into family / given names", false}
+	org := kindOption{"organization", "company, team, project — single name field", true}
 	if currentIsEntity {
-		items = []opt{items[1], items[0]}
+		return []kindOption{org, person}
 	}
-	choice, err := selector.Run(selector.Choices[opt]{
+	return []kindOption{person, org}
+}
+
+func personOrEntity(currentIsEntity bool) (bool, error) {
+	choice, err := selector.Run(selector.Choices[kindOption]{
 		Title:  "Are you setting up your identity as a person or an organization?",
-		Items:  items,
-		Label:  func(o opt) string { return o.label },
-		Detail: func(o opt) string { return o.desc },
+		Items:  kindOptions(currentIsEntity),
+		Label:  func(o kindOption) string { return o.label },
+		Detail: func(o kindOption) string { return o.desc },
 	})
 	if err != nil {
 		if errors.Is(err, selector.ErrCancelled) {
@@ -318,7 +351,7 @@ func initDefaultsStep(cfg *userconfig.Config) error {
 	// Text fields run through the standard section form. no_scan is a real
 	// boolean — pulled out into its own yes/no selector below so the user
 	// gets a visible toggle rather than typing "yes"/"no" into a text box.
-	if err := runSection("Init defaults — pre-fill answers for `pf-cli init`", []field{
+	if err := runSectionPrompt("Init defaults — pre-fill answers for `pf-cli init`", []field{
 		{
 			Label: "format", Description: "default projectfile format (yaml|toml|json)",
 			Current: in.Format, Setter: func(v string) { in.Format = v },
@@ -334,7 +367,7 @@ func initDefaultsStep(cfg *userconfig.Config) error {
 	}); err != nil {
 		return err
 	}
-	noScan, err := yesNo("Init defaults — skip git/stack scanners by default?", in.NoScan)
+	noScan, err := yesNoPrompt("Init defaults — skip git/stack scanners by default?", in.NoScan)
 	if err != nil {
 		return err
 	}
@@ -349,7 +382,7 @@ func fundingStep(cfg *userconfig.Config) error {
 	// known providers are still honoured at load time; users who want them
 	// edit cli.yaml directly. The footer line keeps that discoverable
 	// without forcing every user through 13 prompts on first run.
-	return runSection(
+	return runSectionPrompt(
 		"Funding — personal funding URLs (FUNDING.yml fallback)", []field{
 			{
 				Label: "github", Description: "GitHub Sponsors usernames (comma-separated)",
@@ -366,7 +399,7 @@ func fundingStep(cfg *userconfig.Config) error {
 
 func securityStep(cfg *userconfig.Config) error {
 	s := &cfg.Security
-	return runSection("Security — SECURITY.md defaults", []field{
+	return runSectionPrompt("Security — SECURITY.md defaults", []field{
 		{
 			Label: "report-url", Description: "vulnerability-report URL (hackerone, etc.)",
 			Current: s.ReportURL, Setter: func(v string) { s.ReportURL = v },
@@ -384,7 +417,7 @@ func securityStep(cfg *userconfig.Config) error {
 
 func contributingStep(cfg *userconfig.Config) error {
 	c := &cfg.Contributing
-	return runSection("Contributing — CONTRIBUTING.md defaults", []field{
+	return runSectionPrompt("Contributing — CONTRIBUTING.md defaults", []field{
 		{
 			Label: "cla-url", Description: "Contributor License Agreement URL",
 			Current: c.CLAURL, Setter: func(v string) { c.CLAURL = v },
@@ -398,7 +431,7 @@ func contributingStep(cfg *userconfig.Config) error {
 
 func conventionsStep(cfg *userconfig.Config) error {
 	c := &cfg.Conventions
-	return runSection("Conventions — cross-cutting workflow defaults", []field{
+	return runSectionPrompt("Conventions — cross-cutting workflow defaults", []field{
 		{
 			Label: "commit-style", Description: "commit message style (conventional | gitmoji | free)",
 			Current: c.CommitStyle, Setter: func(v string) { c.CommitStyle = v },
@@ -416,7 +449,7 @@ func conventionsStep(cfg *userconfig.Config) error {
 
 func scanStep(cfg *userconfig.Config) error {
 	s := &cfg.Scan
-	return runSection("Scan — private hosts omitted from any scanner output", []field{
+	return runSectionPrompt("Scan — private hosts omitted from any scanner output", []field{
 		{
 			Label: "private-hosts", Description: "hostnames to redact (comma-separated, e.g. src.example.com)",
 			Current: joinCSV(s.PrivateHosts), Setter: func(v string) { s.PrivateHosts = splitCSV(v) },
@@ -426,7 +459,7 @@ func scanStep(cfg *userconfig.Config) error {
 
 func copyrightStep(cfg *userconfig.Config) error {
 	c := &cfg.Copyright
-	return runSection("Copyright — LICENSE year strategy", []field{
+	return runSectionPrompt("Copyright — LICENSE year strategy", []field{
 		{
 			Label: "year-strategy", Description: "current | fixed (empty = current)",
 			Current: c.YearStrategy, Setter: func(v string) { c.YearStrategy = v },
