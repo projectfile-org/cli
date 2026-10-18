@@ -52,6 +52,8 @@ func resetGetFlags(t *testing.T) {
 	getFile = ""
 	getNamedPaths = nil
 	getLang = ""
+	getPrintPath = false
+	getSuggest = false
 	// StringArrayVar APPENDS on every parse, so a scoped case would leak its
 	// scope into the next test and make an unscoped assertion silently pass
 	// against a composed value.
@@ -858,7 +860,7 @@ func TestSuggestAddressWalksToTheWholeAddress(t *testing.T) {
 		keyIdentity: map[string]any{keyName: valDemo},
 	})
 	for _, tc := range []struct{ typed, want string }{
-		{"identity.nam", addrIdentityName},
+		{addrIdentityNam, addrIdentityName},
 		{"identty.name", addrIdentityName},
 		{"identty.nam", addrIdentityName},
 	} {
@@ -897,7 +899,7 @@ func TestGetSuggestPrintsTheAddressAndExitsZero(t *testing.T) {
 	resetGetFlags(t)
 	rootCmd.SetOut(&buf)
 	rootCmd.SetErr(&buf)
-	rootCmd.SetArgs([]string{cmdGet, flagFile, path, "identity.nam", flagSuggest})
+	rootCmd.SetArgs([]string{cmdGet, flagFile, path, addrIdentityNam, flagSuggest})
 	if err := rootCmd.Execute(); err != nil {
 		t.Fatalf("get --suggest: %v", err)
 	}

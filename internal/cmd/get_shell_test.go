@@ -145,7 +145,7 @@ func TestDeriveKeyNamesAPathByItsAddress(t *testing.T) {
 		{"com.example.env.FOO", "com.example.env.FOO"},
 		{"com.example.env[0]", "com.example.env"},
 		{"com.example.env[12]", "com.example.env"},
-		{"identity.name", "identity.name"},
+		{addrIdentityName, addrIdentityName},
 		{"", ""},
 	} {
 		if got := deriveKey(tc.addr); got != tc.want {

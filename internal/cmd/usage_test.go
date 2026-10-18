@@ -29,6 +29,7 @@ const (
 	cmdSetup         = "setup"
 	cmdValidate      = "validate"
 	addrIdentityName = keyIdentity + "." + keyName
+	addrIdentityNam  = keyIdentity + ".nam"
 	keyIdentity      = "identity"
 	keyName          = "name"
 	keyKeywords      = "keywords"
