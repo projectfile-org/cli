@@ -73,7 +73,7 @@ func TestSetTypedFormsStillCoerce(t *testing.T) {
 	resetSetFlags(t)
 	rootCmd.SetOut(&buf)
 	rootCmd.SetErr(&buf)
-	rootCmd.SetArgs([]string{"set", flagFile, path, "org.demo.count", flagValueJSON, "5"})
+	rootCmd.SetArgs([]string{"set", flagFile, path, addrDemoCount, flagValueJSON, "5"})
 	require.NoError(t, rootCmd.Execute())
 
 	out, err := os.ReadFile(path)

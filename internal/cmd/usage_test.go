@@ -36,6 +36,10 @@ const (
 	valDemo          = "demo"
 	flagNope         = "--nope"
 	flagValueJSON    = "--value-json"
+	keySHA256        = "sha256"
+	addrDemoCount    = "org.demo.count"
+	addrDemoKeywords = "org.demo.keywords"
+	includeDup       = "dup.yaml"
 )
 
 // runRootCmd drives the shared root with args, capturing both streams; flags are reset afterwards, because pflag keeps a --help value across runs and one help execution would silently turn every later one into a help print.
