@@ -31,8 +31,11 @@ const (
 	addrIdentityName = keyIdentity + "." + keyName
 	keyIdentity      = "identity"
 	keyName          = "name"
+	keyKeywords      = "keywords"
+	keyURL           = "url"
 	valDemo          = "demo"
 	flagNope         = "--nope"
+	flagValueJSON    = "--value-json"
 )
 
 // runRootCmd drives the shared root with args, capturing both streams; flags are reset afterwards, because pflag keeps a --help value across runs and one help execution would silently turn every later one into a help print.
@@ -66,7 +69,7 @@ func TestArityErrorsNameCommandShapeAndFix(t *testing.T) {
 	}{
 		{[]string{cmdSet}, "pf-cli set needs <path> [value] (got 0). Run pf-cli set --help."},
 		{[]string{"add"}, "pf-cli add needs <path> [value…] (got 0). Run pf-cli add --help."},
-		{[]string{"del"}, "pf-cli del needs <path> (got 0). Run pf-cli del --help."},
+		{[]string{cmdDel}, "pf-cli del needs <path> (got 0). Run pf-cli del --help."},
 		{[]string{cmdConvert, "yaml"}, "pf-cli convert needs <from-format> <to-format> [directory] (got 1). Supported: json, toml, yaml, yml. Run pf-cli convert --help."},
 		{[]string{cmdValidate, "a", "b"}, "pf-cli validate needs [directory] (got 2). Run pf-cli validate --help."},
 		{[]string{"cache", "status", "x"}, "pf-cli cache status takes no arguments (got 1). Run pf-cli cache status --help."},

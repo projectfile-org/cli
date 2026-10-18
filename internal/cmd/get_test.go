@@ -825,7 +825,7 @@ func TestReportMissingSuggestsClosestSibling(t *testing.T) {
 
 func TestClosestSiblingSkipsNonKeySegments(t *testing.T) {
 	doc := projectfile.FromMap(map[string]any{
-		"keywords":  []any{"a", "b"},
+		keyKeywords: []any{"a", "b"},
 		keyIdentity: map[string]any{keyName: valDemo},
 	})
 	idx, _ := fieldpath.Parse("keywords[7]")

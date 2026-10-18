@@ -41,6 +41,6 @@ func TestIncludesPin_WritesMappingAndResolves(t *testing.T) {
 
 func TestIncludeRef_BothForms(t *testing.T) {
 	assert.Equal(t, includeA, includeRef(includeA))
-	assert.Equal(t, includeA, includeRef(map[string]any{"url": includeA, "sha256": "00"}))
+	assert.Equal(t, includeA, includeRef(map[string]any{keyURL: includeA, "sha256": "00"}))
 	assert.Empty(t, includeRef(42))
 }
