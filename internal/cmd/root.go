@@ -545,8 +545,13 @@ func resolveVersion() string {
 	if v := info.Main.Version; v != "" && v != "(devel)" {
 		return v
 	}
+	return devStamp(info.Settings)
+}
+
+// devStamp composes the dev stamp from the build settings; it is split out so the shape is pinnable without a VCS-stamped build.
+func devStamp(settings []debug.BuildSetting) string {
 	rev, dirty := "", ""
-	for _, s := range info.Settings {
+	for _, s := range settings {
 		switch {
 		case s.Key == "vcs.revision" && len(s.Value) >= 12:
 			rev = s.Value[:12]
@@ -561,22 +566,29 @@ func resolveVersion() string {
 }
 
 func Execute() {
+	if code := runRoot(); code != exitOK {
+		os.Exit(code)
+	}
+}
+
+// runRoot dispatches the root command and answers the exit class of a failure, so the mapping is testable without exiting the test process.
+func runRoot() int {
 	rootCmd.Long = rootLong()
 	rootCmd.Version = resolveVersion()
 	err := rootCmd.Execute()
-	if err != nil {
-		// Cobra's own dispatch failures (unknown command, unknown shorthand)
-		// are usage mistakes, not runtime failures; re-class before printing
-		// so they take the exit-2 class.
-		err = classifyDispatchError(rootCmd, err)
-		code := exitCodeFor(err)
-		fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-		// Exit classes let a caller tell "you invoked me wrong" (2), "the
-		// field you asked for is absent" (3) and "the document fails the
-		// schema" (4) apart from a runtime failure (1). Old-to-new: a
-		// failure that used to exit 1 and now exits 3 or 4 is still a
-		// nonzero, so every existing caller keeps its branch.
-		genlog.FlushDebug()
-		os.Exit(code)
+	if err == nil {
+		return exitOK
 	}
+	// Cobra's own dispatch failures (unknown command, unknown shorthand)
+	// are usage mistakes, not runtime failures; re-class before printing
+	// so they take the exit-2 class.
+	err = classifyDispatchError(rootCmd, err)
+	// Exit classes let a caller tell "you invoked me wrong" (2), "the
+	// field you asked for is absent" (3) and "the document fails the
+	// schema" (4) apart from a runtime failure (1). Old-to-new: a
+	// failure that used to exit 1 and now exits 3 or 4 is still a
+	// nonzero, so every existing caller keeps its branch.
+	fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+	genlog.FlushDebug()
+	return exitCodeFor(err)
 }
