@@ -130,6 +130,7 @@ func TestExpandBracedEnvSubstitutesOnlyBraces(t *testing.T) {
 		{"unset braced becomes empty", "[${PF_TEST_UNSET}]", "[]"},
 		{"unknown braced becomes empty", "[${PF_TEST_ABSENT}]", "[]"},
 		{"no dollar is untouched", "plain text", "plain text"},
+		{"empty name collapses", "a ${} b", "a  b"},
 		{"empty input", "", ""},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

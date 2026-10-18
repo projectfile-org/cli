@@ -624,6 +624,7 @@ func loadDocument(explicit string) (*projectfile.Document, error) {
 // of VAR in the process environment, or the empty string when unset.
 // Bare `$VAR` is left alone — see loadDocument's comment for the rationale
 // (avoiding `$schema` collateral damage on YAML/JSON inputs).
+// The cursor moves past the placeholder by max(end+3, 1): one byte is the floor, so no input can leave it standing still.
 func expandBracedEnv(s string) string {
 	var b strings.Builder
 	b.Grow(len(s))
@@ -635,7 +636,7 @@ func expandBracedEnv(s string) string {
 				if v, ok := os.LookupEnv(name); ok {
 					b.WriteString(v)
 				}
-				i = i + 2 + end + 1
+				i += max(end+3, 1)
 				continue
 			}
 		}
