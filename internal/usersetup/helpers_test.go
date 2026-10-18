@@ -26,6 +26,7 @@ const (
 	fieldHosts  = "private-hosts"
 	kindPerson  = "person"
 	hostSrc     = "src.example.com"
+	sponsors    = "alice, bob"
 
 	encTOML = "toml"
 	encJSON = "json"

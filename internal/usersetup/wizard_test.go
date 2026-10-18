@@ -407,7 +407,7 @@ func TestListStepsSplitTheirAnswers(t *testing.T) {
 		get    func(*userconfig.Config) []string
 		want   []string
 	}{
-		{"funding github", fundingStep, fieldGitHub, "alice, bob", func(c *userconfig.Config) []string { return c.Funding.GitHub }, []string{"alice", "bob"}},
+		{"funding github", fundingStep, fieldGitHub, sponsors, func(c *userconfig.Config) []string { return c.Funding.GitHub }, []string{"alice", "bob"}},
 		{"funding custom", fundingStep, "custom", "https://a.example, https://b.example", func(c *userconfig.Config) []string { return c.Funding.Custom }, []string{"https://a.example", "https://b.example"}},
 		{"scan private hosts", scanStep, fieldHosts, "src.example.com, db.example.com", func(c *userconfig.Config) []string { return c.Scan.PrivateHosts }, []string{hostSrc, "db.example.com"}},
 		{"scan cleared", scanStep, fieldHosts, "   ", func(c *userconfig.Config) []string { return c.Scan.PrivateHosts }, nil},
@@ -436,7 +436,7 @@ func TestListStepsShowTheStoredListAsTheCurrentValue(t *testing.T) {
 		{
 			name: "funding github", step: fundingStep,
 			fill: func(c *userconfig.Config) { c.Funding.GitHub = []string{"alice", "bob"} },
-			want: map[string]string{fieldGitHub: "alice, bob", "custom": ""},
+			want: map[string]string{fieldGitHub: sponsors, "custom": ""},
 		},
 		{
 			name: "scan private hosts", step: scanStep,
