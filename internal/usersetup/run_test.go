@@ -24,7 +24,7 @@ func TestRunWritesTheChosenEncoding(t *testing.T) {
 				noScan:   true,
 				sections: answerSections(map[string]string{
 					fieldGitHub: sponsors,
-					fieldOrcid:  "0000-0001-2345-6789",
+					fieldOrcid:  orcidAda,
 				}),
 			})
 
@@ -33,7 +33,7 @@ func TestRunWritesTheChosenEncoding(t *testing.T) {
 			path := filepath.Join(dir, "projectfile", "cli."+ext)
 			assertExists(t, path, "the wizard must write the config it collected")
 			body := readFile(t, path)
-			if !strings.Contains(body, "0000-0001-2345-6789") {
+			if !strings.Contains(body, orcidAda) {
 				t.Errorf("written config is missing the collected ORCID:\n%s", body)
 			}
 			if !strings.Contains(body, "bob") {

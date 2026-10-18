@@ -43,7 +43,7 @@ func TestGitAccessorsReadTheirOwnKey(t *testing.T) {
 	for _, tc := range []struct{ name, got, want string }{
 		{"gitUserName", gitUserName(), "Ada Lovelace"},
 		{"gitUserEmail", gitUserEmail(), "ada@example.com"},
-		{"gitSigningKey", gitSigningKey(), "ABCDEF0123456789"},
+		{"gitSigningKey", gitSigningKey(), gpgAda},
 	} {
 		if tc.got != tc.want {
 			t.Errorf("%s() = %q, want %q", tc.name, tc.got, tc.want)

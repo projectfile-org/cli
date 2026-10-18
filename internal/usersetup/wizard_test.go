@@ -130,10 +130,10 @@ func TestIdentityStepPrefillsFromGitConfig(t *testing.T) {
 	if cfg.Identity.Email != "ada@example.com" {
 		t.Errorf("Email = %q, want the git address", cfg.Identity.Email)
 	}
-	if cfg.Identity.GPGKey != "ABCDEF0123456789" {
+	if cfg.Identity.GPGKey != gpgAda {
 		t.Errorf("GPGKey = %q, want the git signing key", cfg.Identity.GPGKey)
 	}
-	if cfg.Identity.FamilyNames != gitFamily || cfg.Identity.GivenNames != "Ada" {
+	if cfg.Identity.FamilyNames != gitFamily || cfg.Identity.GivenNames != gitGiven {
 		t.Errorf("git name split into %q/%q, want Lovelace/Ada", cfg.Identity.FamilyNames, cfg.Identity.GivenNames)
 	}
 	if cfg.Identity.Name != "" {
@@ -191,7 +191,7 @@ func TestIdentityStepKeepsAnAlreadySplitName(t *testing.T) {
 func TestIdentityStepPersonBranchClearsTheEntityName(t *testing.T) {
 	isolateGit(t)
 	cfg := &userconfig.Config{}
-	cfg.Identity.Name = "Acme Foundation"
+	cfg.Identity.Name = entityName
 	stubPrompts(t, formatAnswers{isEntity: false})
 
 	assertNoErr(t, identityStep(cfg))
@@ -231,8 +231,8 @@ func TestIdentityStepPersonBranchOffersThePersonFields(t *testing.T) {
 		isEntity     bool
 		want, absent []string
 	}{
-		{kindPerson, false, []string{familyNames, givenNames, "affiliation"}, []string{fieldName}},
-		{"entity", true, []string{fieldName, fieldOrcid}, []string{familyNames, givenNames, "affiliation"}},
+		{kindPerson, false, []string{familyNames, givenNames, fieldAffiliation}, []string{fieldName}},
+		{"entity", true, []string{fieldName, fieldOrcid}, []string{familyNames, givenNames, fieldAffiliation}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			var offered []string

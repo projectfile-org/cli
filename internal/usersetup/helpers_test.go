@@ -33,6 +33,12 @@ const (
 
 	fixtureAcme = "acme"
 
+	fieldAffiliation = "affiliation"
+	entityName       = "Acme Foundation"
+	orcidAda         = "0000-0001-2345-6789"
+	staleValue       = "Stale"
+	gpgAda           = "ABCDEF0123456789"
+
 	gitLovelace = "Ada Lovelace"
 	gitFamily   = "Lovelace"
 	gitGiven    = "Ada"
