@@ -178,6 +178,25 @@ and YAML-only: a value with embedded newlines is re-emitted by the emitter with 
 empty line per break, which changes the value. A literal `|` block, a single
 unbreakable word, a paragraph break and a `>` inside a plain scalar are left alone.
 
+### Mutant coverage is capped at ~87%
+
+Go’s coverage tool does not instrument package-level var initialisers, so every
+mutant inside a `var xxxCmd = &cobra.Command{…}` literal is permanently NOT
+COVERED — 66 of them here, which caps mutant coverage at 87.7% whatever the
+tests do. `org.projectfile.tests.coverage.minimum` is narrowed to 86 for that
+reason and gates statement coverage too (93.4%); efficacy keeps its own 90% gate
+under `org.projectfile.tests.mutation`. Moving a literal into a function does
+not help: package init runs before the counters start.
+
+### A cursor loop must advance on every input
+
+`expandBracedEnv` walks the input with `i += max(end+3, 1)`. A computed advance
+that can come out ≤ 0 is a mutation bomb: gremlins’ `INVERT_NEGATIVES`/`-
+end` variants at that line make the cursor stand still or step back while the
+builder keeps appending, and the mutant’s test run took 20 GB before the kernel
+killed it — twice on this host, once from `make gremlins`. Keep the floor of
+one byte in any cursor arithmetic that writes into a growing buffer.
+
 ## Contracts (do NOT rename)
 
 The binary is `pf-cli` (the `pf-*` triad with `pf-ci` + `pf-bridge`); its image

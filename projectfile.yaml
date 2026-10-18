@@ -164,6 +164,12 @@ org:
     status: maintained
     release:
       tag-prefix: v
+    tests:
+      # Narrowed from the fleet 90: Go does not instrument package-level var initialisers, so every mutant
+      # inside a `var xxxCmd = &cobra.Command{…}` literal is permanently NOT COVERED and caps mutant
+      # coverage at ~87%. Efficacy keeps its own 90% gate under org.projectfile.tests.mutation.
+      coverage:
+        minimum: 86
 repositories:
   - branch: main
     role: origin
