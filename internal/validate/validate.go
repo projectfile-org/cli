@@ -42,34 +42,37 @@ var (
 
 func loadSchema(url string) (*jsonschema.Schema, error) {
 	compileOnce.Do(func() {
-		c := jsonschema.NewCompiler()
-		// JSON Schema specifies ECMA-262 regex semantics, which Go's stdlib
-		// regexp (RE2) does not implement — RE2 rejects lookarounds and
-		// backreferences. regexp2 is the ECMA-262-compatible engine.
-		c.UseRegexpEngine(ecma262Regexp)
-		resources := map[string][]byte{SchemaURL: schemaBytes, FragmentSchemaURL: fragmentSchemaBytes}
-		for id, data := range resources {
-			raw, err := jsonschema.UnmarshalJSON(bytes.NewReader(data))
-			if err != nil {
-				compileErr = fmt.Errorf("parse embedded schema %s: %w", id, err)
-				return
-			}
-			if err := c.AddResource(id, raw); err != nil {
-				compileErr = fmt.Errorf("register embedded schema %s: %w", id, err)
-				return
-			}
-		}
-		compiled = make(map[string]*jsonschema.Schema, len(resources))
-		for id := range resources {
-			s, err := c.Compile(id)
-			if err != nil {
-				compileErr = fmt.Errorf("compile embedded schema %s: %w", id, err)
-				return
-			}
-			compiled[id] = s
-		}
+		compiled, compileErr = compileSchemas(schemaBytes, fragmentSchemaBytes)
 	})
 	return compiled[url], compileErr
+}
+
+// compileSchemas parses and compiles both embedded schemas; it is split out from the cache so a corrupt embed is pinnable without the process-wide once.
+func compileSchemas(schema, fragment []byte) (map[string]*jsonschema.Schema, error) {
+	c := jsonschema.NewCompiler()
+	// JSON Schema specifies ECMA-262 regex semantics, which Go's stdlib
+	// regexp (RE2) does not implement — RE2 rejects lookarounds and
+	// backreferences. regexp2 is the ECMA-262-compatible engine.
+	c.UseRegexpEngine(ecma262Regexp)
+	resources := map[string][]byte{SchemaURL: schema, FragmentSchemaURL: fragment}
+	for id, data := range resources {
+		raw, err := jsonschema.UnmarshalJSON(bytes.NewReader(data))
+		if err != nil {
+			return nil, fmt.Errorf("parse embedded schema %s: %w", id, err)
+		}
+		if err := c.AddResource(id, raw); err != nil {
+			return nil, fmt.Errorf("register embedded schema %s: %w", id, err)
+		}
+	}
+	out := make(map[string]*jsonschema.Schema, len(resources))
+	for id := range resources {
+		s, err := c.Compile(id)
+		if err != nil {
+			return nil, fmt.Errorf("compile embedded schema %s: %w", id, err)
+		}
+		out[id] = s
+	}
+	return out, nil
 }
 
 // Validate runs the projectfile v1 schema against doc. doc may come from any

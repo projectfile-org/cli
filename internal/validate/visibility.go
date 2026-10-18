@@ -15,12 +15,15 @@ import (
 )
 
 const (
+	keyIdentity   = "identity"
 	keyVisibility = "visibility"
 	keyLinks      = "links"
 	keyType       = "type"
 	keyRegistry   = "registry"
 	keyTags       = "tags"
+	keyURL        = "url"
 	linkSource    = "source-code"
+	visPrivate    = "private"
 	tagPublic     = "public"
 )
 
@@ -39,7 +42,7 @@ func VisibilityContradiction(doc map[string]any) []string {
 			continue
 		}
 		out = append(out, fmt.Sprintf("identity.visibility: %s with a links[type=source-code] entry tagged %q: %s",
-			declaredVisibility(doc), tagPublic, stringOr(l["url"], "(no url)")))
+			declaredVisibility(doc), tagPublic, stringOr(l[keyURL], "(no url)")))
 	}
 	return out
 }
@@ -58,7 +61,7 @@ func VisibilityAdvisories(doc map[string]any) []string {
 		if registry == "" {
 			continue
 		}
-		if own, _ := artifact[keyVisibility].(string); own == "public" {
+		if own, _ := artifact[keyVisibility].(string); own == tagPublic {
 			continue
 		}
 		out = append(out, fmt.Sprintf("org.projectfile.artifacts.%s declares registry %q but identity.visibility is %s and the artifact does not opt in: publish sinks skip it",
@@ -68,7 +71,7 @@ func VisibilityAdvisories(doc map[string]any) []string {
 		if l["type"] != linkSource {
 			continue
 		}
-		host := hostOf(stringOr(l["url"], ""))
+		host := hostOf(stringOr(l[keyURL], ""))
 		if host == "" || !userconfig.IsPrivateHost(host) {
 			continue
 		}
@@ -93,7 +96,7 @@ func resolvesPrivate(doc map[string]any) bool {
 }
 
 func identityNode(doc map[string]any) map[string]any {
-	m, _ := doc["identity"].(map[string]any)
+	m, _ := doc[keyIdentity].(map[string]any)
 	return m
 }
 
