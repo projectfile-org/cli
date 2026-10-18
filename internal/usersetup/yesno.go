@@ -25,23 +25,26 @@ import (
 // Cancellation surfaces as errCancelled (same sentinel sections use) so the
 // orchestrator's "user aborted, no changes" branch handles both paths
 // identically.
-func yesNo(title string, defaultYes bool) (bool, error) {
-	type opt struct {
-		label string
-		value bool
-	}
-	items := []opt{{"no", false}, {"yes", true}}
+// yesNoOption is one row of the two-option list.
+type yesNoOption struct {
+	label string
+	value bool
+}
+
+// yesNoOptions orders the rows so the caller's default leads, which is what makes Enter a zero-press accept.
+func yesNoOptions(defaultYes bool) []yesNoOption {
 	if defaultYes {
-		// Reorder so "yes" is the first row — selector lands focus on it,
-		// pressing Enter accepts. Same trick the format picker uses to make
-		// YAML the zero-press default.
-		items = []opt{{"yes", true}, {"no", false}}
+		return []yesNoOption{{"yes", true}, {"no", false}}
 	}
-	choice, err := selector.Run(selector.Choices[opt]{
+	return []yesNoOption{{"no", false}, {"yes", true}}
+}
+
+func yesNo(title string, defaultYes bool) (bool, error) {
+	choice, err := selector.Run(selector.Choices[yesNoOption]{
 		Title:  title,
-		Items:  items,
-		Label:  func(o opt) string { return o.label },
-		Detail: func(_ opt) string { return "" },
+		Items:  yesNoOptions(defaultYes),
+		Label:  func(o yesNoOption) string { return o.label },
+		Detail: func(_ yesNoOption) string { return "" },
 	})
 	if err != nil {
 		if errors.Is(err, selector.ErrCancelled) {

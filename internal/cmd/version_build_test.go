@@ -17,6 +17,13 @@ func TestVersionWithoutLdflags(t *testing.T) {
 	if testing.Short() {
 		t.Skip("builds a binary")
 	}
+	// go build stamps VCS settings by shelling out to git. A linked worktree
+	// carries a .git FILE pointing at the parent repository's gitdir, which a
+	// container that mounts only the worktree tree cannot resolve — the build
+	// then stamps nothing and the fallback text is correct, not a defect.
+	if err := exec.Command("git", "rev-parse", "--absolute-git-dir").Run(); err != nil {
+		t.Skipf("no resolvable git metadata for VCS stamping: %v", err)
+	}
 	bin := filepath.Join(t.TempDir(), "pf-cli")
 	build := exec.Command("go", "build", "-o", bin, "../../cmd/pf-cli")
 	build.Env = withoutGitEnv(os.Environ())

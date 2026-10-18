@@ -73,7 +73,7 @@ func TestSetTypedFormsStillCoerce(t *testing.T) {
 	resetSetFlags(t)
 	rootCmd.SetOut(&buf)
 	rootCmd.SetErr(&buf)
-	rootCmd.SetArgs([]string{"set", flagFile, path, "org.demo.count", "--value-json", "5"})
+	rootCmd.SetArgs([]string{"set", flagFile, path, addrDemoCount, flagValueJSON, "5"})
 	require.NoError(t, rootCmd.Execute())
 
 	out, err := os.ReadFile(path)
@@ -91,11 +91,11 @@ func TestSetRefusesAValueTheFieldCannotHold(t *testing.T) {
 	resetSetFlags(t)
 	rootCmd.SetOut(&buf)
 	rootCmd.SetErr(&buf)
-	rootCmd.SetArgs([]string{"set", flagFile, path, addrIdentityName, "--value-json", "true"})
+	rootCmd.SetArgs([]string{"set", flagFile, path, addrIdentityName, flagValueJSON, "true"})
 	err := rootCmd.Execute()
 
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "--value-json")
+	assert.Contains(t, err.Error(), flagValueJSON)
 	after, readErr := os.ReadFile(path)
 	require.NoError(t, readErr)
 	assert.Equal(t, before, after, "a refused set leaves the file byte-identical")
