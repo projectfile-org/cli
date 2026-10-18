@@ -32,5 +32,5 @@ keywords:
   - yaml
   - validate
   - go
-version: 3.4.1
-date-released: "2026-10-17"
+version: 3.4.2
+date-released: "2026-10-18"
