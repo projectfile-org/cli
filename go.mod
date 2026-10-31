@@ -8,7 +8,7 @@ go 1.27.2
 
 require (
 	charm.land/bubbles/v2 v2.2.1
-	charm.land/bubbletea/v2 v2.1.0
+	charm.land/bubbletea/v2 v2.1.1
 	charm.land/lipgloss/v2 v2.0.6
 	github.com/dlclark/regexp2 v1.12.0
 	github.com/pelletier/go-toml/v2 v2.4.3
@@ -17,7 +17,7 @@ require (
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.12.1
 	go.yaml.in/yaml/v3 v3.0.5
-	kiota.ch/projectfile/core/v2 v2.20.1
+	kiota.ch/projectfile/core/v2 v2.20.2
 )
 
 require (
