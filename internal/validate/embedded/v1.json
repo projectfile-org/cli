@@ -258,6 +258,7 @@
           "url":      { "type": "string", "format": "uri" },
           "version":  { "type": "string" },
           "license":  { "type": "string", "description": "SPDX license expression of the upstream." },
+          "authors":  { "$ref": "#/$defs/localizedString" },
           "relation": { "type": "string", "description": "Open vocabulary: packages (default), fork." }
         }
       }
