@@ -29,12 +29,12 @@ Common flags:
   --file               explicit projectfile path (skips detection)
 
 Flags:
-      --create-only         fail if the path already has a value
-      --csv string          value as a comma-separated string list
-  -n, --dry-run             show the write without saving it
-      --file string         explicit projectfile path (skips detection)
-  -h, --help                help for set
-      --value-json string   value as JSON (a bare value is text)
+      --create-only[=true|false]   fail if the path already has a value
+      --csv string                 value as a comma-separated string list
+  -n, --dry-run[=true|false]       show the write without saving it
+      --file string                explicit projectfile path (skips detection)
+  -h, --help[=true|false]          help for set
+      --value-json string          value as JSON (a bare value is text)
 
 Global Flags:
   …

@@ -26,9 +26,9 @@ Common flags:
   --file               explicit projectfile path (skips detection)
 
 Flags:
-  -n, --dry-run       print the digests without saving
-      --file string   explicit projectfile path (skips detection)
-  -h, --help          help for pin
+  -n, --dry-run[=true|false]   print the digests without saving
+      --file string            explicit projectfile path (skips detection)
+  -h, --help[=true|false]      help for pin
 
 Global Flags:
   …

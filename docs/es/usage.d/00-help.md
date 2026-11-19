@@ -57,16 +57,16 @@ Common flags:
   --offline            refuse network; use cache and embedded data
 
 Flags:
-      --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
-      --fail-on string       abort includes at error|warning (default "error")
-  -h, --help                 help for pf-cli
-      --ignore-user-config   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
-      --offline              refuse network; use cache and embedded data
-  -q, --quiet                mute info; warnings and errors still print
-      --sorted               write YAML keys in sorted order
-      --timeout duration     per-attempt network timeout (default 10s)
-  -v, --verbose              show each step; also PF_CLI_VERBOSE=1
-  -V, --version              print the version
+      --colors string                     colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
+      --fail-on string                    abort includes at error|warning (default "error")
+  -h, --help[=true|false]                 help for pf-cli
+      --ignore-user-config[=true|false]   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
+      --offline[=true|false]              refuse network; use cache and embedded data
+  -q, --quiet[=true|false]                mute info; warnings and errors still print
+      --sorted[=true|false]               write YAML keys in sorted order
+      --timeout duration                  per-attempt network timeout (default 10s)
+  -v, --verbose[=true|false]              show each step; also PF_CLI_VERBOSE=1
+  -V, --version[=true|false]              print the version
 
 Documentation:
   https://github.com/projectfile-org/cli/tree/main/docs

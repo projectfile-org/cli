@@ -31,20 +31,20 @@ Common flags:
   --format             raw, json, yaml, toml, sh, flat
 
 Flags:
-      --batch               read several paths in one run
-      --default string      value to print when the path is missing
-      --exists              exit 0 if present, 1 if absent; prints nothing
-      --expand              fill ${…} from the document; leave the rest as written
-      --expand-env          fill ${VAR} from the environment first
-      --file string         explicit projectfile path (skips detection)
-      --format string       raw, json, yaml, toml, sh, flat (default "raw")
-  -h, --help                help for get
-      --lang string         choose a language for translated fields
-      --or-default          use the built-in default if missing
-      --path stringArray    label a path as KEY=ADDR (repeatable)
-      --print-path          print the projectfile path and exit
-      --scope stringArray   fill ${…} from this address (repeatable)
-      --suggest             on a missing path, print the nearest existing address instead of failing
+      --batch[=true|false]        read several paths in one run
+      --default string            value to print when the path is missing
+      --exists[=true|false]       exit 0 if present, 1 if absent; prints nothing
+      --expand[=true|false]       fill ${…} from the document; leave the rest as written
+      --expand-env[=true|false]   fill ${VAR} from the environment first
+      --file string               explicit projectfile path (skips detection)
+      --format string             raw, json, yaml, toml, sh, flat (default "raw")
+  -h, --help[=true|false]         help for get
+      --lang string               choose a language for translated fields
+      --or-default[=true|false]   use the built-in default if missing
+      --path stringArray          label a path as KEY=ADDR (repeatable)
+      --print-path[=true|false]   print the projectfile path and exit
+      --scope stringArray         fill ${…} from this address (repeatable)
+      --suggest[=true|false]      on a missing path, print the nearest existing address instead of failing
 
 Global Flags:
   …

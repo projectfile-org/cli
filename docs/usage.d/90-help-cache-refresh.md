@@ -19,7 +19,7 @@ Common flags:
   …
 
 Flags:
-  -h, --help   help for refresh
+  -h, --help[=true|false]   help for refresh
 
 Global Flags:
   …

@@ -61,16 +61,16 @@ Common flags:
   --offline            refuse network; use cache and embedded data
 
 Flags:
-      --colors string        colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
-      --fail-on string       abort includes at error|warning (default "error")
-  -h, --help                 help for pf-cli
-      --ignore-user-config   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
-      --offline              refuse network; use cache and embedded data
-  -q, --quiet                mute info; warnings and errors still print
-      --sorted               write YAML keys in sorted order
-      --timeout duration     per-attempt network timeout (default 10s)
-  -v, --verbose              show each step; also PF_CLI_VERBOSE=1
-  -V, --version              print the version
+      --colors string                     colour output: auto|always|never; also PF_CLI_NO_COLOR=1 (default "auto")
+      --fail-on string                    abort includes at error|warning (default "error")
+  -h, --help[=true|false]                 help for pf-cli
+      --ignore-user-config[=true|false]   skip $XDG_CONFIG_HOME/projectfile/cli.* loading
+      --offline[=true|false]              refuse network; use cache and embedded data
+  -q, --quiet[=true|false]                mute info; warnings and errors still print
+      --sorted[=true|false]               write YAML keys in sorted order
+      --timeout duration                  per-attempt network timeout (default 10s)
+  -v, --verbose[=true|false]              show each step; also PF_CLI_VERBOSE=1
+  -V, --version[=true|false]              print the version
 
 Documentation:
   https://github.com/projectfile-org/cli/tree/main/docs
@@ -175,12 +175,12 @@ Common flags:
   --file               explicit projectfile path (skips detection)
 
 Flags:
-      --allow-duplicate     append even if already present
-  -n, --dry-run             show the append without saving it
-      --field stringArray   set one item field as k=v (repeatable)
-      --file string         explicit projectfile path (skips detection)
-  -h, --help                help for add
-      --value-json string   the whole item as JSON
+      --allow-duplicate[=true|false]   append even if already present
+  -n, --dry-run[=true|false]           show the append without saving it
+      --field stringArray              set one item field as k=v (repeatable)
+      --file string                    explicit projectfile path (skips detection)
+  -h, --help[=true|false]              help for add
+      --value-json string              the whole item as JSON
 
 Global Flags:
   …
@@ -212,7 +212,7 @@ Common flags:
   …
 
 Flags:
-  -h, --help   help for cache
+  -h, --help[=true|false]   help for cache
 
 Global Flags:
   …
@@ -243,7 +243,7 @@ Common flags:
   …
 
 Flags:
-  -h, --help   help for purge
+  -h, --help[=true|false]   help for purge
 
 Global Flags:
   …
@@ -271,7 +271,7 @@ Common flags:
   …
 
 Flags:
-  -h, --help   help for refresh
+  -h, --help[=true|false]   help for refresh
 
 Global Flags:
   …
@@ -299,7 +299,7 @@ Common flags:
   …
 
 Flags:
-  -h, --help   help for status
+  -h, --help[=true|false]   help for status
 
 Global Flags:
   …
@@ -331,8 +331,8 @@ Common flags:
   -f, --force          download everything again, even when fresh
 
 Flags:
-  -f, --force   download everything again, even when fresh
-  -h, --help    help for warm
+  -f, --force[=true|false]   download everything again, even when fresh
+  -h, --help[=true|false]    help for warm
 
 Global Flags:
   …
@@ -364,7 +364,7 @@ Common flags:
   …
 
 Flags:
-  -h, --help   help for completion
+  -h, --help[=true|false]   help for completion
 
 Global Flags:
   …
@@ -403,9 +403,9 @@ Common flags:
   -f, --force          overwrite the output file if it already exists
 
 Flags:
-      --delete-source   remove the source file after converting
-  -f, --force           overwrite the output file if it already exists
-  -h, --help            help for convert
+      --delete-source[=true|false]   remove the source file after converting
+  -f, --force[=true|false]           overwrite the output file if it already exists
+  -h, --help[=true|false]            help for convert
 
 Global Flags:
   …
@@ -442,10 +442,10 @@ Common flags:
   --file               explicit projectfile path (skips detection)
 
 Flags:
-  -n, --dry-run       show the deletion without saving it
-      --file string   explicit projectfile path (skips detection)
-  -h, --help          help for del
-      --strict        exit 1 when the path is already absent
+  -n, --dry-run[=true|false]   show the deletion without saving it
+      --file string            explicit projectfile path (skips detection)
+  -h, --help[=true|false]      help for del
+      --strict[=true|false]    exit 1 when the path is already absent
 
 Global Flags:
   …
@@ -485,20 +485,20 @@ Common flags:
   --format             raw, json, yaml, toml, sh, flat
 
 Flags:
-      --batch               read several paths in one run
-      --default string      value to print when the path is missing
-      --exists              exit 0 if present, 1 if absent; prints nothing
-      --expand              fill ${…} from the document; leave the rest as written
-      --expand-env          fill ${VAR} from the environment first
-      --file string         explicit projectfile path (skips detection)
-      --format string       raw, json, yaml, toml, sh, flat (default "raw")
-  -h, --help                help for get
-      --lang string         choose a language for translated fields
-      --or-default          use the built-in default if missing
-      --path stringArray    label a path as KEY=ADDR (repeatable)
-      --print-path          print the projectfile path and exit
-      --scope stringArray   fill ${…} from this address (repeatable)
-      --suggest             on a missing path, print the nearest existing address instead of failing
+      --batch[=true|false]        read several paths in one run
+      --default string            value to print when the path is missing
+      --exists[=true|false]       exit 0 if present, 1 if absent; prints nothing
+      --expand[=true|false]       fill ${…} from the document; leave the rest as written
+      --expand-env[=true|false]   fill ${VAR} from the environment first
+      --file string               explicit projectfile path (skips detection)
+      --format string             raw, json, yaml, toml, sh, flat (default "raw")
+  -h, --help[=true|false]         help for get
+      --lang string               choose a language for translated fields
+      --or-default[=true|false]   use the built-in default if missing
+      --path stringArray          label a path as KEY=ADDR (repeatable)
+      --print-path[=true|false]   print the projectfile path and exit
+      --scope stringArray         fill ${…} from this address (repeatable)
+      --suggest[=true|false]      on a missing path, print the nearest existing address instead of failing
 
 Global Flags:
   …
@@ -526,7 +526,7 @@ Common flags:
   …
 
 Flags:
-  -h, --help   help for includes
+  -h, --help[=true|false]   help for includes
 
 Global Flags:
   …
@@ -563,9 +563,9 @@ Common flags:
   --file               explicit projectfile path (skips detection)
 
 Flags:
-  -n, --dry-run       print the digests without saving
-      --file string   explicit projectfile path (skips detection)
-  -h, --help          help for pin
+  -n, --dry-run[=true|false]   print the digests without saving
+      --file string            explicit projectfile path (skips detection)
+  -h, --help[=true|false]      help for pin
 
 Global Flags:
   …
@@ -604,13 +604,13 @@ Common flags:
   --format             output format: yaml, toml, json (default: prompt)
 
 Flags:
-      --format string      output format: yaml, toml, json (default: prompt)
-  -h, --help               help for init
-      --license string     license SPDX expression (e.g. MIT)
-      --name string        identity.name (project slug)
-      --namespace string   identity.namespace (reverse-DNS, e.g. org.example)
-      --no-scan            skip init-time scanners (accepted for pf-bridge-init parity; the basic scaffold never scans)
-      --non-interactive    fail if required fields are missing instead of prompting
+      --format string                  output format: yaml, toml, json (default: prompt)
+  -h, --help[=true|false]              help for init
+      --license string                 license SPDX expression (e.g. MIT)
+      --name string                    identity.name (project slug)
+      --namespace string               identity.namespace (reverse-DNS, e.g. org.example)
+      --no-scan[=true|false]           skip init-time scanners (accepted for pf-bridge-init parity; the basic scaffold never scans)
+      --non-interactive[=true|false]   fail if required fields are missing instead of prompting
 
 Global Flags:
   …
@@ -647,9 +647,9 @@ Common flags:
   --file               explicit projectfile path (skips detection)
 
 Flags:
-  -n, --dry-run       list removals without saving
-      --file string   explicit projectfile path (skips detection)
-  -h, --help          help for optimize
+  -n, --dry-run[=true|false]   list removals without saving
+      --file string            explicit projectfile path (skips detection)
+  -h, --help[=true|false]      help for optimize
 
 Global Flags:
   …
@@ -687,12 +687,12 @@ Common flags:
   --file               explicit projectfile path (skips detection)
 
 Flags:
-      --create-only         fail if the path already has a value
-      --csv string          value as a comma-separated string list
-  -n, --dry-run             show the write without saving it
-      --file string         explicit projectfile path (skips detection)
-  -h, --help                help for set
-      --value-json string   value as JSON (a bare value is text)
+      --create-only[=true|false]   fail if the path already has a value
+      --csv string                 value as a comma-separated string list
+  -n, --dry-run[=true|false]       show the write without saving it
+      --file string                explicit projectfile path (skips detection)
+  -h, --help[=true|false]          help for set
+      --value-json string          value as JSON (a bare value is text)
 
 Global Flags:
   …
@@ -725,8 +725,8 @@ Common flags:
   --format             output format: yaml, toml, json (default: prompt)
 
 Flags:
-      --format string   output format: yaml, toml, json (default: prompt)
-  -h, --help            help for setup
+      --format string       output format: yaml, toml, json (default: prompt)
+  -h, --help[=true|false]   help for setup
 
 Global Flags:
   …
@@ -761,9 +761,9 @@ Common flags:
   …
 
 Flags:
-      --fragment          treat the argument as one included file and check it against the fragment schema
-  -h, --help              help for validate
-      --strict-includes   fail on repeated includes (default: warn)
+      --fragment[=true|false]          treat the argument as one included file and check it against the fragment schema
+  -h, --help[=true|false]              help for validate
+      --strict-includes[=true|false]   fail on repeated includes (default: warn)
 
 Global Flags:
   …

@@ -28,10 +28,10 @@ Common flags:
   --file               explicit projectfile path (skips detection)
 
 Flags:
-  -n, --dry-run       show the deletion without saving it
-      --file string   explicit projectfile path (skips detection)
-  -h, --help          help for del
-      --strict        exit 1 when the path is already absent
+  -n, --dry-run[=true|false]   show the deletion without saving it
+      --file string            explicit projectfile path (skips detection)
+  -h, --help[=true|false]      help for del
+      --strict[=true|false]    exit 1 when the path is already absent
 
 Global Flags:
   …

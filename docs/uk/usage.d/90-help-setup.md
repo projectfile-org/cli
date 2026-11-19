@@ -24,8 +24,8 @@ Common flags:
   --format             output format: yaml, toml, json (default: prompt)
 
 Flags:
-      --format string   output format: yaml, toml, json (default: prompt)
-  -h, --help            help for setup
+      --format string       output format: yaml, toml, json (default: prompt)
+  -h, --help[=true|false]   help for setup
 
 Global Flags:
   …

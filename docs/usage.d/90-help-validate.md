@@ -26,9 +26,9 @@ Common flags:
   …
 
 Flags:
-      --fragment          treat the argument as one included file and check it against the fragment schema
-  -h, --help              help for validate
-      --strict-includes   fail on repeated includes (default: warn)
+      --fragment[=true|false]          treat the argument as one included file and check it against the fragment schema
+  -h, --help[=true|false]              help for validate
+      --strict-includes[=true|false]   fail on repeated includes (default: warn)
 
 Global Flags:
   …

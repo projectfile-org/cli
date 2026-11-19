@@ -23,7 +23,7 @@ Common flags:
   …
 
 Flags:
-  -h, --help   help for cache
+  -h, --help[=true|false]   help for cache
 
 Global Flags:
   …

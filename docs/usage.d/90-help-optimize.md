@@ -28,9 +28,9 @@ Common flags:
   --file               explicit projectfile path (skips detection)
 
 Flags:
-  -n, --dry-run       list removals without saving
-      --file string   explicit projectfile path (skips detection)
-  -h, --help          help for optimize
+  -n, --dry-run[=true|false]   list removals without saving
+      --file string            explicit projectfile path (skips detection)
+  -h, --help[=true|false]      help for optimize
 
 Global Flags:
   …

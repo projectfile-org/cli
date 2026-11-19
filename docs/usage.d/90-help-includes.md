@@ -19,7 +19,7 @@ Common flags:
   …
 
 Flags:
-  -h, --help   help for includes
+  -h, --help[=true|false]   help for includes
 
 Global Flags:
   …

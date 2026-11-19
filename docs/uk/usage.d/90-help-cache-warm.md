@@ -23,8 +23,8 @@ Common flags:
   -f, --force          download everything again, even when fresh
 
 Flags:
-  -f, --force   download everything again, even when fresh
-  -h, --help    help for warm
+  -f, --force[=true|false]   download everything again, even when fresh
+  -h, --help[=true|false]    help for warm
 
 Global Flags:
   …

@@ -28,9 +28,9 @@ Common flags:
   -f, --force          overwrite the output file if it already exists
 
 Flags:
-      --delete-source   remove the source file after converting
-  -f, --force           overwrite the output file if it already exists
-  -h, --help            help for convert
+      --delete-source[=true|false]   remove the source file after converting
+  -f, --force[=true|false]           overwrite the output file if it already exists
+  -h, --help[=true|false]            help for convert
 
 Global Flags:
   …

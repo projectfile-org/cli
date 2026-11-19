@@ -23,7 +23,7 @@ Common flags:
   …
 
 Flags:
-  -h, --help   help for completion
+  -h, --help[=true|false]   help for completion
 
 Global Flags:
   …

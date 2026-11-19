@@ -26,12 +26,12 @@ Common flags:
   --file               explicit projectfile path (skips detection)
 
 Flags:
-      --allow-duplicate     append even if already present
-  -n, --dry-run             show the append without saving it
-      --field stringArray   set one item field as k=v (repeatable)
-      --file string         explicit projectfile path (skips detection)
-  -h, --help                help for add
-      --value-json string   the whole item as JSON
+      --allow-duplicate[=true|false]   append even if already present
+  -n, --dry-run[=true|false]           show the append without saving it
+      --field stringArray              set one item field as k=v (repeatable)
+      --file string                    explicit projectfile path (skips detection)
+  -h, --help[=true|false]              help for add
+      --value-json string              the whole item as JSON
 
 Global Flags:
   …

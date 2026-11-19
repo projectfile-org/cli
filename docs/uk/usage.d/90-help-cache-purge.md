@@ -20,7 +20,7 @@ Common flags:
   …
 
 Flags:
-  -h, --help   help for purge
+  -h, --help[=true|false]   help for purge
 
 Global Flags:
   …

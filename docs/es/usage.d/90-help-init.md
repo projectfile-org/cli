@@ -30,13 +30,13 @@ Common flags:
   --format             output format: yaml, toml, json (default: prompt)
 
 Flags:
-      --format string      output format: yaml, toml, json (default: prompt)
-  -h, --help               help for init
-      --license string     license SPDX expression (e.g. MIT)
-      --name string        identity.name (project slug)
-      --namespace string   identity.namespace (reverse-DNS, e.g. org.example)
-      --no-scan            skip init-time scanners (accepted for pf-bridge-init parity; the basic scaffold never scans)
-      --non-interactive    fail if required fields are missing instead of prompting
+      --format string                  output format: yaml, toml, json (default: prompt)
+  -h, --help[=true|false]              help for init
+      --license string                 license SPDX expression (e.g. MIT)
+      --name string                    identity.name (project slug)
+      --namespace string               identity.namespace (reverse-DNS, e.g. org.example)
+      --no-scan[=true|false]           skip init-time scanners (accepted for pf-bridge-init parity; the basic scaffold never scans)
+      --non-interactive[=true|false]   fail if required fields are missing instead of prompting
 
 Global Flags:
   …
