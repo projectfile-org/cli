@@ -33,6 +33,7 @@ All types of contributions are encouraged and valued. See the Table of Contents 
 - [Reporting Bugs](#reporting-bugs)
 - [Suggesting Enhancements](#suggesting-enhancements)
 - [Conventions](#conventions)
+- [Submitting Changes](#submitting-changes)
 - [Improving The Documentation](#improving-the-documentation)
 
 ## I Have a Question
@@ -100,6 +101,13 @@ Enhancement suggestions are tracked as [GitHub Issues](https://github.com/projec
 - **Commits:** [Conventional Commits](https://www.conventionalcommits.org/)
 - **Versioning:** [Semantic Versioning](https://semver.org/)
 - **AI Policy:** [Read our AI policy](AI_POLICY.md)
+
+## Submitting Changes
+
+1. Create a feature branch from `dev` and open your pull request against `dev`. `main` is the stable branch: it only fast-forwards to `dev` at release, so a pull request against `main` is retargeted.
+
+2. Make your changes — make every commit atomic: one logical change that builds and passes the tests on its own.
+3. Use [Conventional Commits](https://www.conventionalcommits.org/) for the commit message, and sign every commit (`git commit --gpg-sign`, or an SSH or S/MIME signing key): unsigned commits are not merged.
 
 ## Improving The Documentation
 

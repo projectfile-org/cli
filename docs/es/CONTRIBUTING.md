@@ -34,6 +34,7 @@ Toda forma de contribución se agradece y se valora. Consulta la Tabla de conten
 - [Cómo informar de fallos](#cómo-informar-de-fallos)
 - [Cómo sugerir mejoras](#cómo-sugerir-mejoras)
 - [Convenciones](#convenciones)
+- [Enviar cambios](#enviar-cambios)
 - [Mejorar la documentación](#mejorar-la-documentación)
 
 ## Tengo una pregunta
@@ -101,6 +102,13 @@ Las propuestas de mejora se gestionan como Issues de GitHub.
 - **Commits:** [Conventional Commits](https://www.conventionalcommits.org/)
 - **Versioning:** [Semantic Versioning](https://semver.org/)
 - **AI Policy:** [Lee nuestra política sobre IA y LLM](AI_POLICY.md)
+
+## Enviar cambios
+
+1. Crea una rama de funcionalidad desde `dev` y abre tu solicitud de incorporación contra `dev`. `main` es la rama estable: solo avanza en modo fast-forward hasta `dev` en cada versión, así que una solicitud contra `main` se redirige.
+
+2. Haz tus cambios — cada commit debe ser atómico: un único cambio lógico que compila y pasa las pruebas por sí solo.
+3. Usa [Conventional Commits](https://www.conventionalcommits.org/) en el mensaje del commit y firma cada commit (`git commit --gpg-sign`, o una clave de firma SSH o S/MIME): los commits sin firma no se fusionan.
 
 ## Mejorar la documentación
 
