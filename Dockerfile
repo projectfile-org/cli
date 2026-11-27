@@ -68,7 +68,9 @@ ARG M6E_NEAR_CACHE_HOST=""
 ARG M6E_PROJECT
 ARG TARGETARCH
 
-COPY --chown=${B19_UID}:${B19_GID} .container/base/ /
+COPY --chown=${B19_UID}:${B19_GID} .container/base/deps/ /deps/
+COPY --chown=${B19_UID}:${B19_GID} .container/base/etc/ /etc/
+COPY .container/base/locale/ /locale/
 COPY --from=projectfile-cli-builder /export /
 
 USER 0
@@ -85,7 +87,9 @@ RUN --mount=type=bind,from=fetch,source=.,target=/fetch                         
 # hadolint ignore=DL3066 # B19_UID comes from the root
 USER ${B19_UID}
 
-COPY --chown=${B19_UID}:${B19_GID} .container/user/ /
+COPY .container/user/command.d/ /command.d/
+COPY .container/user/entrypoint.d/ /entrypoint.d/
+COPY --chown=${B19_UID}:${B19_GID} .container/user/test.d/ /test.d/
 
 ARG M6E_VERSION
 RUN --mount=type=bind,from=fetch,source=.,target=/fetch                                             \
