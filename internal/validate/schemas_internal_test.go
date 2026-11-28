@@ -28,13 +28,14 @@ func TestCompileSchemasReportsABrokenEmbed(t *testing.T) {
 	assert.Contains(t, err.Error(), "not valid regex")
 }
 
-// TestCompileSchemasAcceptsTheEmbeddedPair pins the happy path the cache serves every later call from: both schemas compile and answer by URL.
-func TestCompileSchemasAcceptsTheEmbeddedPair(t *testing.T) {
+// TestCompileSchemasAcceptsTheEmbeddedSet pins the happy path the cache serves every later call from: every schema compiles and answers by URL.
+func TestCompileSchemasAcceptsTheEmbeddedSet(t *testing.T) {
 	got, err := compileSchemas(schemaBytes, fragmentSchemaBytes)
 	require.NoError(t, err)
-	assert.Len(t, got, 2)
-	assert.NotNil(t, got[SchemaURL])
-	assert.NotNil(t, got[FragmentSchemaURL])
+	assert.Len(t, got, 5)
+	for _, url := range []string{SchemaURL, FragmentSchemaURL, NamespacesURL, schemaBase + "org.projectfile.deploy.v1.json", schemaBase + "org.projectfile.health.v1.json"} {
+		assert.NotNil(t, got[url], url)
+	}
 }
 
 // TestValidateReportsAnUnencodableDocument pins that a document the JSON round-trip cannot carry is a validation failure in its own voice, not a silent pass.

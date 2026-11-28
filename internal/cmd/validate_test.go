@@ -62,6 +62,46 @@ func TestValidateRejectsUndeclaredArtifactExclude(t *testing.T) {
 	}
 }
 
+// deployDocument is a valid document whose one unit runs the artifact named by runs, in the given shape.
+func deployDocument(runs, shape string) string {
+	return "$schema: https://projectfile.org/schema/v1.json\nidentity:\n  namespace: org.example\n  name: demo\n" +
+		"org:\n  projectfile:\n    artifacts:\n      app:\n        kind: service\n        ports: [{port: 8080, name: http, speaks: http}]\n" +
+		"    deploy:\n      web:\n        runs: " + runs + "\n        shape: " + shape + "\n        offers:\n          site: {port: http, to: everyone, at: example.org}\n"
+}
+
+func TestValidateAcceptsResolvedDeploy(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, "projectfile.yaml", deployDocument("app", "scalable"))
+	out, err := runValidateCmd(t, dir)
+	if err != nil {
+		t.Fatalf("a deploy unit running a declared service failed: %s (%v)", out, err)
+	}
+}
+
+func TestValidateRejectsUnresolvedDeployReference(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, "projectfile.yaml", deployDocument("api", "scalable"))
+	out, err := runValidateCmd(t, dir)
+	if err == nil || !strings.Contains(err.Error(), "deploy or health reference") {
+		t.Fatalf("got %v, want the reference failure", err)
+	}
+	if !strings.Contains(out, `org.projectfile.deploy.web.runs: artifact "api" is not declared`) {
+		t.Fatalf("got %q, want the unit, field and missing name", out)
+	}
+}
+
+func TestValidateRejectsDeploySchemaViolation(t *testing.T) {
+	dir := t.TempDir()
+	writeFile(t, dir, "projectfile.yaml", deployDocument("app", "deployment"))
+	out, err := runValidateCmd(t, dir)
+	if err == nil || !strings.Contains(err.Error(), "extension schema") {
+		t.Fatalf("got %v, want the extension schema failure", err)
+	}
+	if !strings.Contains(out, "/org/projectfile/deploy/web/shape") {
+		t.Fatalf("got %q, want the violating field located", out)
+	}
+}
+
 func TestValidateNamesRepositoriesOriginRule(t *testing.T) {
 	for _, tc := range []struct {
 		name string

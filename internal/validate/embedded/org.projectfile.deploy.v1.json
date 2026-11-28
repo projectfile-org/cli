@@ -1,0 +1,186 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projectfile.org/schema/org.projectfile.deploy.v1.json",
+  "title": "org.projectfile.deploy extension (v1)",
+  "description": "Standalone contract for the value at the org.projectfile.deploy subtree: what a project needs in order to run well, stated as intent and never as mechanism. Each key is a UNIT, one running part of the project, pointing at a service artifact in org.projectfile.artifacts that already says what runs, what it listens on and what it must be given. No field names a platform: a reader (a compose file generator, a Helm chart generator, a cloud template, a written runbook) translates each intent into its own terms, and a reader that cannot honour an intent MUST fail naming the unit, the field and itself, never drop it silently. How healthy a unit is comes from org.projectfile.health, not from here.",
+
+  "type": "object",
+  "minProperties": 1,
+  "propertyNames": { "pattern": "^[a-z0-9][a-z0-9-]*$" },
+  "additionalProperties": { "$ref": "#/$defs/unit" },
+
+  "$defs": {
+    "name": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+
+    "duration": {
+      "type": "string",
+      "pattern": "^P(?!$)([0-9]+Y)?([0-9]+M)?([0-9]+W)?([0-9]+D)?(T(?=[0-9])([0-9]+H)?([0-9]+M)?([0-9]+S)?)?$",
+      "description": "An ISO 8601 duration (`PT1H`, `P1D`, `P1Y`)."
+    },
+
+    "unit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runs", "shape"],
+      "description": "One running part of the project.",
+      "properties": {
+        "runs": {
+          "$ref": "#/$defs/name",
+          "description": "The name of the artifact this unit runs, a key of org.projectfile.artifacts. The artifact owns its image, ports, secrets and settings; the unit repeats none of them."
+        },
+        "shape": {
+          "enum": ["singleton", "scalable", "per-machine", "scheduled", "once"],
+          "description": "How many copies run, and for how long. `singleton`: at most one at any moment, never two during an update (a database, anything holding a lock on its data). `scalable`: any number of copies serve the same thing, and a new one may start before an old one stops. `per-machine`: one on every machine that runs workloads (a log shipper). `scheduled`: runs to completion on the cadence in `every`, then sleeps. `once`: runs to completion before any unit that needs it starts (a migration)."
+        },
+        "every": {
+          "$ref": "#/$defs/duration",
+          "description": "The cadence of a `scheduled` unit (`P1D` is daily). Only with `shape: scheduled`, where it is REQUIRED."
+        },
+        "at": {
+          "type": "string",
+          "pattern": "^([01][0-9]|2[0-3]):[0-5][0-9]$",
+          "description": "The time of day a `scheduled` unit starts, 24-hour `HH:MM` in the deployment’s time zone. Absent means any time the reader picks."
+        },
+        "size": {
+          "enum": ["nano", "micro", "tiny", "small", "medium", "large", "xlarge", "2xlarge"],
+          "description": "A named size class, never cores and bytes. Each class is a CPU and memory ceiling a reader turns into its own limits: `nano` ¼ core and 128 MiB, `micro` ½ core and 256 MiB, `tiny` ½ core and 512 MiB, `small` 1 core and 1 GiB, `medium` 2 cores and 2 GiB, `large` 2 cores and 4 GiB, `xlarge` 4 cores and 8 GiB, `2xlarge` 8 cores and 16 GiB. Absent means the reader’s default class."
+        },
+        "keeps": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": { "pattern": "^[a-z0-9][a-z0-9-]*$" },
+          "additionalProperties": { "$ref": "#/$defs/keep" },
+          "description": "What this unit writes that must outlive one run of it, by name. A unit that keeps nothing may lose every byte it wrote on any restart."
+        },
+        "offers": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": { "pattern": "^[a-z0-9][a-z0-9-]*$" },
+          "additionalProperties": { "$ref": "#/$defs/offer" },
+          "description": "What this unit serves, and to whom, by name. A port of the artifact that no offer names is reachable by nobody."
+        },
+        "needs": {
+          "type": "object",
+          "minProperties": 1,
+          "propertyNames": { "pattern": "^[a-z0-9][a-z0-9-]*$" },
+          "additionalProperties": { "$ref": "#/$defs/need" },
+          "description": "What this unit needs from the world, by name. A unit with no needs calls nobody, and a reader MAY deny it every outbound connection."
+        },
+        "trust": {
+          "$ref": "#/$defs/trust"
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "shape": { "const": "scheduled" } } },
+          "then": { "required": ["every"] },
+          "else": { "not": { "anyOf": [{ "required": ["every"] }, { "required": ["at"] }] } }
+        }
+      ]
+    },
+
+    "keep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["at"],
+      "description": "One thing a unit keeps: where it lives and what losing it costs. Exactly one of `worth` and `backup`.",
+      "properties": {
+        "at": {
+          "type": "string",
+          "pattern": "^/",
+          "description": "The absolute path inside the running unit where this data lives."
+        },
+        "worth": {
+          "enum": ["irreplaceable", "rebuildable", "disposable"],
+          "description": "A named norm class. `irreplaceable`: lose at most one hour of it, keep a year of copies, keep one copy on another machine, and prove a restore weekly; the same as the explicit `backup` {lose-at-most: PT1H, keep: P1Y, elsewhere: true, prove-restore: P1W}. `rebuildable`: no copies; losing it costs time, not data, and a reader SHOULD still keep it across restarts. `disposable`: it MAY vanish on every restart."
+        },
+        "backup": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["lose-at-most", "keep"],
+          "description": "The explicit norm, for data no class fits. A reader that schedules copies also alerts when the newest good copy is older than `lose-at-most`.",
+          "properties": {
+            "lose-at-most": { "$ref": "#/$defs/duration", "description": "The most recent writes a failure may lose: the longest gap between two good copies." },
+            "keep": { "$ref": "#/$defs/duration", "description": "How long each copy is kept." },
+            "elsewhere": { "type": "boolean", "default": false, "description": "At least one copy lives on a machine other than the one the unit runs on." },
+            "prove-restore": { "$ref": "#/$defs/duration", "description": "How often a copy is restored into scratch space to prove it works. Absent means never proven, which a reader SHOULD warn about." }
+          }
+        }
+      },
+      "oneOf": [{ "required": ["worth"] }, { "required": ["backup"] }]
+    },
+
+    "offer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["port", "to"],
+      "description": "One thing a unit serves.",
+      "properties": {
+        "port": {
+          "$ref": "#/$defs/name",
+          "description": "The `name` of one of the artifact’s ports."
+        },
+        "to": {
+          "enum": ["everyone", "operators", "units", "peers"],
+          "description": "The audience. `everyone`: the public internet. `operators`: the people who run the deployment and nobody else (an admin page, a metrics port). `units`: other units of the same deployment only. `peers`: other machines on the internet speaking the same protocol, with no name in front (BitTorrent, Radicle)."
+        },
+        "at": {
+          "type": "string",
+          "minLength": 1,
+          "description": "The public name it is served under, usually an expression over deployment values (`${domain}`). Only with `to: everyone` or `to: operators`, and only for a port that `speaks` a protocol with names in it (`http`)."
+        }
+      },
+      "if": { "required": ["at"] },
+      "then": { "properties": { "to": { "enum": ["everyone", "operators"] } } }
+    },
+
+    "capability": {
+      "type": "string",
+      "pattern": "^(unit:[a-z0-9][a-z0-9-]*|[a-z][a-z0-9-]*)$",
+      "description": "What kind of thing is needed, never which product. Open vocabulary; the first set: `relational-database`, `key-value-cache`, `object-store`, `message-queue`, `internet` (may call out at all). `unit:<name>` names another unit of the same deployment."
+    },
+
+    "need": {
+      "description": "One thing a unit needs. A bare capability when the unit learns nothing from it; the object form when the reader must hand the unit how to reach it.",
+      "oneOf": [
+        { "$ref": "#/$defs/capability" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["is"],
+          "properties": {
+            "is": { "$ref": "#/$defs/capability" },
+            "fills": {
+              "type": "object",
+              "minProperties": 1,
+              "propertyNames": { "pattern": "^[a-z][a-z0-9-]*$" },
+              "additionalProperties": { "$ref": "#/$defs/name" },
+              "description": "Which of the artifact’s `settings` receives each part of what the reader provides, keyed by part (`url`, `host`, `port`, `username`, `password`, `database`). The setting’s own `secret` flag says how the value is delivered."
+            }
+          }
+        }
+      ]
+    },
+
+    "trust": {
+      "description": "How far the unit is trusted. `exposed`: it handles input from strangers, so a reader isolates it as far as it can. `internal`: it sees only its own deployment. The object form adds the powers it cannot run without, in plain words (`network-admin`, `tun-device`); a reader that cannot grant one MUST fail. Absent means `exposed` with no powers, the secure default.",
+      "oneOf": [
+        { "enum": ["exposed", "internal"] },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["is"],
+          "properties": {
+            "is": { "enum": ["exposed", "internal"] },
+            "requires": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": { "$ref": "#/$defs/name" }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

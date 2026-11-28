@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://projectfile.org/schema/org.projectfile.health.v1.json",
+  "title": "org.projectfile.health extension (v1)",
+  "description": "Standalone contract for the value at the org.projectfile.health subtree: how to tell that a running service works. Two signals, each a check: `readiness` (it can take work now; failing it only withholds work) and `liveness` (it is alive at all; failing it means restart it). The project-level pair applies to every `kind: service` artifact in org.projectfile.artifacts, so a shared include can declare an image family’s checks once; `artifacts.<name>` overrides either signal for one artifact. A reader MUST NOT treat a failing readiness check as a reason to restart, and MUST NOT run a liveness check that is absent: no liveness check means the program is trusted to exit on its own when it breaks.",
+
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "readiness": { "$ref": "#/$defs/check" },
+    "liveness": { "$ref": "#/$defs/check" },
+    "artifacts": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[a-z0-9][a-z0-9-]*$" },
+      "description": "Per-artifact overrides, keyed by the artifact’s name in org.projectfile.artifacts. A signal set here replaces the project-level one for that artifact; a signal left out inherits it.",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "minProperties": 1,
+        "properties": {
+          "readiness": { "$ref": "#/$defs/check" },
+          "liveness": { "$ref": "#/$defs/check" }
+        }
+      }
+    }
+  },
+
+  "$defs": {
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command"],
+      "description": "One check. It passes when the command exits 0 inside the running service, with no shell in between.",
+      "properties": {
+        "command": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "description": "The program and its arguments, exec form (`[readycheck.d]`). Never a shell string: a reader runs it as given."
+        }
+      }
+    }
+  }
+}

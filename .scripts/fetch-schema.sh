@@ -37,7 +37,7 @@ set -eu
 REPO="${PROJECTFILE_SPECIFICATION_REPO:-https://kiota.ch/projectfile/specification.git}"
 REF="${PROJECTFILE_SPECIFICATION_REF:-main}"
 DEST="_specification"
-SCHEMAS="v1.json v1-fragment.json"
+SCHEMAS="v1.json v1-fragment.json org.projectfile.deploy.v1.json org.projectfile.health.v1.json"
 TARGET_DIR="internal/validate/embedded"
 
 log() { printf '[fetch-schema] %s\n' "$*" >&2; }

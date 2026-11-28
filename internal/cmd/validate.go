@@ -88,6 +88,16 @@ var validateCmd = &cobra.Command{
 		violations = append(violations, excludes...)
 		contradiction := validate.VisibilityContradiction(raw)
 		violations = append(violations, contradiction...)
+		references := validate.DeployReferences(raw)
+		violations = append(violations, references...)
+		namespaceErr := validate.Namespaces(raw)
+		if namespaceErr != nil {
+			ve, ok := validate.AsValidationError(namespaceErr)
+			if !ok {
+				return fmt.Errorf("validate %s: %w", path, namespaceErr)
+			}
+			violations = append(violations, flattenViolations(ve)...)
+		}
 
 		// Schema violations print as a flat list of "location: reason" lines so
 		// the output is grep-friendly and stable across schema-library upgrades
@@ -137,6 +147,10 @@ var validateCmd = &cobra.Command{
 			return errValidation(fmt.Sprintf("schema validation failed; %d redundant include(s)", len(redundant)))
 		case schemaErr != nil:
 			return errValidation("schema validation failed")
+		case namespaceErr != nil:
+			return errValidation("extension schema validation failed")
+		case len(references) > 0:
+			return errValidation(fmt.Sprintf("%d deploy or health reference(s) name nothing declared", len(references)))
 		case len(excludes) > 0:
 			return errValidation(fmt.Sprintf("%d artifact exclude cell(s) name an undeclared platform", len(excludes)))
 		case len(contradiction) > 0:

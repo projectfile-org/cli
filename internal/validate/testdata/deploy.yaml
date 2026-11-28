@@ -1,0 +1,131 @@
+# SPDX-FileCopyrightText: 2026 Damián Búho <damian.buho@proton.me>
+#
+# SPDX-License-Identifier: MIT
+
+# The deploy and artifacts fixtures of the specification, merged into one org.projectfile subtree
+org:
+  projectfile:
+    health:
+      readiness: {command: [readycheck.d]}
+      liveness: {command: [livecheck.d]}
+      artifacts:
+        boringtun: {liveness: {command: [wg, show]}}
+    deploy:
+      site:
+        runs: website
+        shape: scalable
+        size: nano
+        offers:
+          web: {port: http, to: everyone, at: "${domain}"}
+
+      # A cache: one copy, its data rebuildable, reachable only inside the deployment
+      cache:
+        runs: valkey
+        shape: singleton
+        size: tiny
+        keeps:
+          data: {at: /app/cache, worth: rebuildable}
+        offers:
+          resp: {port: resp, to: units}
+
+      # A database: irreplaceable data, so the full backup norm applies
+      database:
+        runs: postgresql
+        shape: singleton
+        size: medium
+        keeps:
+          data: {at: /app/data/db, worth: irreplaceable}
+        offers:
+          sql: {port: sql, to: units}
+
+      # An application: needs the two units above and fills its settings from them
+      forge:
+        runs: forgejo
+        shape: singleton
+        size: large
+        keeps:
+          repositories:
+            at: /app/data
+            backup: {lose-at-most: P1D, keep: P90D, elsewhere: true, prove-restore: P1M}
+        offers:
+          web: {port: http, to: everyone, at: "git.${domain}"}
+          git: {port: ssh, to: everyone}
+          metrics: {port: metrics, to: operators}
+        needs:
+          records:
+            is: unit:database
+            fills: {host: db-host, username: db-user, password: db-password}
+          speed: unit:cache
+          mail: internet
+
+      # A migration that runs before the application starts
+      migrate:
+        runs: forgejo-migrate
+        shape: once
+        needs:
+          records: unit:database
+        trust: internal
+
+      # A nightly job
+      prune:
+        runs: forgejo-prune
+        shape: scheduled
+        every: P1D
+        at: "03:30"
+        needs:
+          records: unit:database
+
+      # A tunnel that needs powers a restricted runtime does not grant by default
+      tunnel:
+        runs: boringtun
+        shape: singleton
+        size: micro
+        offers:
+          wireguard: {port: wireguard, to: everyone}
+        trust: {is: exposed, requires: [network-admin, tun-device]}
+    artifacts:
+      website:
+        kind: service
+        ports:
+          - {port: 8080, name: http, protocol: tcp, speaks: http}
+
+      valkey:
+        kind: service
+        ports:
+          - {port: 6379, name: resp, protocol: tcp, speaks: resp}
+        settings:
+          password: {env: O9S_VLKY_PASSWORD, secret: true}
+
+      postgresql:
+        kind: service
+        ports:
+          - {port: 5432, name: sql, protocol: tcp, speaks: postgresql}
+        settings:
+          username: {env: O9S_PG_USERNAME, secret: true}
+          password: {env: O9S_PG_PASSWORD, secret: true}
+          database: {env: O9S_PG_DATABASE, secret: true}
+
+      forgejo:
+        kind: service
+        ports:
+          - {port: 3000, name: http, protocol: tcp, speaks: http}
+          - {port: 2222, name: ssh, protocol: tcp, speaks: ssh}
+          - {port: 9100, name: metrics, protocol: tcp, speaks: http, path: /metrics}
+        settings:
+          db-host: {env: FORGEJO_DB_HOST}
+          db-user: {env: FORGEJO_DB_USER}
+          db-password: {env: FORGEJO_DB_PASSWORD, secret: true}
+
+      # Run-to-completion units listen on nothing: `kind: service` makes them runnable, the image addresses them
+      forgejo-migrate:
+        kind: service
+        ref: kiota.ch/r8e/forgejo-migrate:latest
+
+      forgejo-prune:
+        kind: service
+        ref: kiota.ch/r8e/forgejo-prune:latest
+
+      boringtun:
+        kind: service
+        ports:
+          - {port: 51820, name: wireguard, protocol: udp, speaks: wireguard}

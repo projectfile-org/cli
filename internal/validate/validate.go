@@ -9,14 +9,18 @@ package validate
 
 import (
 	"bytes"
-	_ "embed"
+	"embed"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"path"
+	"strings"
 	"sync"
 
 	"github.com/dlclark/regexp2"
 	"github.com/santhosh-tekuri/jsonschema/v6"
+
+	"kiota.ch/projectfile/core/v2/pkg/genlog"
 )
 
 //go:embed embedded/v1.json
@@ -25,12 +29,21 @@ var schemaBytes []byte
 //go:embed embedded/v1-fragment.json
 var fragmentSchemaBytes []byte
 
+//go:embed embedded/org.projectfile.*.v1.json
+var namespaceFS embed.FS // each standalone extension schema, named after the subtree it checks
+
 // SchemaURL is the canonical $id of the embedded schema; the compiler keys
 // its resource cache on this URL.
 const SchemaURL = "https://projectfile.org/schema/v1.json"
 
 // FragmentSchemaURL is the $id of the schema for a document only ever included.
 const FragmentSchemaURL = "https://projectfile.org/schema/v1-fragment.json"
+
+// schemaBase is the URL every embedded schema's $id sits under.
+const schemaBase = "https://projectfile.org/schema/"
+
+// NamespacesURL keys the generated schema that applies each standalone schema at its own subtree.
+const NamespacesURL = "urn:projectfile:cli:namespaces"
 
 // compileOnce guards the one-shot schema compile — the schemas are constant
 // per binary, and re-parsing them on every Validate call would be wasteful.
@@ -55,6 +68,11 @@ func compileSchemas(schema, fragment []byte) (map[string]*jsonschema.Schema, err
 	// backreferences. regexp2 is the ECMA-262-compatible engine.
 	c.UseRegexpEngine(ecma262Regexp)
 	resources := map[string][]byte{SchemaURL: schema, FragmentSchemaURL: fragment}
+	wrapper, err := namespaceResources(resources)
+	if err != nil {
+		return nil, err
+	}
+	resources[NamespacesURL] = wrapper
 	for id, data := range resources {
 		raw, err := jsonschema.UnmarshalJSON(bytes.NewReader(data))
 		if err != nil {
@@ -73,6 +91,48 @@ func compileSchemas(schema, fragment []byte) (map[string]*jsonschema.Schema, err
 		out[id] = s
 	}
 	return out, nil
+}
+
+// namespaceResources adds every embedded extension schema to resources and returns the wrapper placing each at its subtree.
+func namespaceResources(resources map[string][]byte) ([]byte, error) {
+	files, err := namespaceFS.ReadDir("embedded")
+	if err != nil {
+		return nil, fmt.Errorf("list embedded namespace schemas: %w", err)
+	}
+	root := map[string]any{}
+	for _, f := range files {
+		name := f.Name()
+		if !strings.HasSuffix(name, ".v1.json") {
+			continue
+		}
+		data, err := namespaceFS.ReadFile(path.Join("embedded", name))
+		if err != nil {
+			return nil, fmt.Errorf("read embedded schema %s: %w", name, err)
+		}
+		resources[schemaBase+name] = data
+		node := root
+		for _, segment := range strings.Split(strings.TrimSuffix(name, ".v1.json"), ".") {
+			props, _ := node["properties"].(map[string]any)
+			if props == nil {
+				props = map[string]any{}
+				node["properties"] = props
+			}
+			next, _ := props[segment].(map[string]any)
+			if next == nil {
+				next = map[string]any{}
+				props[segment] = next
+			}
+			node = next
+		}
+		node["$ref"] = schemaBase + name
+		genlog.Debug("namespace schema registered", "schema", name)
+	}
+	return json.Marshal(root)
+}
+
+// Namespaces runs each embedded extension schema against its subtree of doc, after include merge.
+func Namespaces(doc any) error {
+	return validateAgainst(NamespacesURL, doc)
 }
 
 // Validate runs the projectfile v1 schema against doc. doc may come from any
