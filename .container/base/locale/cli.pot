@@ -5,7 +5,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: cli 1.1.2\n"
-"Report-Msgid-Bugs-To: i18n@b19.dev\n"
+"Report-Msgid-Bugs-To: https://codeberg.org/projectfile/cli/issues\n"
 "POT-Creation-Date: 2026-09-07 03:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
